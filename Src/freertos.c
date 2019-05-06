@@ -126,6 +126,7 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+	ErrorQueueHandler = xQueueCreate( 10, sizeof(uint8_t) ); // Can handle 10 errors in queue
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
