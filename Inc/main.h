@@ -55,7 +55,13 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+/*
+/ Usart function prototypes
+*/
+void Usart1TxCallback(void);
+void Usart1RxCallback(void);
+void StateSendTimCallback(void);
+void DataSendTimCallback(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
