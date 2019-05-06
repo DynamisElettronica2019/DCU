@@ -119,7 +119,9 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
+	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
@@ -215,6 +217,65 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	if(huart->Instance==USART1) {
+		Usart1RxCallback();
+	}
+	if(huart->Instance==USART2) {
+		//User code
+	}
+}
+	
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+{
+	if(huart->Instance==USART1) {
+		Usart1TxCallback();
+	}
+	if(huart->Instance==USART2) {
+		//User code
+	}
+}
+
+// TX callback for usart 1
+void Usart1TxCallback(void)
+{	
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE; // Variable goes to true when contxt-switch is needed
+	if(sendDataSemaphoreHandle!=NULL) { // Check on system start if semaphore is already created
+		xSemaphoreGiveFromISR(uart1Semaphore, &xHigherPriorityTaskWoken); // Give semaphore to task when DMA is clear
+		portYIELD_FROM_ISR(xHigherPriorityTaskWoken); // Do context-switch if needed
+	}
+}
+
+// RX callback for usart 1
+void Usart1RxCallback(void)
+{	
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE; // Variable goes to true when contxt-switch is needed
+	if(sendDataSemaphoreHandle!=NULL) { // Check on system start if semaphore is already created
+		xSemaphoreGiveFromISR(receiveCommandSemaphoreHandle, &xHigherPriorityTaskWoken); // Give semaphore to task when DMA is clear
+		portYIELD_FROM_ISR(xHigherPriorityTaskWoken); // Do context-switch if needed
+	} 
+}
+
+// Func called every 1hz for unlocking send state task
+void StateSendTimCallback(void)
+{	
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE; // Variable goes to true when contxt-switch is needed
+	if(sendDataSemaphoreHandle!=NULL) { // Check on system start if semaphore is already created
+		xSemaphoreGiveFromISR(sendDataSemaphoreHandle, &xHigherPriorityTaskWoken); // Give semaphore to task when DMA is clear
+		portYIELD_FROM_ISR(xHigherPriorityTaskWoken); // Do context-switch if needed
+	}
+}
+
+// Func called every 10hz for unlocking send data task
+void DataSendTimCallback(void)
+{
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE; // Variable goes to true when contxt-switch is needed
+	if(sendStateSemaphoreHandle!=NULL) { // Check on system start if semaphore is already created
+		xSemaphoreGiveFromISR(sendStateSemaphoreHandle, &xHigherPriorityTaskWoken); // Give semaphore to task when DMA is clear
+		portYIELD_FROM_ISR(xHigherPriorityTaskWoken); // Do context-switch if needed
+	}
+}
 
 /* USER CODE END 4 */
 
@@ -235,7 +296,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-
+	if (htim->Instance == TIM5) {
+    //1Hz user code
+		StateSendTimCallback();
+  }
+	if (htim->Instance == TIM6) {
+    DataSendTimCallback();
+  }
+	if (htim->Instance == TIM7) {
+    //100Hz user code
+  }
   /* USER CODE END Callback 1 */
 }
 
