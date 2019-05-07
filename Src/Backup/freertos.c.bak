@@ -49,6 +49,10 @@
 
 /* USER CODE END Variables */
 osThreadId aliveHandle;
+osThreadId adc1ConversionHandle;
+osThreadId adc2ConversionHandle;
+osSemaphoreId adc1SemaphoreHandle;
+osSemaphoreId adc2SemaphoreHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -56,6 +60,7 @@ osThreadId aliveHandle;
 /* USER CODE END FunctionPrototypes */
 
 void aliveTask(void const * argument);
+void adc1ConversionTask(void const * argument);
 
 extern void MX_FATFS_Init(void);
 extern void MX_USB_HOST_Init(void);
@@ -75,8 +80,19 @@ void MX_FREERTOS_Init(void) {
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
+  /* Create the semaphores(s) */
+  /* definition and creation of adc1Semaphore */
+  osSemaphoreDef(adc1Semaphore);
+  adc1SemaphoreHandle = osSemaphoreCreate(osSemaphore(adc1Semaphore), 1);
+
+  /* definition and creation of adc2Semaphore */
+  osSemaphoreDef(adc2Semaphore);
+  adc2SemaphoreHandle = osSemaphoreCreate(osSemaphore(adc2Semaphore), 1);
+
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
+	xSemaphoreTake(adc1SemaphoreHandle, portMAX_DELAY);			/* Start with the task locked */
+	xSemaphoreTake(adc2SemaphoreHandle, portMAX_DELAY); 		/* Start with the task locked */
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -91,6 +107,14 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of alive */
   osThreadDef(alive, aliveTask, osPriorityLow, 0, 128);
   aliveHandle = osThreadCreate(osThread(alive), NULL);
+
+  /* definition and creation of adc1Conversion */
+  osThreadDef(adc1Conversion, adc1ConversionTask, osPriorityLow, 0, 128);
+  adc1ConversionHandle = osThreadCreate(osThread(adc1Conversion), NULL);
+
+  /* definition and creation of adc2Conversion */
+  osThreadDef(adc2Conversion, adc1ConversionTask, osPriorityLow, 0, 128);
+  adc2ConversionHandle = osThreadCreate(osThread(adc2Conversion), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -117,9 +141,28 @@ void aliveTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    HAL_GPIO_TogglePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin);
+		vTaskDelay(500 / portTICK_PERIOD_MS);
   }
   /* USER CODE END aliveTask */
+}
+
+/* USER CODE BEGIN Header_adc1ConversionTask */
+/**
+* @brief Function implementing the adc1Conversion thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_adc1ConversionTask */
+void adc1ConversionTask(void const * argument)
+{
+  /* USER CODE BEGIN adc1ConversionTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END adc1ConversionTask */
 }
 
 /* Private application code --------------------------------------------------*/

@@ -337,7 +337,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F767xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc; ../Drivers/STM32F7xx_HAL_Driver/Inc; ../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy; ../Middlewares/Third_Party/FatFs/src; ../Middlewares/Third_Party/FreeRTOS/Source/include; ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS; ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM7/r0p1; ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc; ../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc; ../Drivers/CMSIS/Device/ST/STM32F7xx/Include; ../Drivers/CMSIS/Include</IncludePath>
+              <IncludePath>../Inc;   ../Drivers/STM32F7xx_HAL_Driver/Inc;   ../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy;   ../Middlewares/Third_Party/FatFs/src;   ../Middlewares/Third_Party/FreeRTOS/Source/include;   ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;   ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM7/r0p1;   ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc;   ../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc;   ../Drivers/CMSIS/Device/ST/STM32F7xx/Include;   ../Drivers/CMSIS/Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -491,6 +491,11 @@
               <FileType>1</FileType>
               <FilePath>../Src/stm32f7xx_hal_timebase_tim.c</FilePath>
             </File>
+            <File>
+              <FileName>data_conversion.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\data_conversion.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -605,6 +610,11 @@
               <FileName>usbh_platform.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Inc\usbh_platform.h</FilePath>
+            </File>
+            <File>
+              <FileName>data_conversion.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Inc\data_conversion.h</FilePath>
             </File>
           </Files>
         </Group>
