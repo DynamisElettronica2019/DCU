@@ -30,6 +30,7 @@ float adcBufferConvertedAux[ADC_CONVERTED_AUX_DATA_LEN];
 extern osSemaphoreId adc1SemaphoreHandle;
 extern osSemaphoreId adc2SemaphoreHandle;
 /* USER CODE END 0 */
+
 ADC_HandleTypeDef hadc1;
 ADC_HandleTypeDef hadc2;
 DMA_HandleTypeDef hdma_adc1;
@@ -379,6 +380,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
 	if(hadc->Instance == ADC1) {
 		if(adc1SemaphoreHandle != NULL) {																						/* Check on system start if semaphore is already created */
 			HAL_ADC_Stop_DMA(hadc);																										/* Stop ADC1 conversion */
+			xSemaphoreGiveFromISR(adc1SemaphoreHandle, &xHigherPriorityTaskWoken); 		/* Give semaphore to task when DMA is clear */
 			xSemaphoreGiveFromISR(adc1SemaphoreHandle, &xHigherPriorityTaskWoken); 		/* Give semaphore to task when DMA is clear */
 			portYIELD_FROM_ISR(xHigherPriorityTaskWoken);															/* Do context-switch if needed */
 		}

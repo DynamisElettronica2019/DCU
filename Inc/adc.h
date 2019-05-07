@@ -55,6 +55,7 @@ extern ADC_HandleTypeDef hadc2;
 
 void MX_ADC1_Init(void);
 void MX_ADC2_Init(void);
+
 /* USER CODE BEGIN Prototypes */
 extern void adcBuffersInit(void);
 /* USER CODE END Prototypes */

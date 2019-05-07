@@ -25,7 +25,8 @@
 #include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */    
+/* USER CODE BEGIN Includes */     
+#include "gpio.h"
 #include "adc.h"
 #include "data_conversion.h"
 /* USER CODE END Includes */
@@ -55,15 +56,24 @@ extern float adcBufferConvertedAux[ADC_CONVERTED_AUX_DATA_LEN];
 osThreadId aliveHandle;
 osThreadId adc1ConversionHandle;
 osThreadId adc2ConversionHandle;
+osThreadId digitalAuxManagerHandle;
+osThreadId autogearManagerHandle;
+osMessageQId digitalAuxQueueHandle;
 osSemaphoreId adc1SemaphoreHandle;
 osSemaphoreId adc2SemaphoreHandle;
+osSemaphoreId autogearSemaphoreHandle;
+
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 
 /* USER CODE END FunctionPrototypes */
+
 void aliveTask(void const * argument);
 void adc1ConversionTask(void const * argument);
 void adc2ConversionTask(void const * argument);
+void digitalAuxManagerTask(void const * argument);
+void autogearManagerTask(void const * argument);
+
 extern void MX_FATFS_Init(void);
 extern void MX_USB_HOST_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -91,15 +101,25 @@ void MX_FREERTOS_Init(void) {
   osSemaphoreDef(adc2Semaphore);
   adc2SemaphoreHandle = osSemaphoreCreate(osSemaphore(adc2Semaphore), 1);
 
+  /* definition and creation of autogearSemaphore */
+  osSemaphoreDef(autogearSemaphore);
+  autogearSemaphoreHandle = osSemaphoreCreate(osSemaphore(autogearSemaphore), 1);
+
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
-	xSemaphoreTake(adc1SemaphoreHandle, portMAX_DELAY);			/* Start with the task locked */
-	xSemaphoreTake(adc2SemaphoreHandle, portMAX_DELAY); 		/* Start with the task locked */
+	xSemaphoreTake(adc1SemaphoreHandle, portMAX_DELAY);					/* Start with the task locked */
+	xSemaphoreTake(adc2SemaphoreHandle, portMAX_DELAY); 				/* Start with the task locked */
+	xSemaphoreTake(autogearSemaphoreHandle, portMAX_DELAY); 		/* Start with the task locked */
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
+
+  /* Create the queue(s) */
+  /* definition and creation of digitalAuxQueue */
+  osMessageQDef(digitalAuxQueue, 8, uint8_t);
+  digitalAuxQueueHandle = osMessageCreate(osMessageQ(digitalAuxQueue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -117,6 +137,14 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of adc2Conversion */
   osThreadDef(adc2Conversion, adc2ConversionTask, osPriorityLow, 0, 128);
   adc2ConversionHandle = osThreadCreate(osThread(adc2Conversion), NULL);
+
+  /* definition and creation of digitalAuxManager */
+  osThreadDef(digitalAuxManager, digitalAuxManagerTask, osPriorityLow, 0, 128);
+  digitalAuxManagerHandle = osThreadCreate(osThread(digitalAuxManager), NULL);
+
+  /* definition and creation of autogearManager */
+  osThreadDef(autogearManager, autogearManagerTask, osPriorityNormal, 0, 128);
+  autogearManagerHandle = osThreadCreate(osThread(autogearManager), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -171,7 +199,7 @@ void adc1ConversionTask(void const * argument)
 		adcBufferConvertedDebug[DCU_TEMP_SENSE_POSITION] = dcuTempSenseConversion(adc1BufferRaw[DCU_TEMP_SENSE_POSITION]);
 		adcBufferConvertedDebug[VBAT_CHANNEL_POSITION] = vbatConversion(adc1BufferRaw[VBAT_CHANNEL_POSITION]);
 		/* TO BE IMPLEMENTED */
-		/* Put here the CSV buffer conversion funzioncs */
+		/* Put here the CSV buffer conversion functions */
   }
   /* USER CODE END adc1ConversionTask */
 }
@@ -194,9 +222,76 @@ void adc2ConversionTask(void const * argument)
 		adcBufferConvertedAux[ANALOG_AUX_2_POSITION] = analogAux2Conversion(adc2BufferRaw[ANALOG_AUX_2_POSITION]);
 		adcBufferConvertedAux[ANALOG_AUX_3_POSITION] = analogAux3Conversion(adc2BufferRaw[ANALOG_AUX_3_POSITION]);
 		/* TO BE IMPLEMENTED */
-		/* Put here the CSV buffer conversion funzioncs */
+		/* Put here the CSV buffer conversion functions */
   }
   /* USER CODE END adc2ConversionTask */
+}
+
+/* USER CODE BEGIN Header_digitalAuxManagerTask */
+/**
+* @brief Function implementing the digitalAuxManager thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_digitalAuxManagerTask */
+void digitalAuxManagerTask(void const * argument)
+{
+  /* USER CODE BEGIN digitalAuxManagerTask */
+	uint8_t digitalAuxEvent;
+	
+  /* Infinite loop */
+  for(;;) {
+    xQueueReceive(digitalAuxQueueHandle, &digitalAuxEvent, portMAX_DELAY);		/* Wait for an event and get the identifier from the queue */
+		
+		switch(digitalAuxEvent) {
+			case DIGITAL_EVENT_AUX_1:
+				if(HAL_GPIO_ReadPin(DIGITAL_AUX_1_GPIO_Port, DIGITAL_AUX_1_Pin) == GPIO_PIN_RESET) {
+					/* TO BE IMPLEMENTED */
+					/* Put here the code to handling digital aux 1 event */
+				}
+				
+				break;
+			
+			case DIGITAL_EVENT_AUX_2:
+				if(HAL_GPIO_ReadPin(DIGITAL_AUX_2_GPIO_Port, DIGITAL_AUX_2_Pin) == GPIO_PIN_RESET) {
+					/* TO BE IMPLEMENTED */
+					/* Put here the code to handling digital aux 1 event */
+				}
+				
+				break;
+			
+			case DIGITAL_EVENT_AUX_3:
+				if(HAL_GPIO_ReadPin(DIGITAL_AUX_3_GPIO_Port, DIGITAL_AUX_3_Pin) == GPIO_PIN_RESET) {
+					/* TO BE IMPLEMENTED */
+					/* Put here the code to handling digital aux 1 event */
+				}
+			
+				break;
+		}
+  }
+  /* USER CODE END digitalAuxManagerTask */
+}
+
+/* USER CODE BEGIN Header_autogearManagerTask */
+/**
+* @brief Function implementing the autogearManager thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_autogearManagerTask */
+void autogearManagerTask(void const * argument)
+{
+  /* USER CODE BEGIN autogearManagerTask */
+  /* Infinite loop */
+  for(;;) {
+    xSemaphoreTake(autogearSemaphoreHandle, portMAX_DELAY); 		/* Unlock when interrupt callback is called */
+		
+		if(HAL_GPIO_ReadPin(AUTOGEAR_SWTICH_MCU_GPIO_Port, AUTOGEAR_SWTICH_MCU_Pin) == GPIO_PIN_RESET) {
+			/* TO BE IMPLEMENTED */
+			/* Put here the code to handling autogear event */
+		}
+  }
+  /* USER CODE END autogearManagerTask */
 }
 
 /* Private application code --------------------------------------------------*/

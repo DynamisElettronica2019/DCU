@@ -32,7 +32,9 @@
 /* USER CODE END Includes */
 
 /* USER CODE BEGIN Private defines */
-
+#define DIGITAL_EVENT_AUX_1 (uint8_t)1
+#define DIGITAL_EVENT_AUX_2 (uint8_t)2
+#define DIGITAL_EVENT_AUX_3 (uint8_t)3
 /* USER CODE END Private defines */
 
 void MX_GPIO_Init(void);
