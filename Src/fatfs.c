@@ -39,7 +39,10 @@ void MX_FATFS_Init(void)
   retUSBH = FATFS_LinkDriver(&USBH_Driver, USBHPath);
 
   /* USER CODE BEGIN Init */
-  /* additional user code for init */     
+  /* additional user code for init */
+	if(retUSBH == 0) {
+		f_mount(&USBHFatFS, (TCHAR const*)USBHPath, 1);
+	}
   /* USER CODE END Init */
 }
 

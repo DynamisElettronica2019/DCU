@@ -49,6 +49,10 @@
 
 /* USER CODE END Variables */
 osThreadId aliveHandle;
+osThreadId saveUsbHandle;
+osThreadId usbManagerHandle;
+osMessageQId usbEventQueueHandle;
+osSemaphoreId saveUsbSemaphoreHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -56,6 +60,8 @@ osThreadId aliveHandle;
 /* USER CODE END FunctionPrototypes */
 
 void aliveTask(void const * argument);
+void saveUsbTask(void const * argument);
+void usbManageTask(void const * argument);
 
 extern void MX_FATFS_Init(void);
 extern void MX_USB_HOST_Init(void);
@@ -75,6 +81,11 @@ void MX_FREERTOS_Init(void) {
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
+  /* Create the semaphores(s) */
+  /* definition and creation of saveUsbSemaphore */
+  osSemaphoreDef(saveUsbSemaphore);
+  saveUsbSemaphoreHandle = osSemaphoreCreate(osSemaphore(saveUsbSemaphore), 1);
+
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
@@ -82,6 +93,11 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
+
+  /* Create the queue(s) */
+  /* definition and creation of usbEventQueue */
+  osMessageQDef(usbEventQueue, 8, uint8_t);
+  usbEventQueueHandle = osMessageCreate(osMessageQ(usbEventQueue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -91,6 +107,14 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of alive */
   osThreadDef(alive, aliveTask, osPriorityLow, 0, 128);
   aliveHandle = osThreadCreate(osThread(alive), NULL);
+
+  /* definition and creation of saveUsb */
+  osThreadDef(saveUsb, saveUsbTask, osPriorityHigh, 0, 512);
+  saveUsbHandle = osThreadCreate(osThread(saveUsb), NULL);
+
+  /* definition and creation of usbManager */
+  osThreadDef(usbManager, usbManageTask, osPriorityLow, 0, 128);
+  usbManagerHandle = osThreadCreate(osThread(usbManager), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -115,11 +139,47 @@ void aliveTask(void const * argument)
 
   /* USER CODE BEGIN aliveTask */
   /* Infinite loop */
+  for(;;) {
+    HAL_GPIO_TogglePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin);
+		vTaskDelay(500 / portTICK_PERIOD_MS);
+  }
+  /* USER CODE END aliveTask */
+}
+
+/* USER CODE BEGIN Header_saveUsbTask */
+/**
+* @brief Function implementing the saveUsb thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_saveUsbTask */
+void saveUsbTask(void const * argument)
+{
+  /* USER CODE BEGIN saveUsbTask */
+  /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END aliveTask */
+  /* USER CODE END saveUsbTask */
+}
+
+/* USER CODE BEGIN Header_usbManageTask */
+/**
+* @brief Function implementing the usbManager thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_usbManageTask */
+void usbManageTask(void const * argument)
+{
+  /* USER CODE BEGIN usbManageTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END usbManageTask */
 }
 
 /* Private application code --------------------------------------------------*/

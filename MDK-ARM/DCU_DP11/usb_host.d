@@ -70,3 +70,4 @@ dcu_dp11\usb_host.o: ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_ctlr
 dcu_dp11\usb_host.o: ../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc/usbh_msc.h
 dcu_dp11\usb_host.o: ../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc/usbh_msc_bot.h
 dcu_dp11\usb_host.o: ../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc/usbh_msc_scsi.h
+dcu_dp11\usb_host.o: ../Inc/usbh_platform.h

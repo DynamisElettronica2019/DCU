@@ -26,12 +26,12 @@
 #include "usbh_msc.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "usbh_platform.h"
 /* USER CODE END Includes */
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-
+extern osMessageQId usbEventQueueHandle;
 /* USER CODE END PV */
 
 /* USER CODE BEGIN PFP */
@@ -60,6 +60,15 @@ static void USBH_UserProcess(USBH_HandleTypeDef *phost, uint8_t id);
  */
 /* USER CODE BEGIN 1 */
 
+extern void usbInitStart(void)
+{
+	USBH_Init(&hUsbHostHS, USBH_UserProcess, HOST_HS);			/* Init Host Library */
+	USBH_RegisterClass(&hUsbHostHS, USBH_MSC_CLASS); 				/* Add Supported Class */
+	USBH_Start(&hUsbHostHS);																/* Start Host Process */
+	MX_DriverVbusHS(VBUS_ENABLE);														/* Enable USB Vbus power */
+	return;
+}
+
 /* USER CODE END 1 */
 
 /**
@@ -69,7 +78,8 @@ static void USBH_UserProcess(USBH_HandleTypeDef *phost, uint8_t id);
 void MX_USB_HOST_Init(void)
 {
   /* USER CODE BEGIN USB_HOST_Init_PreTreatment */
-  
+  /* Inside USBH_Start could be present a call to USBH_LL_DriverVBUS (phost, TRUE),
+	that disable te VBUS on the port: check it out in case of problems */
   /* USER CODE END USB_HOST_Init_PreTreatment */
   
   /* Init host Library, add supported class and start the library. */
@@ -95,26 +105,28 @@ void MX_USB_HOST_Init(void)
  */
 static void USBH_UserProcess  (USBH_HandleTypeDef *phost, uint8_t id)
 {
-  /* USER CODE BEGIN CALL_BACK_1 */
-  switch(id)
+  /* USER CODE BEGIN CALL_BACK_1 */	
+	switch(id)
   {
-  case HOST_USER_SELECT_CONFIGURATION:
-  break;
+    case HOST_USER_SELECT_CONFIGURATION:
+      break;
+      
+    case HOST_USER_DISCONNECTION:
+      Appli_state = APPLICATION_DISCONNECT;
+			osMessagePut(usbEventQueueHandle, DISCONNECTION_EVENT, 0);
+			break;
+      
+    case HOST_USER_CLASS_ACTIVE:
+      Appli_state = APPLICATION_READY;
+			osMessagePut(usbEventQueueHandle, CONNECTED_EVENT, 0);
+			break;
 
-  case HOST_USER_DISCONNECTION:
-  Appli_state = APPLICATION_DISCONNECT;
-  break;
+    case HOST_USER_CONNECTION:
+      Appli_state = APPLICATION_START;
+      break;
 
-  case HOST_USER_CLASS_ACTIVE:
-  Appli_state = APPLICATION_READY;
-  break;
-
-  case HOST_USER_CONNECTION:
-  Appli_state = APPLICATION_START;
-  break;
-
-  default:
-  break;
+    default:
+      break;
   }
   /* USER CODE END CALL_BACK_1 */
 }

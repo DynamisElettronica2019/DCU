@@ -35,7 +35,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "fatfs.h"
+#include "usb_host.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,7 +57,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+extern osSemaphoreId saveUsbHandle;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -122,6 +123,12 @@ int main(void)
 	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
+	usbInitStart();
+	MX_FATFS_Init();
+	HAL_Delay(500);
+	HAL_TIM_Base_Start_IT(&htim5);
+	HAL_TIM_Base_Start_IT(&htim6);
+	HAL_TIM_Base_Start_IT(&htim7);
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
@@ -237,6 +244,25 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
+	
+	/* Timer 5 period elapsed callback: 1 Hz */
+	/* USB test task */
+	if(htim->Instance == TIM5) {
+		BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+	
+		if(saveUsbHandle != NULL) {
+			xSemaphoreGiveFromISR(saveUsbHandle, &xHigherPriorityTaskWoken);
+			portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+		}
+	}
+	
+	/* Timer 6 period elapsed callback: 10 Hz */
+	if(htim->Instance == TIM6) {
+	}
+	
+	/* Timer 7 period elapsed callback: 100 Hz */
+	if(htim->Instance == TIM7) {
+	}
 
   /* USER CODE END Callback 1 */
 }
@@ -249,7 +275,14 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-
+	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
+	
+  while(1) {
+		HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
+		HAL_Delay(100);
+	}
   /* USER CODE END Error_Handler_Debug */
 }
 
@@ -266,6 +299,14 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
      tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
+	
+  while(1) {
+		HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
+		HAL_Delay(100);
+	}
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
