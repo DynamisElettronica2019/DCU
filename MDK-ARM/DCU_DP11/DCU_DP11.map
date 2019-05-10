@@ -5,17 +5,17 @@ Component: ARM Compiler 5.06 update 5 (build 528) Tool: armlink [4d35e2]
 Section Cross References
 
     main.o(i.DataSendTimCallback) refers to queue.o(i.xQueueGiveFromISR) for xQueueGiveFromISR
-    main.o(i.DataSendTimCallback) refers to freertos.o(.data) for sendStateSemaphoreHandle
+    main.o(i.DataSendTimCallback) refers to freertos.o(.data) for sendDataSemaphoreHandle
     main.o(i.HAL_TIM_PeriodElapsedCallback) refers to stm32f7xx_hal.o(i.HAL_IncTick) for HAL_IncTick
     main.o(i.HAL_TIM_PeriodElapsedCallback) refers to queue.o(i.xQueueGiveFromISR) for xQueueGiveFromISR
-    main.o(i.HAL_TIM_PeriodElapsedCallback) refers to freertos.o(.data) for sendDataSemaphoreHandle
+    main.o(i.HAL_TIM_PeriodElapsedCallback) refers to freertos.o(.data) for sendStateSemaphoreHandle
     main.o(i.HAL_UART_RxCpltCallback) refers to queue.o(i.xQueueGiveFromISR) for xQueueGiveFromISR
     main.o(i.HAL_UART_RxCpltCallback) refers to freertos.o(.data) for sendDataSemaphoreHandle
     main.o(i.HAL_UART_TxCpltCallback) refers to queue.o(i.xQueueReceiveFromISR) for xQueueReceiveFromISR
     main.o(i.HAL_UART_TxCpltCallback) refers to queue.o(i.xQueueGiveFromISR) for xQueueGiveFromISR
     main.o(i.HAL_UART_TxCpltCallback) refers to freertos.o(.data) for Usart1TxModeQueueHandle
     main.o(i.StateSendTimCallback) refers to queue.o(i.xQueueGiveFromISR) for xQueueGiveFromISR
-    main.o(i.StateSendTimCallback) refers to freertos.o(.data) for sendDataSemaphoreHandle
+    main.o(i.StateSendTimCallback) refers to freertos.o(.data) for sendStateSemaphoreHandle
     main.o(i.SystemClock_Config) refers to memseta.o(.text) for __aeabi_memclr4
     main.o(i.SystemClock_Config) refers to stm32f7xx_hal_pwr.o(i.HAL_PWR_EnableBkUpAccess) for HAL_PWR_EnableBkUpAccess
     main.o(i.SystemClock_Config) refers to stm32f7xx_hal_rcc.o(i.HAL_RCC_OscConfig) for HAL_RCC_OscConfig

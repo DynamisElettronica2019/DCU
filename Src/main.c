@@ -300,8 +300,8 @@ void Usart1RxCallback(void)
 void StateSendTimCallback(void)
 {	
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE; // Variable goes to true when contxt-switch is needed
-	if(sendDataSemaphoreHandle!=NULL) { // Check on system start if semaphore is already created
-		xSemaphoreGiveFromISR(sendDataSemaphoreHandle, &xHigherPriorityTaskWoken); // Give semaphore to task when DMA is clear
+	if(sendStateSemaphoreHandle!=NULL) { // Check on system start if semaphore is already created
+		xSemaphoreGiveFromISR(sendStateSemaphoreHandle, &xHigherPriorityTaskWoken); // Give semaphore to task when DMA is clear
 		portYIELD_FROM_ISR(xHigherPriorityTaskWoken); // Do context-switch if needed
 	}
 }
@@ -310,8 +310,8 @@ void StateSendTimCallback(void)
 void DataSendTimCallback(void)
 {
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE; // Variable goes to true when contxt-switch is needed
-	if(sendStateSemaphoreHandle!=NULL) { // Check on system start if semaphore is already created
-		xSemaphoreGiveFromISR(sendStateSemaphoreHandle, &xHigherPriorityTaskWoken); // Give semaphore to task when DMA is clear
+	if(sendDataSemaphoreHandle!=NULL) { // Check on system start if semaphore is already created
+		xSemaphoreGiveFromISR(sendDataSemaphoreHandle, &xHigherPriorityTaskWoken); // Give semaphore to task when DMA is clear
 		portYIELD_FROM_ISR(xHigherPriorityTaskWoken); // Do context-switch if needed
 	}
 }
