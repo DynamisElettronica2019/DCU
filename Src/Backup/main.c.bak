@@ -35,7 +35,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "user_defines.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,7 +56,15 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+extern uint8_t telemRxBuffer[BUFFER_COMMAND_LEN];
+/*
+* Semaphore handlers
+*/
+extern osSemaphoreId sendDataSemaphoreHandle;
+extern osSemaphoreId sendStateSemaphoreHandle;
+extern osSemaphoreId sendErrorSemaphoreHandle;
+extern osSemaphoreId receiveCommandSemaphoreHandle;
+extern osSemaphoreId uart1SemHandle;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -122,6 +130,13 @@ int main(void)
 	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
+	/*
+	/ Start uart and timers
+	*/
+	HAL_UART_Receive_DMA(&huart1, telemRxBuffer, BUFFER_COMMAND_LEN);
+	HAL_TIM_Base_Start_IT(&htim5);
+  HAL_TIM_Base_Start_IT(&htim6);
+	HAL_TIM_Base_Start_IT(&htim7);
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
@@ -242,7 +257,7 @@ void Usart1TxCallback(void)
 {	
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE; // Variable goes to true when contxt-switch is needed
 	if(sendDataSemaphoreHandle!=NULL) { // Check on system start if semaphore is already created
-		xSemaphoreGiveFromISR(uart1Semaphore, &xHigherPriorityTaskWoken); // Give semaphore to task when DMA is clear
+		xSemaphoreGiveFromISR(uart1SemHandle, &xHigherPriorityTaskWoken); // Give semaphore to task when DMA is clear
 		portYIELD_FROM_ISR(xHigherPriorityTaskWoken); // Do context-switch if needed
 	}
 }

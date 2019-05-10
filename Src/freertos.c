@@ -55,13 +55,14 @@ uint8_t dcu_State_Packet[BUFFER_STATE_LEN] = "[S;1;0;0;0;0;0;0;0]";
 uint8_t block_Buffer[BUFFER_BLOCK_LEN] = "[C;000000;000.0;000.0;000.0;000.0;000;000;000;000;000;000;000;00.0;0;00000;000;000;000.0;000.0;0000.0;0;0;000;0;00000;00000;0.000;00000;0;0;000;000;00.00;00000;00.0;00.00;00000;00.0;00000;00.00;0000;00.00;00000;00000;00000;000;000;000;000;000;000;000;000;000;000;000;000;0000.00;0000.00;000.00;0000.00;0000.00;0000.00;000;000;0;0;0;000;000;00000;00000;00000;00000;00000;00000;000;0000;000;0000;000;0000;000;0000;000;0000000000;0000000;0000000;0000000;000000000000000000000000000000000000000000000000000000000000]";
 uint8_t telemRxBuffer[BUFFER_COMMAND_LEN];
 uint8_t setRtcRxBuffer[BUFFER_RTC_SET_LEN];
-QueueHandle_t ErrorQueueHandler; // Create error queue handler
 /* USER CODE END Variables */
 osThreadId aliveHandle;
 osThreadId SendStatesHandle;
 osThreadId SendDataHandle;
 osThreadId ReceiveTelemHandle;
 osThreadId SendErrorHandle;
+osMessageQId ErrorQueueHandle;
+osMessageQId Usart1TxModeQueueHandle;
 osSemaphoreId sendDataSemaphoreHandle;
 osSemaphoreId sendStateSemaphoreHandle;
 osSemaphoreId receiveCommandSemaphoreHandle;
@@ -124,9 +125,17 @@ void MX_FREERTOS_Init(void) {
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
 
+  /* Create the queue(s) */
+  /* definition and creation of ErrorQueue */
+  osMessageQDef(ErrorQueue, 10, uint8_t);
+  ErrorQueueHandle = osMessageCreate(osMessageQ(ErrorQueue), NULL);
+
+  /* definition and creation of Usart1TxModeQueue */
+  osMessageQDef(Usart1TxModeQueue, 1, uint8_t);
+  Usart1TxModeQueueHandle = osMessageCreate(osMessageQ(Usart1TxModeQueue), NULL);
+
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
-	ErrorQueueHandler = xQueueCreate( 10, sizeof(uint8_t) ); // Can handle 10 errors in queue
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
@@ -260,7 +269,7 @@ void ReceiveTelemFunc(void const * argument)
 				HAL_UART_Receive_DMA(&huart1, telemRxBuffer, BUFFER_COMMAND_LEN); // Re enable receiving
 			}
 			else { // If message does not end correctly
-				xQueueSend(ErrorQueueHandler, ( void * ) &errorLetter, ( TickType_t ) 0 ); // Add error to queue
+				xQueueSend(ErrorQueueHandle, ( void * ) &errorLetter, ( TickType_t ) 0 ); // Add error to queue
 			}
 		}
 		else { // If you are waiting for standard message
@@ -309,7 +318,7 @@ void ReceiveTelemFunc(void const * argument)
 							break;
 						default: // Message not recognised
 						{
-							xQueueSend(ErrorQueueHandler, ( void * ) &errorLetter, ( TickType_t ) 0 ); // Add error to queue
+							xQueueSend(ErrorQueueHandle, ( void * ) &errorLetter, ( TickType_t ) 0 ); // Add error to queue
 						}
 						break;
 						}
@@ -322,13 +331,13 @@ void ReceiveTelemFunc(void const * argument)
 					}
 					else { // Not set rtc type -> error
 						HAL_UART_Receive_DMA(&huart1, telemRxBuffer, BUFFER_COMMAND_LEN); // Re enable receiving
-						xQueueSend(ErrorQueueHandler, ( void * ) &errorLetter, ( TickType_t ) 0 ); // Add error to queue
+						xQueueSend(ErrorQueueHandle, ( void * ) &errorLetter, ( TickType_t ) 0 ); // Add error to queue
 					}
 				}
 			}
 			else { // If message does not start correctly
 				HAL_UART_Receive_DMA(&huart1, telemRxBuffer, BUFFER_COMMAND_LEN); // Re enable receiving
-				xQueueSend(ErrorQueueHandler, ( void * ) &errorLetter, ( TickType_t ) 0 ); // Add error to queue
+				xQueueSend(ErrorQueueHandle, ( void * ) &errorLetter, ( TickType_t ) 0 ); // Add error to queue
 			}
 		}
   }
@@ -350,7 +359,7 @@ void SendErrorFunc(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    xQueueReceive(ErrorQueueHandler, &queueLetter, portMAX_DELAY); // Wait for error, get the identifier char from the queue
+    xQueueReceive(ErrorQueueHandle, &queueLetter, portMAX_DELAY); // Wait for error, get the identifier char from the queue
     errorMsg[ERROR_MSG_IDENTIFIER_POS] = queueLetter; // Set error identifier into the message
 		xSemaphoreTake(uart1SemHandle, portMAX_DELAY); //Lock if DMA is in use
 		HAL_UART_Transmit_DMA(&huart1, errorMsg, ERROR_MSG_LEN); //Transmit error message
