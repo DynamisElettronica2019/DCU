@@ -211,11 +211,13 @@ void aliveTask(void const * argument)
 void SendStatesFunc(void const * argument)
 {
   /* USER CODE BEGIN SendStatesFunc */
+	uint8_t normalTxModeFlag = NORMAL_MODE_TX_FLAG; // Setting flag identifier to put later into the queue
   /* Infinite loop */
   for(;;)
   {
     xSemaphoreTake(sendStateSemaphoreHandle, portMAX_DELAY); //Unlock when timer callback is called
 		xSemaphoreTake(uart1SemHandle, portMAX_DELAY); //Lock if DMA is in use
+		xQueueSend(Usart1TxModeQueueHandle, ( void * ) &normalTxModeFlag, ( TickType_t ) 0 ); // Add flag to queue
 		HAL_UART_Transmit_DMA(&huart1, dcu_State_Packet, BUFFER_STATE_LEN); //Transmit state message
   }
   /* USER CODE END SendStatesFunc */
@@ -357,13 +359,15 @@ void SendErrorFunc(void const * argument)
 {
   /* USER CODE BEGIN SendErrorFunc */
 	uint8_t queueLetter;
-	uint8_t errorMsg[ERROR_MSG_LEN] = ERROR_MSG;
+	uint8_t errorMsg[ERROR_MSG_LEN] = ERROR_MSG; // Set standard error message to be edited later
+	uint8_t normalTxModeFlag = NORMAL_MODE_TX_FLAG; // Setting flag identifier to put later into the queue
   /* Infinite loop */
   for(;;)
   {
     xQueueReceive(ErrorQueueHandle, &queueLetter, portMAX_DELAY); // Wait for error, get the identifier char from the queue
     errorMsg[ERROR_MSG_IDENTIFIER_POS] = queueLetter; // Set error identifier into the message
 		xSemaphoreTake(uart1SemHandle, portMAX_DELAY); //Lock if DMA is in use
+		xQueueSend(Usart1TxModeQueueHandle, ( void * ) &normalTxModeFlag, ( TickType_t ) 0 ); // Add flag to queue
 		HAL_UART_Transmit_DMA(&huart1, errorMsg, ERROR_MSG_LEN); //Transmit error message
   }
   /* USER CODE END SendErrorFunc */
