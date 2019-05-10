@@ -47,7 +47,6 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-char state = '0'; // Only for debug
 /*
 * Buffer declaration
 */
@@ -206,17 +205,6 @@ void SendStatesFunc(void const * argument)
     xSemaphoreTake(sendStateSemaphoreHandle, portMAX_DELAY); //Unlock when timer callback is called
 		xSemaphoreTake(uart1SemHandle, portMAX_DELAY); //Lock if DMA is in use
 		HAL_UART_Transmit_DMA(&huart1, dcu_State_Packet, BUFFER_STATE_LEN); //Transmit state message
-		/*
-		* Debug only
-		*/
-		if(state=='0') {
-			dcu_State_Packet[3]='1';
-			state='1';
-		}
-		else {
-			dcu_State_Packet[3]='0';
-			state='0';
-		}
   }
   /* USER CODE END SendStatesFunc */
 }
