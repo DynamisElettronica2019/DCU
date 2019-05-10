@@ -60,12 +60,14 @@ osThreadId SendStatesHandle;
 osThreadId SendDataHandle;
 osThreadId ReceiveTelemHandle;
 osThreadId SendErrorHandle;
+osThreadId SendFollowingDataHandle;
 osMessageQId ErrorQueueHandle;
 osMessageQId Usart1TxModeQueueHandle;
 osSemaphoreId sendDataSemaphoreHandle;
 osSemaphoreId sendStateSemaphoreHandle;
 osSemaphoreId receiveCommandSemaphoreHandle;
 osSemaphoreId uart1SemHandle;
+osSemaphoreId sendFollowingDataSemaphoreHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -77,6 +79,7 @@ void SendStatesFunc(void const * argument);
 void SendDataFunc(void const * argument);
 void ReceiveTelemFunc(void const * argument);
 void SendErrorFunc(void const * argument);
+void SendFollowingDataFunc(void const * argument);
 
 extern void MX_FATFS_Init(void);
 extern void MX_USB_HOST_Init(void);
@@ -113,11 +116,16 @@ void MX_FREERTOS_Init(void) {
   osSemaphoreDef(uart1Sem);
   uart1SemHandle = osSemaphoreCreate(osSemaphore(uart1Sem), 1);
 
+  /* definition and creation of sendFollowingDataSemaphore */
+  osSemaphoreDef(sendFollowingDataSemaphore);
+  sendFollowingDataSemaphoreHandle = osSemaphoreCreate(osSemaphore(sendFollowingDataSemaphore), 1);
+
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
 	xSemaphoreTake(sendStateSemaphoreHandle, portMAX_DELAY); //Start locked
 	xSemaphoreTake(sendDataSemaphoreHandle, portMAX_DELAY); //Start locked
 	xSemaphoreTake(receiveCommandSemaphoreHandle, portMAX_DELAY); //Start locked
+	xSemaphoreTake(sendFollowingDataSemaphoreHandle, portMAX_DELAY); //Start locked
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -157,6 +165,10 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of SendError */
   osThreadDef(SendError, SendErrorFunc, osPriorityIdle, 0, 128);
   SendErrorHandle = osThreadCreate(osThread(SendError), NULL);
+
+  /* definition and creation of SendFollowingData */
+  osThreadDef(SendFollowingData, SendFollowingDataFunc, osPriorityIdle, 0, 128);
+  SendFollowingDataHandle = osThreadCreate(osThread(SendFollowingData), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -219,12 +231,14 @@ void SendStatesFunc(void const * argument)
 void SendDataFunc(void const * argument)
 {
   /* USER CODE BEGIN SendDataFunc */
+	uint8_t secondTxModeFlag = SECOND_HALF_TX_FLAG; // Setting flag identifier to put later into the queue
   /* Infinite loop */
   for(;;)
   {
     xSemaphoreTake(sendDataSemaphoreHandle, portMAX_DELAY); //Unlock when timer callback is called
 		xSemaphoreTake(uart1SemHandle, portMAX_DELAY); //Lock if DMA is in use
-		HAL_UART_Transmit_DMA(&huart1, block_Buffer, BUFFER_BLOCK_LEN); //Transmit data message
+		xQueueSend(Usart1TxModeQueueHandle, ( void * ) &secondTxModeFlag, ( TickType_t ) 0 ); // Add flag to queue
+		HAL_UART_Transmit_DMA(&huart1, &block_Buffer[0], HALF_DATA_INDEX+1); //Transmit first half of data message
   }
   /* USER CODE END SendDataFunc */
 }
@@ -353,6 +367,27 @@ void SendErrorFunc(void const * argument)
 		HAL_UART_Transmit_DMA(&huart1, errorMsg, ERROR_MSG_LEN); //Transmit error message
   }
   /* USER CODE END SendErrorFunc */
+}
+
+/* USER CODE BEGIN Header_SendFollowingDataFunc */
+/**
+* @brief Function implementing the SendFollowingData thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_SendFollowingDataFunc */
+void SendFollowingDataFunc(void const * argument)
+{
+  /* USER CODE BEGIN SendFollowingDataFunc */
+	uint8_t normalTxModeFlag = NORMAL_MODE_TX_FLAG; // Setting flag identifier to put later into the queue
+  /* Infinite loop */
+  for(;;)
+  {
+    xSemaphoreTake(sendFollowingDataSemaphoreHandle, portMAX_DELAY); //Unlock when first part tx is completed, unlocked from tx complete callback
+		xQueueSend(Usart1TxModeQueueHandle, ( void * ) &normalTxModeFlag, ( TickType_t ) 0 ); // Add flag to queue
+		HAL_UART_Transmit_DMA(&huart1, &block_Buffer[HALF_DATA_INDEX], HALF_DATA_INDEX+1); //Transmit second half of data message
+  }
+  /* USER CODE END SendFollowingDataFunc */
 }
 
 /* Private application code --------------------------------------------------*/

@@ -13,6 +13,9 @@
 #define COMMAND_ACK_MSG_LEN         ((uint8_t)4)
 #define ERROR_MSG_IDENTIFIER_POS    ((uint8_t)2)
 #define COMMAND_ACK_IDENTIFIER_POS  ((uint8_t)2)
+#define HALF_DATA_INDEX  						((uint8_t)255)
+#define SECOND_HALF_TX_FLAG         ((uint8_t)'S')
+#define NORMAL_MODE_TX_FLAG         ((uint8_t)'N')
 
 /*
 * Command and error messages identifiers
