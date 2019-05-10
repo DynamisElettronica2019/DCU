@@ -240,7 +240,7 @@ void SendDataFunc(void const * argument)
     xSemaphoreTake(sendDataSemaphoreHandle, portMAX_DELAY); //Unlock when timer callback is called
 		xSemaphoreTake(uart1SemHandle, portMAX_DELAY); //Lock if DMA is in use
 		xQueueSend(Usart1TxModeQueueHandle, ( void * ) &secondTxModeFlag, ( TickType_t ) 0 ); // Add flag to queue
-		HAL_UART_Transmit_DMA(&huart1, &block_Buffer[0], HALF_DATA_INDEX+1); //Transmit first half of data message
+		HAL_UART_Transmit_DMA(&huart1, block_Buffer, HALF_DATA_INDEX); //Transmit first half of data message
   }
   /* USER CODE END SendDataFunc */
 }
@@ -389,7 +389,7 @@ void SendFollowingDataFunc(void const * argument)
   {
     xSemaphoreTake(sendFollowingDataSemaphoreHandle, portMAX_DELAY); //Unlock when first part tx is completed, unlocked from tx complete callback
 		xQueueSend(Usart1TxModeQueueHandle, ( void * ) &normalTxModeFlag, ( TickType_t ) 0 ); // Add flag to queue
-		HAL_UART_Transmit_DMA(&huart1, &block_Buffer[HALF_DATA_INDEX], HALF_DATA_INDEX+1); //Transmit second half of data message
+		HAL_UART_Transmit_DMA(&huart1, block_Buffer+HALF_DATA_INDEX, HALF_DATA_INDEX); //Transmit second half of data message
   }
   /* USER CODE END SendFollowingDataFunc */
 }
