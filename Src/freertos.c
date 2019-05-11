@@ -26,8 +26,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */     
-#include "user_defines.h"
 #include "usart.h"
+#include "data.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,13 +47,10 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-/*
-* Buffer declaration
-*/
-uint8_t dcu_State_Packet[BUFFER_STATE_LEN] = "[S;1;0;0;0;0;0;0;0]";
-uint8_t block_Buffer[BUFFER_BLOCK_LEN] = "[C;000000;000.0;000.0;000.0;000.0;000;000;000;000;000;000;000;00.0;0;00000;000;000;000.0;000.0;0000.0;0;0;000;0;00000;00000;0.000;00000;0;0;000;000;00.00;00000;00.0;00.00;00000;00.0;00000;00.00;0000;00.00;00000;00000;00000;000;000;000;000;000;000;000;000;000;000;000;000;0000.00;0000.00;000.00;0000.00;0000.00;0000.00;000;000;0;0;0;000;000;00000;00000;00000;00000;00000;00000;000;0000;000;0000;000;0000;000;0000;000;0000000000;0000000;0000000;0000000;000000000000000000000000000000000000000000000000000000000000]";
-uint8_t telemRxBuffer[BUFFER_COMMAND_LEN];
-uint8_t setRtcRxBuffer[BUFFER_RTC_SET_LEN];
+extern uint8_t dcuStateBuffer[BUFFER_STATE_LEN];
+extern uint8_t blockBuffer [BUFFER_BLOCK_LEN];
+extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
+extern uint8_t setRtcReceivedBuffer [BUFFER_RTC_SET_LEN];
 /* USER CODE END Variables */
 osThreadId aliveHandle;
 osThreadId SendStatesHandle;
@@ -122,10 +119,10 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
-	xSemaphoreTake(sendStateSemaphoreHandle, portMAX_DELAY); //Start locked
-	xSemaphoreTake(sendDataSemaphoreHandle, portMAX_DELAY); //Start locked
-	xSemaphoreTake(receiveCommandSemaphoreHandle, portMAX_DELAY); //Start locked
-	xSemaphoreTake(sendFollowingDataSemaphoreHandle, portMAX_DELAY); //Start locked
+	xSemaphoreTake(sendStateSemaphoreHandle, portMAX_DELAY); 							/* Start with the task locked */
+	xSemaphoreTake(sendDataSemaphoreHandle, portMAX_DELAY); 							/* Start with the task locked */
+	xSemaphoreTake(receiveCommandSemaphoreHandle, portMAX_DELAY); 				/* Start with the task locked */
+	xSemaphoreTake(sendFollowingDataSemaphoreHandle, portMAX_DELAY); 			/* Start with the task locked */
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -193,8 +190,7 @@ void aliveTask(void const * argument)
 
   /* USER CODE BEGIN aliveTask */
   /* Infinite loop */
-  for(;;)
-  {
+  for(;;) {
     HAL_GPIO_TogglePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin);
 		vTaskDelay(500 / portTICK_PERIOD_MS);
   }
@@ -211,14 +207,14 @@ void aliveTask(void const * argument)
 void SendStatesFunc(void const * argument)
 {
   /* USER CODE BEGIN SendStatesFunc */
-	uint8_t normalTxModeFlag = NORMAL_MODE_TX_FLAG; // Setting flag identifier to put later into the queue
-  /* Infinite loop */
-  for(;;)
-  {
-    xSemaphoreTake(sendStateSemaphoreHandle, portMAX_DELAY); //Unlock when timer callback is called
-		xSemaphoreTake(uart1SemHandle, portMAX_DELAY); //Lock if DMA is in use
-		xQueueSend(Usart1TxModeQueueHandle, ( void * ) &normalTxModeFlag, ( TickType_t ) 0 ); // Add flag to queue
-		HAL_UART_Transmit_DMA(&huart1, dcu_State_Packet, BUFFER_STATE_LEN); //Transmit state message
+	uint8_t normalTxModeFlag = NORMAL_MODE_TX_FLAG;  																			/* Setting flag identifier to put later into the queue */
+  
+	/* Infinite loop */
+  for(;;) {
+    xSemaphoreTake(sendStateSemaphoreHandle, portMAX_DELAY); 														/* Unlock when timer callback is called */
+		xSemaphoreTake(uart1SemHandle, portMAX_DELAY); 																			/* Lock if DMA is in use */
+		xQueueSend(Usart1TxModeQueueHandle, (void *)&normalTxModeFlag, (TickType_t)0); 			/* Add flag to queue */
+		HAL_UART_Transmit_DMA(&huart1, dcuStateBuffer, BUFFER_STATE_LEN); 									/* Transmit state message */
   }
   /* USER CODE END SendStatesFunc */
 }
@@ -233,14 +229,14 @@ void SendStatesFunc(void const * argument)
 void SendDataFunc(void const * argument)
 {
   /* USER CODE BEGIN SendDataFunc */
-	uint8_t secondTxModeFlag = SECOND_HALF_TX_FLAG; // Setting flag identifier to put later into the queue
-  /* Infinite loop */
-  for(;;)
-  {
-    xSemaphoreTake(sendDataSemaphoreHandle, portMAX_DELAY); //Unlock when timer callback is called
-		xSemaphoreTake(uart1SemHandle, portMAX_DELAY); //Lock if DMA is in use
-		xQueueSend(Usart1TxModeQueueHandle, ( void * ) &secondTxModeFlag, ( TickType_t ) 0 ); // Add flag to queue
-		HAL_UART_Transmit_DMA(&huart1, block_Buffer, HALF_DATA_INDEX); //Transmit first half of data message
+	uint8_t secondTxModeFlag = SECOND_HALF_TX_FLAG; 																			/* Setting flag identifier to put later into the queue */
+  
+	/* Infinite loop */
+  for(;;) {
+    xSemaphoreTake(sendDataSemaphoreHandle, portMAX_DELAY); 														/* Unlock when timer callback is called */
+		xSemaphoreTake(uart1SemHandle, portMAX_DELAY); 																			/* Lock if DMA is in use */
+		xQueueSend(Usart1TxModeQueueHandle, (void *)&secondTxModeFlag, (TickType_t)0); 			/* Add flag to queue */
+		HAL_UART_Transmit_DMA(&huart1, blockBuffer, HALF_DATA_INDEX); 											/* Transmit first half of data message */
   }
   /* USER CODE END SendDataFunc */
 }
@@ -255,93 +251,91 @@ void SendDataFunc(void const * argument)
 void ReceiveTelemFunc(void const * argument)
 {
   /* USER CODE BEGIN ReceiveTelemFunc */
-	uint8_t errorLetter = CMD_READ_ERR_ID; // You have to define which char is the identifier of the error, and add it to the queue for waking up the error sender task
-	uint8_t commandAckMsg[COMMAND_ACK_MSG_LEN] = ACK_MSG;
+	uint8_t errorLetter = CMD_READ_ERR_ID; 																									/* Define which char is the identifier of the error */
+	uint8_t commandAckMsg [COMMAND_ACK_MSG_LEN] = ACK_MSG;
 	_Bool setRtcComing = 0;
-  /* Infinite loop */
-  for(;;)
-  {
-    xSemaphoreTake(receiveCommandSemaphoreHandle, portMAX_DELAY); //Unlock when uart rx from telemetry is completed
-		if(setRtcComing == 1) { // If you are waiting for set rtc parameter
-			if(setRtcRxBuffer[BUFFER_RTC_SET_LEN - 1] == MESSAGE_END_ID) { // Check if message ends correctly
-				
-				// User code to set rtc
-				
-				xSemaphoreTake(uart1SemHandle, portMAX_DELAY); //Lock if DMA is in use
-				commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = SET_RTC_ID; // Set the correct identifier
-				HAL_UART_Transmit_DMA(&huart1, commandAckMsg, COMMAND_ACK_MSG_LEN); //Transmit ack message
-				HAL_UART_Receive_DMA(&huart1, telemRxBuffer, BUFFER_COMMAND_LEN); // Re enable receiving
+  
+	/* Infinite loop */
+  for(;;) {
+    xSemaphoreTake(receiveCommandSemaphoreHandle, portMAX_DELAY); 												/* Unlock when uart rx from telemetry is completed */
+		
+		if(setRtcComing == 1) { 																															/* If you are waiting for set rtc parameter */
+			if(setRtcReceivedBuffer[BUFFER_RTC_SET_LEN - 1] == MESSAGE_END_ID) { 								/* Check if message ends correctly */
+				/* Put here the code for the RTC setting */
+				xSemaphoreTake(uart1SemHandle, portMAX_DELAY); 																		/* Lock if DMA is in use */
+				commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = SET_RTC_ID; 													/* Set the correct identifier */
+				HAL_UART_Transmit_DMA(&huart1, commandAckMsg, COMMAND_ACK_MSG_LEN); 							/* Transmit ack message */
+				HAL_UART_Receive_DMA(&huart1, telemetryReceivedBuffer, BUFFER_COMMAND_LEN); 			/* Re enable receiving */
 			}
-			else { // If message does not end correctly
-				xQueueSend(ErrorQueueHandle, ( void * ) &errorLetter, ( TickType_t ) 0 ); // Add error to queue
+			else { 																																							/* If message does not end correctly */
+				xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0);			 					/* Add error to queue */
 			}
 		}
-		else { // If you are waiting for standard message
-			if(telemRxBuffer[0] == MESSAGE_INIT_ID) { // If message starts correctly with [
-				if(telemRxBuffer[BUFFER_COMMAND_LEN-1] == MESSAGE_END_ID) { // If message ends correctly as standard message
-						switch (telemRxBuffer[BUFFER_COMMAND_LEN-2]) {
-						case RESET_TELEM_ID: // Reset telemetry
-							/*
-							* Here put user code necessary for resetting telemetry
-							*/
-							xSemaphoreTake(uart1SemHandle, portMAX_DELAY); //Lock if DMA is in use
-							commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = RESET_TELEM_ID; // Set the correct identifier
-							HAL_UART_Transmit_DMA(&huart1, commandAckMsg, COMMAND_ACK_MSG_LEN); //Transmit ack message
+		
+		else { 																																								/* If you are waiting for standard message */
+			if(telemetryReceivedBuffer[0] == MESSAGE_INIT_ID) { 																/* If message starts correctly with [ */
+				if(telemetryReceivedBuffer[BUFFER_COMMAND_LEN - 1] == MESSAGE_END_ID) { 					/* If message ends correctly as standard message */
+						
+					switch(telemetryReceivedBuffer[BUFFER_COMMAND_LEN - 2]) {
+						case RESET_TELEM_ID:																													/* Reset telemetry */
+							/* Put here the code necessary for resetting telemetry */
+							xSemaphoreTake(uart1SemHandle, portMAX_DELAY); 															/* Lock if DMA is in use */
+							commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = RESET_TELEM_ID; 								/* Set the correct identifier */
+							HAL_UART_Transmit_DMA(&huart1, commandAckMsg, COMMAND_ACK_MSG_LEN); 				/* Transmit ack message */
 							break;
-						case START_ACQ_ID: // Start Acquisition
-							/*
-							* Here put user code necessary for starting acquisition
-							*/
-							xSemaphoreTake(uart1SemHandle, portMAX_DELAY); //Lock if DMA is in use
-							commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = START_ACQ_ID; // Set the correct identifier
-							HAL_UART_Transmit_DMA(&huart1, commandAckMsg, COMMAND_ACK_MSG_LEN); //Transmit ack message
-							break;	
-						case STOP_ACQ_ID: // Stop Acquisition
-							/*
-							* Here put user code necessary for stopping acquisition
-							*/
-							xSemaphoreTake(uart1SemHandle, portMAX_DELAY); //Lock if DMA is in use
-							commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = STOP_ACQ_ID; // Set the correct identifier
-							HAL_UART_Transmit_DMA(&huart1, commandAckMsg, COMMAND_ACK_MSG_LEN); //Transmit ack message
-							break;
-						case GIVE_RTC_TIME_ID: // Give RTC Time
-							/*
-							* Here put user code necessary for giving rtc time
-							*/
-							xSemaphoreTake(uart1SemHandle, portMAX_DELAY); //Lock if DMA is in use
-							commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = GIVE_RTC_TIME_ID; // Set the correct identifier
-							HAL_UART_Transmit_DMA(&huart1, commandAckMsg, COMMAND_ACK_MSG_LEN); //Transmit ack message
-							break;
-						case GIVE_RTC_DATE_ID: // Give RTC Data
-							/*
-							* Here put user code necessary for Giving rtc data
-							*/
-							xSemaphoreTake(uart1SemHandle, portMAX_DELAY); //Lock if DMA is in use
-							commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = GIVE_RTC_DATE_ID; // Set the correct identifier
-							HAL_UART_Transmit_DMA(&huart1, commandAckMsg, COMMAND_ACK_MSG_LEN); //Transmit ack message
-							break;
-						default: // Message not recognised
-						{
-							xQueueSend(ErrorQueueHandle, ( void * ) &errorLetter, ( TickType_t ) 0 ); // Add error to queue
+			
+							case START_ACQ_ID:
+								/* Put here the code necessary for starting acquisition */
+								xSemaphoreTake(uart1SemHandle, portMAX_DELAY); 														/* Lock if DMA is in use */
+								commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = START_ACQ_ID; 								/* Set the correct identifier */
+								HAL_UART_Transmit_DMA(&huart1, commandAckMsg, COMMAND_ACK_MSG_LEN); 			/* Transmit ack message */
+								break;	
+
+							case STOP_ACQ_ID:
+								/* Put here the code necessary for stopping acquisition */
+								xSemaphoreTake(uart1SemHandle, portMAX_DELAY); 														/* Lock if DMA is in use */
+								commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = STOP_ACQ_ID; 									/* Set the correct identifier */
+								HAL_UART_Transmit_DMA(&huart1, commandAckMsg, COMMAND_ACK_MSG_LEN); 			/* Transmit ack message */
+								break;
+
+							case GIVE_RTC_TIME_ID:
+								/* Put here the code necessary for giving RTC time */
+								xSemaphoreTake(uart1SemHandle, portMAX_DELAY); 														/* Lock if DMA is in use */
+								commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = GIVE_RTC_TIME_ID; 						/* Set the correct identifier */
+								HAL_UART_Transmit_DMA(&huart1, commandAckMsg, COMMAND_ACK_MSG_LEN); 			/* Transmit ack message */
+								break;
+
+							case GIVE_RTC_DATE_ID:
+								/* Here put the code necessary for giving RTC data */
+								xSemaphoreTake(uart1SemHandle, portMAX_DELAY); 														/* Lock if DMA is in use */
+								commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = GIVE_RTC_DATE_ID; 						/* Set the correct identifier */
+								HAL_UART_Transmit_DMA(&huart1, commandAckMsg, COMMAND_ACK_MSG_LEN); 			/* Transmit ack message */
+								break;
+
+							default:																																		/* Message not recognised */
+								xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 				/* Add error to queue */
+								break;
 						}
-						break;
-						}
-						HAL_UART_Receive_DMA(&huart1, telemRxBuffer, BUFFER_COMMAND_LEN); // Re enable receiving
+					
+					HAL_UART_Receive_DMA(&huart1, telemetryReceivedBuffer, BUFFER_COMMAND_LEN); 		/* Re enable receiving */
 				}
-				else { // If message does not end here
-					if(telemRxBuffer[BUFFER_COMMAND_LEN-2] == SET_RTC_ID) { // If the message type is set rtc, wait for the parameter
+				
+				else { 																																						/* If message does not end here */
+					if(telemetryReceivedBuffer[BUFFER_COMMAND_LEN - 2] == SET_RTC_ID) { 						/* If the message type is set RTC, wait for the parameters */
 						setRtcComing = 1;
-						HAL_UART_Receive_DMA(&huart1, setRtcRxBuffer, BUFFER_RTC_SET_LEN); // Re enable receiving, wait for parameter
+						HAL_UART_Receive_DMA(&huart1, setRtcReceivedBuffer, BUFFER_RTC_SET_LEN); 			/* Re enable receiving, wait for parameter */
 					}
-					else { // Not set rtc type -> error
-						HAL_UART_Receive_DMA(&huart1, telemRxBuffer, BUFFER_COMMAND_LEN); // Re enable receiving
-						xQueueSend(ErrorQueueHandle, ( void * ) &errorLetter, ( TickType_t ) 0 ); // Add error to queue
+					
+					else { 																																					/* Not set RTC message */
+						HAL_UART_Receive_DMA(&huart1, telemetryReceivedBuffer, BUFFER_COMMAND_LEN); 	/* Re enable receiving */
+						xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 						/* Add error to queue */
 					}
 				}
 			}
-			else { // If message does not start correctly
-				HAL_UART_Receive_DMA(&huart1, telemRxBuffer, BUFFER_COMMAND_LEN); // Re enable receiving
-				xQueueSend(ErrorQueueHandle, ( void * ) &errorLetter, ( TickType_t ) 0 ); // Add error to queue
+			
+			else { 																																							/* If message does not start correctly */
+				HAL_UART_Receive_DMA(&huart1, telemetryReceivedBuffer, BUFFER_COMMAND_LEN); 			/* Re enable receiving */
+				xQueueSend(ErrorQueueHandle, ( void * ) &errorLetter, ( TickType_t ) 0 ); 				/* Add error to queue */
 			}
 		}
   }
@@ -359,16 +353,16 @@ void SendErrorFunc(void const * argument)
 {
   /* USER CODE BEGIN SendErrorFunc */
 	uint8_t queueLetter;
-	uint8_t errorMsg[ERROR_MSG_LEN] = ERROR_MSG; // Set standard error message to be edited later
-	uint8_t normalTxModeFlag = NORMAL_MODE_TX_FLAG; // Setting flag identifier to put later into the queue
-  /* Infinite loop */
-  for(;;)
-  {
-    xQueueReceive(ErrorQueueHandle, &queueLetter, portMAX_DELAY); // Wait for error, get the identifier char from the queue
-    errorMsg[ERROR_MSG_IDENTIFIER_POS] = queueLetter; // Set error identifier into the message
-		xSemaphoreTake(uart1SemHandle, portMAX_DELAY); //Lock if DMA is in use
-		xQueueSend(Usart1TxModeQueueHandle, ( void * ) &normalTxModeFlag, ( TickType_t ) 0 ); // Add flag to queue
-		HAL_UART_Transmit_DMA(&huart1, errorMsg, ERROR_MSG_LEN); //Transmit error message
+	uint8_t errorMsg[ERROR_MSG_LEN] = ERROR_MSG; 																						/* Set standard error message to be edited later */
+	uint8_t normalTxModeFlag = NORMAL_MODE_TX_FLAG; 																				/* Setting flag identifier to put later into the queue */
+  
+	/* Infinite loop */
+  for(;;) {
+    xQueueReceive(ErrorQueueHandle, &queueLetter, portMAX_DELAY); 												/* Wait for error, get the identifier char from the queue */
+    errorMsg[ERROR_MSG_IDENTIFIER_POS] = queueLetter; 																		/* Set error identifier into the message */
+		xSemaphoreTake(uart1SemHandle, portMAX_DELAY); 																				/* Lock if DMA is in use */
+		xQueueSend(Usart1TxModeQueueHandle, (void *) &normalTxModeFlag, (TickType_t)0); 			/* Add flag to queue */
+		HAL_UART_Transmit_DMA(&huart1, errorMsg, ERROR_MSG_LEN); 															/* Transmit error message */
   }
   /* USER CODE END SendErrorFunc */
 }
@@ -383,13 +377,13 @@ void SendErrorFunc(void const * argument)
 void SendFollowingDataFunc(void const * argument)
 {
   /* USER CODE BEGIN SendFollowingDataFunc */
-	uint8_t normalTxModeFlag = NORMAL_MODE_TX_FLAG; // Setting flag identifier to put later into the queue
-  /* Infinite loop */
-  for(;;)
-  {
-    xSemaphoreTake(sendFollowingDataSemaphoreHandle, portMAX_DELAY); //Unlock when first part tx is completed, unlocked from tx complete callback
-		xQueueSend(Usart1TxModeQueueHandle, ( void * ) &normalTxModeFlag, ( TickType_t ) 0 ); // Add flag to queue
-		HAL_UART_Transmit_DMA(&huart1, block_Buffer+HALF_DATA_INDEX, HALF_DATA_INDEX); //Transmit second half of data message
+	uint8_t normalTxModeFlag = NORMAL_MODE_TX_FLAG; 																				/* Setting flag identifier to put later into the queue */
+  
+	/* Infinite loop */
+  for(;;) {
+    xSemaphoreTake(sendFollowingDataSemaphoreHandle, portMAX_DELAY); 											/* Unlock when first part tx is completed, unlocked from tx complete callback */
+		xQueueSend(Usart1TxModeQueueHandle, (void *)&normalTxModeFlag, (TickType_t)0); 				/* Add flag to queue */
+		HAL_UART_Transmit_DMA(&huart1, blockBuffer + HALF_DATA_INDEX, HALF_DATA_INDEX); 			/* Transmit second half of data message */
   }
   /* USER CODE END SendFollowingDataFunc */
 }

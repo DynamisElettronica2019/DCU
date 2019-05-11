@@ -35,7 +35,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "user_defines.h"
+#include "data.h"
+#include "telemetry.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,20 +57,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-extern uint8_t telemRxBuffer[BUFFER_COMMAND_LEN];
-/*
-* Semaphore handlers
-*/
-extern osSemaphoreId sendDataSemaphoreHandle;
-extern osSemaphoreId sendStateSemaphoreHandle;
-extern osSemaphoreId sendErrorSemaphoreHandle;
-extern osSemaphoreId receiveCommandSemaphoreHandle;
-extern osSemaphoreId uart1SemHandle;
-extern osSemaphoreId sendFollowingDataSemaphoreHandle;
-/*
-/ Queue handlers
-*/
-extern osMessageQId Usart1TxModeQueueHandle;
+extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -135,10 +123,7 @@ int main(void)
 	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
-	/*
-	/ Start uart and timers
-	*/
-	HAL_UART_Receive_DMA(&huart1, telemRxBuffer, BUFFER_COMMAND_LEN);
+	HAL_UART_Receive_DMA(&huart1, telemetryReceivedBuffer, BUFFER_COMMAND_LEN);
 	HAL_TIM_Base_Start_IT(&htim5);
   HAL_TIM_Base_Start_IT(&htim6);
 	HAL_TIM_Base_Start_IT(&htim7);
@@ -154,8 +139,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
+  while (1) {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -173,19 +157,15 @@ void SystemClock_Config(void)
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
   RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
-  /** Configure LSE Drive Capability 
-  */
-  HAL_PWR_EnableBkUpAccess();
-  __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_HIGH);
   /** Configure the main internal regulator output voltage 
   */
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
   /** Initializes the CPU, AHB and APB busses clocks 
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 4;
@@ -224,7 +204,7 @@ void SystemClock_Config(void)
   PeriphClkInitStruct.PLLSAI.PLLSAIP = RCC_PLLSAIP_DIV8;
   PeriphClkInitStruct.PLLSAIDivQ = 1;
   PeriphClkInitStruct.PLLSAIDivR = RCC_PLLSAIDIVR_2;
-  PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
+  PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
   PeriphClkInitStruct.Usart1ClockSelection = RCC_USART1CLKSOURCE_SYSCLK;
   PeriphClkInitStruct.Usart2ClockSelection = RCC_USART2CLKSOURCE_SYSCLK;
   PeriphClkInitStruct.I2c4ClockSelection = RCC_I2C4CLKSOURCE_SYSCLK;
@@ -237,82 +217,25 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	if(huart->Instance==USART1) {
-		Usart1RxCallback();
+	if(huart->Instance == USART1) {
+		usart1RxCallback();
 	}
-	if(huart->Instance==USART2) {
-		//User code
+	
+	if(huart->Instance == USART2) {
+		/* Put here the GPS code */
 	}
 }
-	
+
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
 	if(huart->Instance==USART1) {
-		Usart1TxCallback();
+		usart1TxCallback();
 	}
 	if(huart->Instance==USART2) {
-		//User code
-	}
-}
-
-// TX callback for usart 1
-void Usart1TxCallback(void)
-{
-	BaseType_t xHigherPriorityTaskWoken = pdFALSE; // Variable goes to true when contxt-switch is needed	
-	uint8_t queueFlag; //Receive from queue and store into this variable
-	xQueueReceiveFromISR( Usart1TxModeQueueHandle, ( void * ) &queueFlag, &xHigherPriorityTaskWoken);
-	switch (queueFlag) { //Check which flag you have received, and unlock the correct semaphore
-		case SECOND_HALF_TX_FLAG: //To send second part of data, unlock the secont part tx task and keep the uart semaphore locked to avoit uart use from other tasks
-			if(sendFollowingDataSemaphoreHandle!=NULL) { // Check on system start if semaphore is already created
-				xSemaphoreGiveFromISR(sendFollowingDataSemaphoreHandle, &xHigherPriorityTaskWoken); // Give semaphore to task when DMA is clear
-				portYIELD_FROM_ISR(xHigherPriorityTaskWoken); // Do context-switch if needed
-			}
-			break;
-		case NORMAL_MODE_TX_FLAG: //To return to normal mode, unlock the uart semaphore
-			if(sendDataSemaphoreHandle!=NULL) { // Check on system start if semaphore is already created
-				xSemaphoreGiveFromISR(uart1SemHandle, &xHigherPriorityTaskWoken); // Give semaphore to task when DMA is clear
-				portYIELD_FROM_ISR(xHigherPriorityTaskWoken); // Do context-switch if needed
-			}
-			break;
-		default: //If the flag is unrecognised, raise eventually an error and return to normal mode
-			//Eventual error throwing code to be inserted here
-			if(sendDataSemaphoreHandle!=NULL) { // Check on system start if semaphore is already created
-				xSemaphoreGiveFromISR(uart1SemHandle, &xHigherPriorityTaskWoken); // Give semaphore to task when DMA is clear
-				portYIELD_FROM_ISR(xHigherPriorityTaskWoken); // Do context-switch if needed
-			}
-			break;
-	}
-}
-
-// RX callback for usart 1
-void Usart1RxCallback(void)
-{	
-	BaseType_t xHigherPriorityTaskWoken = pdFALSE; // Variable goes to true when contxt-switch is needed
-	if(sendDataSemaphoreHandle!=NULL) { // Check on system start if semaphore is already created
-		xSemaphoreGiveFromISR(receiveCommandSemaphoreHandle, &xHigherPriorityTaskWoken); // Give semaphore to task when DMA is clear
-		portYIELD_FROM_ISR(xHigherPriorityTaskWoken); // Do context-switch if needed
-	} 
-}
-
-// Func called every 1hz for unlocking send state task
-void StateSendTimCallback(void)
-{	
-	BaseType_t xHigherPriorityTaskWoken = pdFALSE; // Variable goes to true when contxt-switch is needed
-	if(sendStateSemaphoreHandle!=NULL) { // Check on system start if semaphore is already created
-		xSemaphoreGiveFromISR(sendStateSemaphoreHandle, &xHigherPriorityTaskWoken); // Give semaphore to task when DMA is clear
-		portYIELD_FROM_ISR(xHigherPriorityTaskWoken); // Do context-switch if needed
-	}
-}
-
-// Func called every 10hz for unlocking send data task
-void DataSendTimCallback(void)
-{
-	BaseType_t xHigherPriorityTaskWoken = pdFALSE; // Variable goes to true when contxt-switch is needed
-	if(sendDataSemaphoreHandle!=NULL) { // Check on system start if semaphore is already created
-		xSemaphoreGiveFromISR(sendDataSemaphoreHandle, &xHigherPriorityTaskWoken); // Give semaphore to task when DMA is clear
-		portYIELD_FROM_ISR(xHigherPriorityTaskWoken); // Do context-switch if needed
+		/* Put here the GPS code */
 	}
 }
 
@@ -335,15 +258,21 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
+	
+	/* 1 Hz timer callback */
 	if (htim->Instance == TIM5) {
-    //1Hz user code
-		StateSendTimCallback();
+    /* Telemetry DCU state packet send at 1 Hz */
+		stateSendTimCallback();
   }
+	
+	/* 10 Hz timer callback */
 	if (htim->Instance == TIM6) {
-    DataSendTimCallback();
+		/* Data packet send at 10 Hz */
+    dataSendTimCallback();
   }
-	if (htim->Instance == TIM7) {
-    //100Hz user code
+	
+	/* 100 Hz timer callback */
+	if (htim->Instance == TIM6) {
   }
   /* USER CODE END Callback 1 */
 }
@@ -356,7 +285,7 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-
+	
   /* USER CODE END Error_Handler_Debug */
 }
 

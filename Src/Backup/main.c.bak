@@ -56,15 +56,14 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-extern uint8_t telemRxBuffer[BUFFER_COMMAND_LEN];
-/*
-* Semaphore handlers
-*/
+extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
 extern osSemaphoreId sendDataSemaphoreHandle;
 extern osSemaphoreId sendStateSemaphoreHandle;
 extern osSemaphoreId sendErrorSemaphoreHandle;
 extern osSemaphoreId receiveCommandSemaphoreHandle;
 extern osSemaphoreId uart1SemHandle;
+extern osSemaphoreId sendFollowingDataSemaphoreHandle;
+extern osMessageQId Usart1TxModeQueueHandle;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -88,7 +87,6 @@ int main(void)
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
-  
 
   /* Enable I-Cache---------------------------------------------------------*/
   SCB_EnableICache();
@@ -130,10 +128,7 @@ int main(void)
 	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
-	/*
-	/ Start uart and timers
-	*/
-	HAL_UART_Receive_DMA(&huart1, telemRxBuffer, BUFFER_COMMAND_LEN);
+	HAL_UART_Receive_DMA(&huart1, telemetryReceivedBuffer, BUFFER_COMMAND_LEN);
 	HAL_TIM_Base_Start_IT(&htim5);
   HAL_TIM_Base_Start_IT(&htim6);
 	HAL_TIM_Base_Start_IT(&htim7);
@@ -232,63 +227,89 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	if(huart->Instance==USART1) {
 		Usart1RxCallback();
 	}
+	
 	if(huart->Instance==USART2) {
-		//User code
+		/* Put here the GPS code */
 	}
 }
-	
+
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
 	if(huart->Instance==USART1) {
 		Usart1TxCallback();
 	}
 	if(huart->Instance==USART2) {
-		//User code
+		/* Put here the GPS code */
 	}
 }
 
-// TX callback for usart 1
 void Usart1TxCallback(void)
-{	
-	BaseType_t xHigherPriorityTaskWoken = pdFALSE; // Variable goes to true when contxt-switch is needed
-	if(sendDataSemaphoreHandle!=NULL) { // Check on system start if semaphore is already created
-		xSemaphoreGiveFromISR(uart1SemHandle, &xHigherPriorityTaskWoken); // Give semaphore to task when DMA is clear
-		portYIELD_FROM_ISR(xHigherPriorityTaskWoken); // Do context-switch if needed
+{
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE; 			/* Variable goes to true when contxt-switch is needed */
+	uint8_t queueUartTransmitFlag; 											/* Receive from queue and store into this variable */
+	
+	xQueueReceiveFromISR(Usart1TxModeQueueHandle, (void *)&queueUartTransmitFlag, &xHigherPriorityTaskWoken);
+	
+	/* Check which flag you have received and unlock the correct semaphore */
+	switch(queueUartTransmitFlag) {
+		
+		/* To send second part of data, unlock the secont part tx task and keep the UART semaphore locked to avoit its use from other tasks */
+		case SECOND_HALF_TX_FLAG:
+			if(sendFollowingDataSemaphoreHandle != NULL) { 																					/* Check on system start if semaphore is already created */
+				xSemaphoreGiveFromISR(sendFollowingDataSemaphoreHandle, &xHigherPriorityTaskWoken); 	/* Give semaphore to task when DMA is clear */
+				portYIELD_FROM_ISR(xHigherPriorityTaskWoken); 																				/* Do context-switch if needed */
+			}
+			break;
+		
+		/* To return to normal mode, unlock the UART locking semaphore */
+		case NORMAL_MODE_TX_FLAG: 
+			if(uart1SemHandle != NULL) { 																														/* Check on system start if semaphore is already created */
+				xSemaphoreGiveFromISR(uart1SemHandle, &xHigherPriorityTaskWoken);											/* Give semaphore to task when DMA is clear */
+				portYIELD_FROM_ISR(xHigherPriorityTaskWoken); 																				/* Do context-switch if needed */
+			}
+			break;
+		
+		/* If the flag is unrecognised, raise eventually an error and return to normal mode */
+		default:
+			/* Eventual error throwing code to be inserted here */
+			if(uart1SemHandle != NULL) { 																														/* Check on system start if semaphore is already created */
+				xSemaphoreGiveFromISR(uart1SemHandle, &xHigherPriorityTaskWoken); 										/* Give semaphore to task when DMA is clear */
+				portYIELD_FROM_ISR(xHigherPriorityTaskWoken); 																				/* Do context-switch if needed */
+			}
+			break;
 	}
 }
 
-// RX callback for usart 1
 void Usart1RxCallback(void)
-{	
-	BaseType_t xHigherPriorityTaskWoken = pdFALSE; // Variable goes to true when contxt-switch is needed
-	if(sendDataSemaphoreHandle!=NULL) { // Check on system start if semaphore is already created
-		xSemaphoreGiveFromISR(receiveCommandSemaphoreHandle, &xHigherPriorityTaskWoken); // Give semaphore to task when DMA is clear
-		portYIELD_FROM_ISR(xHigherPriorityTaskWoken); // Do context-switch if needed
-	} 
+{
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE; 																							/* Variable goes to true when contxt-switch is needed */
+	if(receiveCommandSemaphoreHandle != NULL) { 																								/* Check on system start if semaphore is already created */
+		xSemaphoreGiveFromISR(receiveCommandSemaphoreHandle, &xHigherPriorityTaskWoken); 					/* Give semaphore to task when DMA is clear */
+		portYIELD_FROM_ISR(xHigherPriorityTaskWoken); 																						/* Do context-switch if needed */
+	}
 }
 
-// Func called every 1hz for unlocking send state task
 void StateSendTimCallback(void)
 {	
-	BaseType_t xHigherPriorityTaskWoken = pdFALSE; // Variable goes to true when contxt-switch is needed
-	if(sendDataSemaphoreHandle!=NULL) { // Check on system start if semaphore is already created
-		xSemaphoreGiveFromISR(sendDataSemaphoreHandle, &xHigherPriorityTaskWoken); // Give semaphore to task when DMA is clear
-		portYIELD_FROM_ISR(xHigherPriorityTaskWoken); // Do context-switch if needed
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE; 																							/* Variable goes to true when contxt-switch is needed */
+	if(sendStateSemaphoreHandle!=NULL) { 																												/* Check on system start if semaphore is already created */
+		xSemaphoreGiveFromISR(sendStateSemaphoreHandle, &xHigherPriorityTaskWoken); 							/* Give semaphore to task when DMA is clear */
+		portYIELD_FROM_ISR(xHigherPriorityTaskWoken); 																						/* Do context-switch if needed */
 	}
 }
 
-// Func called every 10hz for unlocking send data task
 void DataSendTimCallback(void)
 {
-	BaseType_t xHigherPriorityTaskWoken = pdFALSE; // Variable goes to true when contxt-switch is needed
-	if(sendStateSemaphoreHandle!=NULL) { // Check on system start if semaphore is already created
-		xSemaphoreGiveFromISR(sendStateSemaphoreHandle, &xHigherPriorityTaskWoken); // Give semaphore to task when DMA is clear
-		portYIELD_FROM_ISR(xHigherPriorityTaskWoken); // Do context-switch if needed
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE; 																							/* Variable goes to true when contxt-switch is needed */
+	if(sendDataSemaphoreHandle!=NULL) { 																												/* Check on system start if semaphore is already created */
+		xSemaphoreGiveFromISR(sendDataSemaphoreHandle, &xHigherPriorityTaskWoken); 								/* Give semaphore to task when DMA is clear */
+		portYIELD_FROM_ISR(xHigherPriorityTaskWoken); 																						/* Do context-switch if needed */
 	}
 }
 
@@ -311,15 +332,21 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
+	
+	/* 1 Hz timer callback */
 	if (htim->Instance == TIM5) {
-    //1Hz user code
+    /* Telemetry DCU state packet send at 1 Hz */
 		StateSendTimCallback();
   }
+	
+	/* 10 Hz timer callback */
 	if (htim->Instance == TIM6) {
+		/* Data packet send at 10 Hz */
     DataSendTimCallback();
   }
-	if (htim->Instance == TIM7) {
-    //100Hz user code
+	
+	/* 100 Hz timer callback */
+	if (htim->Instance == TIM6) {
   }
   /* USER CODE END Callback 1 */
 }
@@ -332,7 +359,7 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-
+	
   /* USER CODE END Error_Handler_Debug */
 }
 
