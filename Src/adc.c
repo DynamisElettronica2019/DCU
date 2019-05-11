@@ -23,10 +23,10 @@
 /* USER CODE BEGIN 0 */
 #include "cmsis_os.h"
 
-uint32_t adc1BufferRaw[ADC1_RAW_DATA_LEN];					
-uint32_t adc2BufferRaw[ADC2_RAW_DATA_LEN];
-float adcBufferConvertedDebug[ADC_CONVERTED_DEBUG_DATA_LEN];
-float adcBufferConvertedAux[ADC_CONVERTED_AUX_DATA_LEN];
+uint32_t adc1BufferRaw [ADC1_RAW_DATA_LEN];					
+uint32_t adc2BufferRaw [ADC2_RAW_DATA_LEN];
+float adcBufferConvertedDebug [ADC_CONVERTED_DEBUG_DATA_LEN];
+float adcBufferConvertedAux [ADC_CONVERTED_AUX_DATA_LEN];
 extern osSemaphoreId adc1SemaphoreHandle;
 extern osSemaphoreId adc2SemaphoreHandle;
 /* USER CODE END 0 */
@@ -399,13 +399,13 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
 
 extern void adcBuffersInit(void) {
 	for (uint8_t i = 0; i < ADC1_NUMBER_OF_CHANNELS; i++) {
-		adc1BufferRaw[i] = 0;
-		adcBufferConvertedDebug[i] = 0.0;
+		adc1BufferRaw [i] = 0;
+		adcBufferConvertedDebug [i] = 0.0;
 	}
 	
 	for (uint8_t i = 0; i < ADC2_NUMBER_OF_CHANNELS; i++) {
-		adc2BufferRaw[i] = 0;
-		adcBufferConvertedAux[i] = 0.0;
+		adc2BufferRaw [i] = 0;
+		adcBufferConvertedAux [i] = 0.0;
 	}
 	
 	return;

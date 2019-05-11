@@ -32,6 +32,7 @@
 #include "usart.h"
 #include "usb_host.h"
 #include "gpio.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -59,6 +60,9 @@ extern uint32_t adc1BufferRaw[ADC1_RAW_DATA_LEN];
 extern uint32_t adc2BufferRaw[ADC2_RAW_DATA_LEN];
 extern float adcBufferConvertedDebug[ADC_CONVERTED_DEBUG_DATA_LEN];
 extern float adcBufferConvertedAux[ADC_CONVERTED_AUX_DATA_LEN];
+extern osMessageQId digitalAuxQueueHandle;
+extern osSemaphoreId autogearSemaphoreHandle;
+extern osMessageQId digitalAuxQueueHandle;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -125,8 +129,6 @@ int main(void)
 	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_SET); 				/* Green LED off as default */
 	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET); 		/* Yellow LED off as default */
 	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET); 					/* Red LED off as default */
-	HAL_ADC_Start_DMA(&hadc1,adc1BufferRaw, ADC1_NUMBER_OF_CHANNELS); 					/* Start ADC 1 in DMA mode */
-	HAL_ADC_Start_DMA(&hadc2,adc2BufferRaw, ADC2_NUMBER_OF_CHANNELS ); 					/* Start ADC 2 in DMA mode */
 	HAL_TIM_Base_Start_IT(&htim5); 																							/* Start timer 5 in interrupt mode */
 	HAL_TIM_Base_Start_IT(&htim6); 																							/* Start timer 6 in interrupt mode */
 	HAL_TIM_Base_Start_IT(&htim7); 																							/* Start timer 7 in interrupt mode */
@@ -226,6 +228,38 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+	uint8_t digitalAuxEvent;
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+	
+	if(GPIO_Pin == AUTOGEAR_SWTICH_MCU_Pin) {
+		if(autogearSemaphoreHandle != NULL) {																						/* Check on system start if semaphore is already created */
+			xSemaphoreGiveFromISR(autogearSemaphoreHandle, &xHigherPriorityTaskWoken); 		/* Give semaphore to task when interrupt is called */
+			portYIELD_FROM_ISR(xHigherPriorityTaskWoken);																	/* Do context-switch if needed */
+		}
+	}
+	else {
+		
+		if(GPIO_Pin == DIGITAL_AUX_1_Pin) {
+			digitalAuxEvent = DIGITAL_EVENT_AUX_1;
+			xQueueSend(digitalAuxQueueHandle, (void *)&digitalAuxEvent, (TickType_t)0);		/* Add digital aux event to queue */
+		}
+		else if(GPIO_Pin == DIGITAL_AUX_2_Pin) {
+			digitalAuxEvent = DIGITAL_EVENT_AUX_2;
+			xQueueSend(digitalAuxQueueHandle, (void *)&digitalAuxEvent, (TickType_t)0); 	/* Add digital aux event to queue */
+		}
+		else if(GPIO_Pin == DIGITAL_AUX_3_Pin) {
+			digitalAuxEvent = DIGITAL_EVENT_AUX_3;
+			xQueueSend(digitalAuxQueueHandle, (void *)&digitalAuxEvent, (TickType_t)0); 	/* Add digital aux event to queue */
+		}
+		
+		if(digitalAuxQueueHandle != NULL) {																							/* Check on system start if semaphore is already created */
+			xSemaphoreGiveFromISR(digitalAuxQueueHandle, &xHigherPriorityTaskWoken); 			/* Give semaphore to task when interrupt is called */
+			portYIELD_FROM_ISR(xHigherPriorityTaskWoken);																	/* Do context-switch if needed */
+		}
+	}
+}
+
 /* USER CODE END 4 */
 
 /**
@@ -250,7 +284,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if (htim->Instance == TIM5) {
 		
 		/* ADCs management: 1 Hz sampling time */
-		HAL_GPIO_TogglePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin);							/* Yellow LED toogle for debug */
 		HAL_ADC_Start_DMA(&hadc1,adc1BufferRaw, ADC1_NUMBER_OF_CHANNELS);			/* Start ADC 1 in DMA mode */
 		HAL_ADC_Start_DMA(&hadc2,adc2BufferRaw, ADC2_NUMBER_OF_CHANNELS ); 		/* Start ADC 2 in DMA mode */
 	}
