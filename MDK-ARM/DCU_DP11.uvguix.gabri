@@ -11,17 +11,17 @@
     <View>
       <WinId>38003</WinId>
       <ViewName>Registers</ViewName>
-      <TableColWidths>82 100</TableColWidths>
+      <TableColWidths>115 95</TableColWidths>
     </View>
     <View>
       <WinId>346</WinId>
       <ViewName>Code Coverage</ViewName>
-      <TableColWidths>770 560</TableColWidths>
+      <TableColWidths>770 160</TableColWidths>
     </View>
     <View>
       <WinId>204</WinId>
       <ViewName>Performance Analyzer</ViewName>
-      <TableColWidths>952 139 139 100</TableColWidths>
+      <TableColWidths>930</TableColWidths>
     </View>
   </SECTreeCtrl>
 
@@ -36,7 +36,7 @@
       <WinId>1936</WinId>
       <ViewName>Watch 1</ViewName>
       <UserString></UserString>
-      <TableColWidths>190 161 64</TableColWidths>
+      <TableColWidths>64 64 64</TableColWidths>
     </View>
     <View>
       <WinId>1937</WinId>
@@ -48,7 +48,7 @@
       <WinId>1935</WinId>
       <ViewName>Call Stack + Locals</ViewName>
       <UserString></UserString>
-      <TableColWidths>245 64 64</TableColWidths>
+      <TableColWidths>64 64 64</TableColWidths>
     </View>
     <View>
       <WinId>2506</WinId>
@@ -3516,11 +3516,11 @@
       <ActiveTab>0</ActiveTab>
       <Doc>
         <Name>../Src/main.c</Name>
-        <ColumnNumber>0</ColumnNumber>
+        <ColumnNumber>45</ColumnNumber>
         <TopLine>1</TopLine>
-        <CurrentLine>20</CurrentLine>
+        <CurrentLine>21</CurrentLine>
         <Folding>1</Folding>
-        <ContractedFolders>1,78,149,157,162,250,290,295,309</ContractedFolders>
+        <ContractedFolders>1,79,150,158,163,254,294,299,313</ContractedFolders>
         <PaneID>0</PaneID>
       </Doc>
       <Doc>
@@ -3529,16 +3529,16 @@
         <TopLine>1</TopLine>
         <CurrentLine>20</CurrentLine>
         <Folding>1</Folding>
-        <ContractedFolders>1,75,131,150,176</ContractedFolders>
+        <ContractedFolders>1,76,132,151,177</ContractedFolders>
         <PaneID>0</PaneID>
       </Doc>
       <Doc>
         <Name>../Src/fatfs.c</Name>
-        <ColumnNumber>4</ColumnNumber>
+        <ColumnNumber>0</ColumnNumber>
         <TopLine>1</TopLine>
-        <CurrentLine>37</CurrentLine>
+        <CurrentLine>20</CurrentLine>
         <Folding>1</Folding>
-        <ContractedFolders>0,48</ContractedFolders>
+        <ContractedFolders>0,45</ContractedFolders>
         <PaneID>0</PaneID>
       </Doc>
       <Doc>
@@ -3547,14 +3547,14 @@
         <TopLine>1</TopLine>
         <CurrentLine>21</CurrentLine>
         <Folding>1</Folding>
-        <ContractedFolders>1,45,52,57,73,78,133,137</ContractedFolders>
+        <ContractedFolders>1,45,52,57,74,79,103,134,138</ContractedFolders>
         <PaneID>0</PaneID>
       </Doc>
       <Doc>
         <Name>..\Src\data.c</Name>
         <ColumnNumber>0</ColumnNumber>
         <TopLine>1</TopLine>
-        <CurrentLine>3</CurrentLine>
+        <CurrentLine>4</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>
         <PaneID>0</PaneID>

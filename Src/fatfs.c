@@ -40,9 +40,6 @@ void MX_FATFS_Init(void)
 
   /* USER CODE BEGIN Init */
   /* additional user code for init */
-	if(retUSBH == 0) {
-		f_mount(&USBHFatFS, (TCHAR const*)USBHPath, 1);
-	}
   /* USER CODE END Init */
 }
 

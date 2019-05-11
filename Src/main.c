@@ -37,6 +37,7 @@
 /* USER CODE BEGIN Includes */
 #include "fatfs.h"
 #include "usb_host.h"
+#include "data.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -57,7 +58,11 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-extern osSemaphoreId saveUsbHandle;
+uint8_t startAcquisitionCommand;
+FRESULT openResult = FR_EXIST;
+FRESULT closeResult = FR_EXIST;
+extern osSemaphoreId saveUsbSemaphoreHandle;
+extern uint8_t dcuStateBuffer[BUFFER_STATE_LEN];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -129,6 +134,7 @@ int main(void)
 	HAL_TIM_Base_Start_IT(&htim5);
 	HAL_TIM_Base_Start_IT(&htim6);
 	HAL_TIM_Base_Start_IT(&htim7);
+	HAL_UART_Receive_IT(&huart1, &startAcquisitionCommand, 1);
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
@@ -144,7 +150,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
+		
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -160,19 +166,15 @@ void SystemClock_Config(void)
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
   RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
-  /** Configure LSE Drive Capability 
-  */
-  HAL_PWR_EnableBkUpAccess();
-  __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_HIGH);
   /** Configure the main internal regulator output voltage 
   */
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
   /** Initializes the CPU, AHB and APB busses clocks 
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 4;
@@ -211,7 +213,7 @@ void SystemClock_Config(void)
   PeriphClkInitStruct.PLLSAI.PLLSAIP = RCC_PLLSAIP_DIV8;
   PeriphClkInitStruct.PLLSAIDivQ = 1;
   PeriphClkInitStruct.PLLSAIDivR = RCC_PLLSAIDIVR_2;
-  PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
+  PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
   PeriphClkInitStruct.Usart1ClockSelection = RCC_USART1CLKSOURCE_SYSCLK;
   PeriphClkInitStruct.Usart2ClockSelection = RCC_USART2CLKSOURCE_SYSCLK;
   PeriphClkInitStruct.I2c4ClockSelection = RCC_I2C4CLKSOURCE_SYSCLK;
@@ -224,6 +226,29 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	/* To be implemented as state machine in a separate task, using queue */
+	switch(startAcquisitionCommand)
+	{
+		case ACQUISITION_ON_TELEMETRY_COMMAND:
+			openResult = f_open(&USBHFile, "DynamisPRC_USB_test.txt", FA_CREATE_ALWAYS | FA_WRITE);
+			HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
+			dcuStateBuffer[STATE_ACQUISITION_ON] = STATE_ON;
+			/* Put here the code to manage errors */
+			break;
+		
+		case ACQUISITION_OFF_TELEMETRY_COMMAND:
+			closeResult = f_close(&USBHFile);
+			HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
+			dcuStateBuffer[STATE_ACQUISITION_ON] = STATE_OFF;
+			/* Put here the code to manage errors */
+			break;
+	}
+	
+	HAL_UART_Receive_IT(&huart1, &startAcquisitionCommand, 1);
+}
 
 /* USER CODE END 4 */
 
@@ -246,14 +271,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE BEGIN Callback 1 */
 	
 	/* Timer 5 period elapsed callback: 1 Hz */
-	/* USB test task */
 	if(htim->Instance == TIM5) {
-		BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-	
-		if(saveUsbHandle != NULL) {
-			xSemaphoreGiveFromISR(saveUsbHandle, &xHigherPriorityTaskWoken);
-			portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-		}
 	}
 	
 	/* Timer 6 period elapsed callback: 10 Hz */
@@ -262,6 +280,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	
 	/* Timer 7 period elapsed callback: 100 Hz */
 	if(htim->Instance == TIM7) {
+		BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+		
+		/* USB saving task */
+		if(saveUsbSemaphoreHandle != NULL) {
+			xSemaphoreGiveFromISR(saveUsbSemaphoreHandle, &xHigherPriorityTaskWoken);
+			portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+		}
 	}
 
   /* USER CODE END Callback 1 */

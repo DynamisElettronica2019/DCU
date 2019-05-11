@@ -66,6 +66,7 @@ extern void usbInitStart(void)
 	USBH_RegisterClass(&hUsbHostHS, USBH_MSC_CLASS); 				/* Add Supported Class */
 	USBH_Start(&hUsbHostHS);																/* Start Host Process */
 	MX_DriverVbusHS(VBUS_ENABLE);														/* Enable USB Vbus power */
+	/* Put here the code to manage errors */
 	return;
 }
 
@@ -105,7 +106,7 @@ void MX_USB_HOST_Init(void)
  */
 static void USBH_UserProcess  (USBH_HandleTypeDef *phost, uint8_t id)
 {
-  /* USER CODE BEGIN CALL_BACK_1 */	
+  /* USER CODE BEGIN CALL_BACK_1 */
 	switch(id)
   {
     case HOST_USER_SELECT_CONFIGURATION:

@@ -52,10 +52,10 @@ uint8_t linkResult;
 UINT bytesWritten;
 FRESULT mountResult;
 FRESULT writeResult;
-FRESULT openResult;
-FRESULT closeResult;
+extern uint8_t acquisitionOn;
 extern USBH_HandleTypeDef hUsbHostFS;
 extern uint8_t blockBuffer[BUFFER_BLOCK_LEN];
+extern uint8_t dcuStateBuffer[BUFFER_STATE_LEN];
 /* USER CODE END Variables */
 osThreadId aliveHandle;
 osThreadId saveUsbHandle;
@@ -96,9 +96,8 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
-	xSemaphoreTake(saveUsbHandle, portMAX_DELAY);			/* Start with the USB saving task locked */
-  
-	/* USER CODE BEGIN RTOS_TIMERS */
+	xSemaphoreTake(saveUsbSemaphoreHandle, portMAX_DELAY);			/* Start with task locked */
+  /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
 
@@ -139,6 +138,7 @@ void MX_FREERTOS_Init(void) {
 /* USER CODE END Header_aliveTask */
 void aliveTask(void const * argument)
 {
+
   /* USER CODE BEGIN aliveTask */
   /* Infinite loop */
   for(;;) {
@@ -159,19 +159,17 @@ void saveUsbTask(void const * argument)
 {
   /* USER CODE BEGIN saveUsbTask */
 	dataBufferInit();
+	dcuStateBufferInit();
 	
   /* Infinite loop */
   for(;;) {
-		xSemaphoreTake(saveUsbHandle, portMAX_DELAY);		/* Unlock when timer callback is called */
-		
-		/* Put here the saving code */
-		
-		/* Testing code */
-		openResult = f_open(&USBHFile, "DynamisPRC_Polimi.txt", FA_CREATE_ALWAYS | FA_WRITE);
-		HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
-		writeResult = f_write(&USBHFile, blockBuffer, BUFFER_BLOCK_LEN, (void *)&bytesWritten);
-		closeResult = f_close(&USBHFile);
-		HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
+		xSemaphoreTake(saveUsbSemaphoreHandle, portMAX_DELAY);		/* Unlock when timer callback is called */
+
+		/* Saving task code */
+		if((dcuStateBuffer[STATE_ACQUISITION_ON] == STATE_ON) && (dcuStateBuffer[STATE_USB_PRESENT_INDEX] == STATE_ON)) {
+			writeResult = f_write(&USBHFile, blockBuffer, BUFFER_BLOCK_LEN, (void *)&bytesWritten);
+			/* Put here the code to manage errors */
+		}
   }
   /* USER CODE END saveUsbTask */
 }
@@ -197,15 +195,19 @@ void usbManageTask(void const * argument)
 				case DISCONNECTION_EVENT:
 					mountResult = f_mount(NULL, (TCHAR const *)"", 1);
 					linkResult = FATFS_UnLinkDriver(USBHPath);
-					/* Update here the status packet */
+					dcuStateBuffer[STATE_USB_READY_INDEX] = STATE_OFF; 				/* Update of the status packet */
+					dcuStateBuffer[STATE_USB_PRESENT_INDEX] = STATE_OFF; 			/* Update of the status packet */
+					/* Put here the code to manage errors */
 					break;
 
 				case CONNECTED_EVENT:
 					if(FATFS_LinkDriver(&USBH_Driver, USBHPath) == 0) {
 						mountResult = f_mount(&USBHFatFS, (TCHAR const *)USBHPath, 1);
+						dcuStateBuffer[STATE_USB_READY_INDEX] = STATE_ON; 			/* Update of the status packet */
+						dcuStateBuffer[STATE_USB_PRESENT_INDEX] = STATE_ON;			/* Update of the status packet */
 					}
-					/* Update here the status packet */
 					
+					/* Put here the code to manage errors */
 					break;
 	    
 				default:
