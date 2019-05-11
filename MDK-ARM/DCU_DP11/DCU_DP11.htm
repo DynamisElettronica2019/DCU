@@ -3,7 +3,7 @@
 <title>Static Call Graph - [DCU_DP11\DCU_DP11.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image DCU_DP11\DCU_DP11.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Sat May 11 12:39:13 2019
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Sat May 11 12:44:14 2019
 <BR><P>
 <H3>Maximum Stack Usage =        424 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -2857,7 +2857,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[8a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;usbManageTask
 </UL>
 
-<P><STRONG><a name="[89]"></a>saveUsbTask</STRONG> (Thumb, 44 bytes, Stack size 0 bytes, freertos.o(i.saveUsbTask))
+<P><STRONG><a name="[89]"></a>saveUsbTask</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, freertos.o(i.saveUsbTask))
 <BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = saveUsbTask &rArr; f_write &rArr; validate &rArr; ff_rel_grant &rArr; osSemaphoreRelease &rArr; xQueueGenericSend &rArr; xTaskResumeAll
 </UL>
 <BR>[Calls]<UL><LI><a href="#[123]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getAcquisitionState
@@ -2886,7 +2886,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[76]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[8a]"></a>usbManageTask</STRONG> (Thumb, 96 bytes, Stack size 16 bytes, freertos.o(i.usbManageTask))
+<P><STRONG><a name="[8a]"></a>usbManageTask</STRONG> (Thumb, 90 bytes, Stack size 16 bytes, freertos.o(i.usbManageTask))
 <BR><BR>[Stack]<UL><LI>Max Depth = 216<LI>Call Chain = usbManageTask &rArr; f_mount &rArr; find_volume &rArr; ff_req_grant &rArr; osSemaphoreWait &rArr; xQueueSemaphoreTake &rArr; xTaskResumeAll
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setUsbReadyState

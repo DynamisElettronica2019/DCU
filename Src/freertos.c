@@ -48,10 +48,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-uint8_t linkResult;
 UINT bytesWritten;
-FRESULT mountResult;
-FRESULT writeResult;
 extern uint8_t acquisitionOn;
 extern USBH_HandleTypeDef hUsbHostFS;
 extern uint8_t blockBuffer[BUFFER_BLOCK_LEN];
@@ -138,7 +135,6 @@ void MX_FREERTOS_Init(void) {
 /* USER CODE END Header_aliveTask */
 void aliveTask(void const * argument)
 {
-
   /* USER CODE BEGIN aliveTask */
   /* Infinite loop */
   for(;;) {
@@ -166,7 +162,7 @@ void saveUsbTask(void const * argument)
 
 		/* Saving task code */
 		if(getAcquisitionState() == STATE_ON) {
-			writeResult = f_write(&USBHFile, blockBuffer, BUFFER_BLOCK_LEN, (void *)&bytesWritten);
+			f_write(&USBHFile, blockBuffer, BUFFER_BLOCK_LEN, (void *)&bytesWritten);
 			/* Put here the code to manage errors */
 		}
   }
@@ -192,8 +188,8 @@ void usbManageTask(void const * argument)
 		if(usbEvent.status == osEventMessage) {
 			switch(usbEvent.value.v) {
 				case DISCONNECTION_EVENT:
-					mountResult = f_mount(NULL, (TCHAR const *)"", 1);
-					linkResult = FATFS_UnLinkDriver(USBHPath);
+					f_mount(NULL, (TCHAR const *)"", 1);
+					FATFS_UnLinkDriver(USBHPath);
 					resetUsbReadyState();					/* Update of the status packet */
 					resetUsbPresentState();				/* Update of the status packet */
 					/* Put here the code to manage errors */
@@ -201,7 +197,7 @@ void usbManageTask(void const * argument)
 
 				case CONNECTED_EVENT:
 					if(FATFS_LinkDriver(&USBH_Driver, USBHPath) == 0) {
-						mountResult = f_mount(&USBHFatFS, (TCHAR const *)USBHPath, 1);
+						f_mount(&USBHFatFS, (TCHAR const *)USBHPath, 1);
 						setUsbReadyState();					/* Update of the status packet */
 						setUsbReadyState();					/* Update of the status packet */
 					}

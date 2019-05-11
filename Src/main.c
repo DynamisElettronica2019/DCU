@@ -59,8 +59,8 @@
 
 /* USER CODE BEGIN PV */
 uint8_t startAcquisitionCommand;
-FRESULT openResult = FR_EXIST;
-FRESULT closeResult = FR_EXIST;
+FRESULT openResult;
+FRESULT closeResult;
 extern osSemaphoreId saveUsbSemaphoreHandle;
 /* USER CODE END PV */
 
