@@ -34,12 +34,15 @@ FIL USBHFile;       /* File object for USBH */
 void MX_FATFS_Init(void) 
 {
   /*## FatFS: Link the SD driver ###########################*/
-  retSD = FATFS_LinkDriver(&SD_Driver, SDPath);
+  //retSD = FATFS_LinkDriver(&SD_Driver, SDPath);
   /*## FatFS: Link the USBH driver ###########################*/
   retUSBH = FATFS_LinkDriver(&USBH_Driver, USBHPath);
 
   /* USER CODE BEGIN Init */
   /* additional user code for init */
+	if(retUSBH == FR_OK) {
+		f_mount(&USBHFatFS, (TCHAR const *)USBHPath, 1);
+	}
   /* USER CODE END Init */
 }
 

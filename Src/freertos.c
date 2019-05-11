@@ -159,14 +159,13 @@ void saveUsbTask(void const * argument)
 {
   /* USER CODE BEGIN saveUsbTask */
 	dataBufferInit();
-	dcuStateBufferInit();
 	
   /* Infinite loop */
   for(;;) {
 		xSemaphoreTake(saveUsbSemaphoreHandle, portMAX_DELAY);		/* Unlock when timer callback is called */
 
 		/* Saving task code */
-		if((dcuStateBuffer[STATE_ACQUISITION_ON] == STATE_ON) && (dcuStateBuffer[STATE_USB_PRESENT_INDEX] == STATE_ON)) {
+		if(getAcquisitionState() == STATE_ON) {
 			writeResult = f_write(&USBHFile, blockBuffer, BUFFER_BLOCK_LEN, (void *)&bytesWritten);
 			/* Put here the code to manage errors */
 		}
@@ -195,16 +194,16 @@ void usbManageTask(void const * argument)
 				case DISCONNECTION_EVENT:
 					mountResult = f_mount(NULL, (TCHAR const *)"", 1);
 					linkResult = FATFS_UnLinkDriver(USBHPath);
-					dcuStateBuffer[STATE_USB_READY_INDEX] = STATE_OFF; 				/* Update of the status packet */
-					dcuStateBuffer[STATE_USB_PRESENT_INDEX] = STATE_OFF; 			/* Update of the status packet */
+					resetUsbReadyState();					/* Update of the status packet */
+					resetUsbPresentState();				/* Update of the status packet */
 					/* Put here the code to manage errors */
 					break;
 
 				case CONNECTED_EVENT:
 					if(FATFS_LinkDriver(&USBH_Driver, USBHPath) == 0) {
 						mountResult = f_mount(&USBHFatFS, (TCHAR const *)USBHPath, 1);
-						dcuStateBuffer[STATE_USB_READY_INDEX] = STATE_ON; 			/* Update of the status packet */
-						dcuStateBuffer[STATE_USB_PRESENT_INDEX] = STATE_ON;			/* Update of the status packet */
+						setUsbReadyState();					/* Update of the status packet */
+						setUsbReadyState();					/* Update of the status packet */
 					}
 					
 					/* Put here the code to manage errors */

@@ -62,7 +62,6 @@ uint8_t startAcquisitionCommand;
 FRESULT openResult = FR_EXIST;
 FRESULT closeResult = FR_EXIST;
 extern osSemaphoreId saveUsbSemaphoreHandle;
-extern uint8_t dcuStateBuffer[BUFFER_STATE_LEN];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -228,22 +227,40 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
+{	
 	/* To be implemented as state machine in a separate task, using queue */
 	switch(startAcquisitionCommand)
 	{
 		case ACQUISITION_ON_TELEMETRY_COMMAND:
-			openResult = f_open(&USBHFile, "DynamisPRC_USB_test.txt", FA_CREATE_ALWAYS | FA_WRITE);
-			HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
-			dcuStateBuffer[STATE_ACQUISITION_ON] = STATE_ON;
-			/* Put here the code to manage errors */
+			if((getAcquisitionState() == STATE_OFF) && (getUsbReadyState() == STATE_ON)){
+				openResult = f_open(&USBHFile, "DynamisPRC_USB_test.txt", FA_CREATE_ALWAYS | FA_WRITE);
+				
+				if(openResult == FR_OK) {
+				HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
+				setAcquisitionState();				/* Update of the status packet */
+				/* Put here the code to manage errors */
+				}
+			}
+			
+			startAcquisitionCommand = IDLE_COMMAND;
 			break;
 		
 		case ACQUISITION_OFF_TELEMETRY_COMMAND:
-			closeResult = f_close(&USBHFile);
-			HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
-			dcuStateBuffer[STATE_ACQUISITION_ON] = STATE_OFF;
-			/* Put here the code to manage errors */
+			if((getAcquisitionState() == STATE_ON) && (getUsbReadyState() == STATE_ON)) {
+				closeResult = f_close(&USBHFile);
+				
+				if(openResult == FR_OK) {
+					HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
+					resetAcquisitionState();			/* Update of the status packet */
+					/* Put here the code to manage errors */
+				}
+			}
+			
+			startAcquisitionCommand = IDLE_COMMAND;
+			break;
+		
+		default:
+			startAcquisitionCommand = IDLE_COMMAND;
 			break;
 	}
 	

@@ -3,7 +3,7 @@
 #include "data.h"
 
 uint8_t blockBuffer[BUFFER_BLOCK_LEN];
-uint8_t dcuStateBuffer[BUFFER_STATE_LEN];
+uint8_t dcuStateBuffer[BUFFER_STATE_LEN] = "[S;0;0;0;0;0;0;0;0]";
 
 extern void dataBufferInit(void)
 {
@@ -15,8 +15,48 @@ extern void dataBufferInit(void)
 	return;
 }
 
-extern void dcuStateBufferInit(void)
+extern inline uint8_t getUsbReadyState(void)
 {
-	sprintf((char *)dcuStateBuffer, "[S;1;0;0;0;0;0;0;0]");
+	return dcuStateBuffer[STATE_USB_READY_INDEX];
+}
+
+extern inline uint8_t getAcquisitionState(void)
+{
+	return dcuStateBuffer[STATE_ACQUISITION_ON_INDEX];
+}
+
+extern inline void setUsbPresentState(void)
+{
+	dcuStateBuffer[STATE_USB_PRESENT_INDEX] = STATE_ON;
+	return;
+}
+
+extern inline void setUsbReadyState(void)
+{
+	dcuStateBuffer[STATE_USB_READY_INDEX] = STATE_ON;
+	return;
+}
+
+extern inline void setAcquisitionState(void)
+{
+	dcuStateBuffer[STATE_ACQUISITION_ON_INDEX] = STATE_ON;
+	return;
+}
+
+extern inline void resetUsbPresentState(void)
+{
+	dcuStateBuffer[STATE_USB_PRESENT_INDEX] = STATE_OFF;
+	return;
+}
+
+extern inline void resetUsbReadyState(void)
+{
+	dcuStateBuffer[STATE_USB_READY_INDEX] = STATE_OFF;
+	return;
+}
+
+extern inline void resetAcquisitionState(void)
+{
+	dcuStateBuffer[STATE_ACQUISITION_ON_INDEX] = STATE_OFF;
 	return;
 }
