@@ -10,7 +10,6 @@
       <TargetName>DCU_DP11</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pArmCC>5060750::V5.06 update 6 (build 750)::.\ARM_Compiler_5.06u6</pArmCC>
       <pCCUsed>5060750::V5.06 update 6 (build 750)::.\ARM_Compiler_5.06u6</pCCUsed>
       <uAC6>0</uAC6>
       <TargetOption>
@@ -337,7 +336,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F767xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc; ../Drivers/STM32F7xx_HAL_Driver/Inc; ../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy; ../Middlewares/Third_Party/FatFs/src; ../Middlewares/Third_Party/FreeRTOS/Source/include; ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS; ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM7/r0p1; ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc; ../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc; ../Drivers/CMSIS/Device/ST/STM32F7xx/Include; ../Drivers/CMSIS/Include</IncludePath>
+              <IncludePath>../Inc;      ../Drivers/STM32F7xx_HAL_Driver/Inc;      ../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy;      ../Middlewares/Third_Party/FatFs/src;      ../Middlewares/Third_Party/FreeRTOS/Source/include;      ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;      ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM7/r0p1;      ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc;      ../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc;      ../Drivers/CMSIS/Device/ST/STM32F7xx/Include;      ../Drivers/CMSIS/Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -381,6 +380,11 @@
         <Group>
           <GroupName>Application/User</GroupName>
           <Files>
+            <File>
+              <FileName>data_conversion.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\data_conversion.c</FilePath>
+            </File>
             <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
@@ -605,6 +609,11 @@
               <FileName>usbh_platform.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Inc\usbh_platform.h</FilePath>
+            </File>
+            <File>
+              <FileName>data_conversion.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Inc\data_conversion.h</FilePath>
             </File>
           </Files>
         </Group>

@@ -49,13 +49,25 @@
 
 /* USER CODE END Variables */
 osThreadId aliveHandle;
+osThreadId adc1ConversionHandle;
+osThreadId adc2ConversionHandle;
+osThreadId digitalAuxManagerHandle;
+osThreadId autogearManagerHandle;
+osMessageQId digitalAuxQueueHandle;
+osSemaphoreId adc1SemaphoreHandle;
+osSemaphoreId adc2SemaphoreHandle;
+osSemaphoreId autogearSemaphoreHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
-   
+
 /* USER CODE END FunctionPrototypes */
 
 void aliveTask(void const * argument);
+void adc1ConversionTask(void const * argument);
+void adc2ConversionTask(void const * argument);
+void digitalAuxManagerTask(void const * argument);
+void autogearManagerTask(void const * argument);
 
 extern void MX_FATFS_Init(void);
 extern void MX_USB_HOST_Init(void);
@@ -75,13 +87,32 @@ void MX_FREERTOS_Init(void) {
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
+  /* Create the semaphores(s) */
+  /* definition and creation of adc1Semaphore */
+  osSemaphoreDef(adc1Semaphore);
+  adc1SemaphoreHandle = osSemaphoreCreate(osSemaphore(adc1Semaphore), 1);
+
+  /* definition and creation of adc2Semaphore */
+  osSemaphoreDef(adc2Semaphore);
+  adc2SemaphoreHandle = osSemaphoreCreate(osSemaphore(adc2Semaphore), 1);
+
+  /* definition and creation of autogearSemaphore */
+  osSemaphoreDef(autogearSemaphore);
+  autogearSemaphoreHandle = osSemaphoreCreate(osSemaphore(autogearSemaphore), 1);
+
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
+
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
+
+  /* Create the queue(s) */
+  /* definition and creation of digitalAuxQueue */
+  osMessageQDef(digitalAuxQueue, 8, uint8_t);
+  digitalAuxQueueHandle = osMessageCreate(osMessageQ(digitalAuxQueue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -91,6 +122,22 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of alive */
   osThreadDef(alive, aliveTask, osPriorityLow, 0, 128);
   aliveHandle = osThreadCreate(osThread(alive), NULL);
+
+  /* definition and creation of adc1Conversion */
+  osThreadDef(adc1Conversion, adc1ConversionTask, osPriorityLow, 0, 128);
+  adc1ConversionHandle = osThreadCreate(osThread(adc1Conversion), NULL);
+
+  /* definition and creation of adc2Conversion */
+  osThreadDef(adc2Conversion, adc2ConversionTask, osPriorityLow, 0, 128);
+  adc2ConversionHandle = osThreadCreate(osThread(adc2Conversion), NULL);
+
+  /* definition and creation of digitalAuxManager */
+  osThreadDef(digitalAuxManager, digitalAuxManagerTask, osPriorityLow, 0, 128);
+  digitalAuxManagerHandle = osThreadCreate(osThread(digitalAuxManager), NULL);
+
+  /* definition and creation of autogearManager */
+  osThreadDef(autogearManager, autogearManagerTask, osPriorityNormal, 0, 128);
+  autogearManagerHandle = osThreadCreate(osThread(autogearManager), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -115,12 +162,44 @@ void aliveTask(void const * argument)
 
   /* USER CODE BEGIN aliveTask */
   /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
+  for(;;) {
+    HAL_GPIO_TogglePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin);
+		vTaskDelay(500 / portTICK_PERIOD_MS);
   }
   /* USER CODE END aliveTask */
 }
+
+/* USER CODE BEGIN Header_adc1ConversionTask */
+/**
+* @brief Function implementing the adc1Conversion thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_adc1ConversionTask */
+
+/* USER CODE BEGIN Header_adc2ConversionTask */
+/**
+* @brief Function implementing the adc2Conversion thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_adc2ConversionTask */
+
+/* USER CODE BEGIN Header_digitalAuxManagerTask */
+/**
+* @brief Function implementing the digitalAuxManager thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_digitalAuxManagerTask */
+
+/* USER CODE BEGIN Header_autogearManagerTask */
+/**
+* @brief Function implementing the autogearManager thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_autogearManagerTask */
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */

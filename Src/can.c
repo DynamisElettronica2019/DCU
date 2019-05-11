@@ -21,7 +21,17 @@
 #include "can.h"
 
 /* USER CODE BEGIN 0 */
-
+CAN_TxHeaderTypeDef packetHeader;
+CAN_FilterTypeDef canFilterConfigHeader;
+HAL_StatusTypeDef filterInitReturn;
+HAL_StatusTypeDef canStartReturn;
+HAL_StatusTypeDef canSendReturn;
+CAN_RxHeaderTypeDef canReceivedMessageHeader0;
+CAN_RxHeaderTypeDef canReceivedMessageHeader1;
+uint32_t packetMailbox;
+uint8_t dataPacket[8];
+uint8_t canReceivedMessageData0[8];
+uint8_t canReceivedMessageData1[8];
 /* USER CODE END 0 */
 
 CAN_HandleTypeDef hcan1;
@@ -117,6 +127,66 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 } 
 
 /* USER CODE BEGIN 1 */
+
+extern void canStart(void)
+{
+	canFilterConfig();
+	canStartReturn = HAL_CAN_Start(&hcan1);
+	HAL_CAN_ActivateNotification(&hcan1, CAN_IT_TX_MAILBOX_EMPTY);
+	HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
+  HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO1_MSG_PENDING);
+	return;
+}
+
+extern void canSendDebug(void)
+{
+	packetHeader.StdId = 0x1E4;
+	packetHeader.RTR = CAN_RTR_DATA;
+	packetHeader.IDE = CAN_ID_STD;
+	packetHeader.DLC = 8;
+	packetHeader.TransmitGlobalTime = DISABLE;
+	dataPacket[0] = 5;
+	dataPacket[1] = 4;
+	dataPacket[2] = 3;
+	dataPacket[3] = 7;
+	dataPacket[4] = 9;
+	dataPacket[5] = 0;
+	dataPacket[6] = 1;
+	dataPacket[7] = 8;
+	canSendReturn = HAL_CAN_AddTxMessage(&hcan1, &packetHeader, dataPacket, &packetMailbox);
+	return;
+}
+
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
+{
+  HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &canReceivedMessageHeader0, canReceivedMessageData0);
+	/* Receive FIFO 0 callback function */
+	return;
+}
+
+void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
+{
+  HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO1, &canReceivedMessageHeader1, canReceivedMessageData1);
+	/* Receive FIFO 1 callback function */
+	return;
+}
+
+static void canFilterConfig(void)
+{
+	/* All pass filter, final config to be implemented */
+	canFilterConfigHeader.FilterBank = 0;
+  canFilterConfigHeader.FilterMode = CAN_FILTERMODE_IDMASK;
+  canFilterConfigHeader.FilterScale = CAN_FILTERSCALE_32BIT;
+	canFilterConfigHeader.FilterIdHigh = (0x000 << 5);
+  canFilterConfigHeader.FilterIdLow = 0x0000;
+  canFilterConfigHeader.FilterMaskIdHigh = (0x000 << 5);
+  canFilterConfigHeader.FilterMaskIdLow = 0x0000;
+	canFilterConfigHeader.FilterFIFOAssignment = CAN_RX_FIFO0;
+  canFilterConfigHeader.FilterActivation = ENABLE;	
+  canFilterConfigHeader.SlaveStartFilterBank = 14;
+	filterInitReturn = HAL_CAN_ConfigFilter(&hcan1, &canFilterConfigHeader);
+	return;
+}
 
 /* USER CODE END 1 */
 

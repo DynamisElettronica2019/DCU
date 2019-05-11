@@ -52,7 +52,7 @@ osThreadId aliveHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
-   
+
 /* USER CODE END FunctionPrototypes */
 
 void aliveTask(void const * argument);
@@ -77,6 +77,7 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
+
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -115,8 +116,7 @@ void aliveTask(void const * argument)
 
   /* USER CODE BEGIN aliveTask */
   /* Infinite loop */
-  for(;;)
-  {
+  for(;;) {
     HAL_GPIO_TogglePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin);
 		vTaskDelay(500 / portTICK_PERIOD_MS);
   }
