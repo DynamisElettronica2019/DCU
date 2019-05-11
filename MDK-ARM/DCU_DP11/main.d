@@ -91,4 +91,5 @@ dcu_dp11\main.o: ../Inc/tim.h
 dcu_dp11\main.o: ../Inc/usart.h
 dcu_dp11\main.o: ../Inc/usb_host.h
 dcu_dp11\main.o: ../Inc/gpio.h
-dcu_dp11\main.o: ../Inc/user_defines.h
+dcu_dp11\main.o: ../Inc/data.h
+dcu_dp11\main.o: ../Inc/telemetry.h
