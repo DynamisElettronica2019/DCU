@@ -45,7 +45,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define WRITE_BUFFER_LEN (uint16_t)8
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -56,7 +56,14 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+uint8_t startAcquisitionCommand;
+uint8_t sdIsDetected;
+uint8_t byteWritten;
+uint8_t writeBuffer[WRITE_BUFFER_LEN];
+FRESULT mountResult;
+FRESULT openFileResult;
+FRESULT closeFileResult;
+FRESULT writeResult;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -122,13 +129,20 @@ int main(void)
 	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
+	
+	for(uint16_t i = 0; i < WRITE_BUFFER_LEN; i++) writeBuffer[i] = '0';
+	HAL_Delay(500);
+	sdIsDetected = BSP_SD_IsDetected();
+	BSP_SD_Init();
+	mountResult = f_mount(&SDFatFS, SDPath, 1);
+	HAL_UART_Receive_IT(&huart1, &startAcquisitionCommand, 1);
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
-  MX_FREERTOS_Init();
+  //MX_FREERTOS_Init();
 
   /* Start scheduler */
-  osKernelStart();
+  //osKernelStart();
   
   /* We should never get here as control is now taken by the scheduler */
 
@@ -238,7 +252,37 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   }
   /* USER CODE BEGIN Callback 1 */
 
+	if(htim->Instance == TIM5) {
+		writeResult = f_write(&SDFile, writeBuffer, WRITE_BUFFER_LEN, (void*)&byteWritten);
+	}
+	
+	if(htim->Instance == TIM5) {
+		HAL_GPIO_TogglePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin);
+	}
+	
   /* USER CODE END Callback 1 */
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{	
+	/* To be implemented as state machine in a separate task, using queue */
+	switch(startAcquisitionCommand)
+	{
+		case 'T':
+			openFileResult = f_open(&SDFile, (const TCHAR*)"Dynamis.txt", FA_CREATE_ALWAYS | FA_WRITE);
+			HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
+			break;
+		
+		case 'M':
+			closeFileResult = f_close(&SDFile);
+			HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
+			break;
+		
+		default:
+			break;
+	}
+	
+	HAL_UART_Receive_IT(&huart1, &startAcquisitionCommand, 1);
 }
 
 /**
