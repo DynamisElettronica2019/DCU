@@ -35,7 +35,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "timestamp.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,7 +56,9 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+time_t time;
+date_t date;
+extern osSemaphoreId updateRtcValueSemaphoreHandle;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -111,7 +113,6 @@ int main(void)
   MX_ADC2_Init();
   MX_CAN1_Init();
   MX_I2C4_Init();
-  MX_RTC_Init();
   MX_SDMMC1_SD_Init();
   MX_TIM5_Init();
   MX_TIM6_Init();
@@ -119,7 +120,13 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
+	rtcPeripheralInit();																												/* RTC peripheral init only */
+	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET);			/* Green LED off as default */
+	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET);		/* Yellow LED off as default */
+	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);					/* Red LED off as default */
+	HAL_TIM_Base_Start_IT(&htim5); 																							/* Start timer 5 in interrupt mode */
+	HAL_TIM_Base_Start_IT(&htim6); 																							/* Start timer 6 in interrupt mode */
+	HAL_TIM_Base_Start_IT(&htim7);																							/* Start timer 7 in interrupt mode */
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
@@ -151,19 +158,15 @@ void SystemClock_Config(void)
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
   RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
-  /** Configure LSE Drive Capability 
-  */
-  HAL_PWR_EnableBkUpAccess();
-  __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_HIGH);
   /** Configure the main internal regulator output voltage 
   */
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
   /** Initializes the CPU, AHB and APB busses clocks 
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 4;
@@ -202,7 +205,7 @@ void SystemClock_Config(void)
   PeriphClkInitStruct.PLLSAI.PLLSAIP = RCC_PLLSAIP_DIV8;
   PeriphClkInitStruct.PLLSAIDivQ = 1;
   PeriphClkInitStruct.PLLSAIDivR = RCC_PLLSAIDIVR_2;
-  PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
+  PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
   PeriphClkInitStruct.Usart1ClockSelection = RCC_USART1CLKSOURCE_SYSCLK;
   PeriphClkInitStruct.Usart2ClockSelection = RCC_USART2CLKSOURCE_SYSCLK;
   PeriphClkInitStruct.I2c4ClockSelection = RCC_I2C4CLKSOURCE_SYSCLK;
@@ -229,13 +232,39 @@ void SystemClock_Config(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
-
+	
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM1) {
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
 
+	/* Timer 5 period elapsed callback: 1 Hz */
+	if (htim->Instance == TIM5) {
+		BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+		
+		/* Timestamp managing task */
+		if(updateRtcValueSemaphoreHandle != NULL) {
+			xSemaphoreGiveFromISR(updateRtcValueSemaphoreHandle, &xHigherPriorityTaskWoken);
+			portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+		}
+	}
+	
+	/* Timer 6 period elapsed callback: 10 Hz */
+	if (htim->Instance == TIM6) {
+		HAL_GPIO_TogglePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin);
+		
+		/* RTC and GPS timestamp reading, only for debug purposes */
+		getTimestampTimeFormRtc(&time);
+		getTimestampDateFormRtc(&date);
+		getTimestampTimeFormGps(&time);
+		getTimestampDateFormGps(&date);
+	}
+	
+	/* Timer 7 period elapsed callback: 100 Hz */
+	if (htim->Instance == TIM7) {
+	}
+	
   /* USER CODE END Callback 1 */
 }
 

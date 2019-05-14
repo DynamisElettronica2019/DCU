@@ -39,7 +39,11 @@ extern RTC_HandleTypeDef hrtc;
 void MX_RTC_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+extern void rtcPeripheralInit(void);
+extern void resetRtcTime(void);
+extern void resetRtcDate(void);
+extern inline void setRtcTime(uint8_t hours, uint8_t minutes, uint8_t seconds);
+extern inline void setRtcDate(uint8_t weekday, uint8_t month, uint8_t dateNumber, uint8_t year);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
