@@ -58,11 +58,8 @@
 /* USER CODE BEGIN PV */
 extern uint32_t adc1BufferRaw [ADC1_RAW_DATA_LEN];					
 extern uint32_t adc2BufferRaw [ADC2_RAW_DATA_LEN];
-extern float adcBufferConvertedDebug [ADC_CONVERTED_DEBUG_DATA_LEN];
-extern float adcBufferConvertedAux [ADC_CONVERTED_AUX_DATA_LEN];
 extern osMessageQId digitalAuxQueueHandle;
 extern osSemaphoreId autogearSemaphoreHandle;
-extern osMessageQId digitalAuxQueueHandle;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -225,32 +222,12 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-	uint8_t digitalAuxEvent;
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 	
+	/* Autogear switch ISR */
 	if(GPIO_Pin == AUTOGEAR_SWTICH_MCU_Pin) {
 		if(autogearSemaphoreHandle != NULL) {																						/* Check on system start if semaphore is already created */
 			xSemaphoreGiveFromISR(autogearSemaphoreHandle, &xHigherPriorityTaskWoken); 		/* Give semaphore to task when interrupt is called */
-			portYIELD_FROM_ISR(xHigherPriorityTaskWoken);																	/* Do context-switch if needed */
-		}
-	}
-	else {
-		
-		if(GPIO_Pin == DIGITAL_AUX_1_Pin) {
-			digitalAuxEvent = DIGITAL_EVENT_AUX_1;
-			xQueueSend(digitalAuxQueueHandle, (void *)&digitalAuxEvent, (TickType_t)0);		/* Add digital aux event to queue */
-		}
-		else if(GPIO_Pin == DIGITAL_AUX_2_Pin) {
-			digitalAuxEvent = DIGITAL_EVENT_AUX_2;
-			xQueueSend(digitalAuxQueueHandle, (void *)&digitalAuxEvent, (TickType_t)0); 	/* Add digital aux event to queue */
-		}
-		else if(GPIO_Pin == DIGITAL_AUX_3_Pin) {
-			digitalAuxEvent = DIGITAL_EVENT_AUX_3;
-			xQueueSend(digitalAuxQueueHandle, (void *)&digitalAuxEvent, (TickType_t)0); 	/* Add digital aux event to queue */
-		}
-		
-		if(digitalAuxQueueHandle != NULL) {																							/* Check on system start if semaphore is already created */
-			xSemaphoreGiveFromISR(digitalAuxQueueHandle, &xHigherPriorityTaskWoken); 			/* Give semaphore to task when interrupt is called */
 			portYIELD_FROM_ISR(xHigherPriorityTaskWoken);																	/* Do context-switch if needed */
 		}
 	}
@@ -269,7 +246,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
-
+	uint8_t digitalAuxEvent = 0;
+	
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM1) {
     HAL_IncTick();
@@ -282,6 +260,19 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		/* ADCs management: 1 Hz sampling time */
 		HAL_ADC_Start_DMA(&hadc1,adc1BufferRaw, ADC1_NUMBER_OF_CHANNELS);			/* Start ADC 1 in DMA mode */
 		HAL_ADC_Start_DMA(&hadc2,adc2BufferRaw, ADC2_NUMBER_OF_CHANNELS ); 		/* Start ADC 2 in DMA mode */
+	
+		/* Digital aux management: 1 Hz sampling time */
+		if(HAL_GPIO_ReadPin(DIGITAL_AUX_1_GPIO_Port, DIGITAL_AUX_1_Pin) == GPIO_PIN_SET) {
+			xQueueSend(digitalAuxQueueHandle, (void *)&digitalAuxEvent, (TickType_t)0); 	/* Add digital aux event to queue */
+		}
+		
+		if(HAL_GPIO_ReadPin(DIGITAL_AUX_2_GPIO_Port, DIGITAL_AUX_2_Pin) == GPIO_PIN_SET) {
+			xQueueSend(digitalAuxQueueHandle, (void *)&digitalAuxEvent, (TickType_t)0); 	/* Add digital aux event to queue */
+		}
+		
+		if(HAL_GPIO_ReadPin(DIGITAL_AUX_3_GPIO_Port, DIGITAL_AUX_3_Pin) == GPIO_PIN_SET) {
+			xQueueSend(digitalAuxQueueHandle, (void *)&digitalAuxEvent, (TickType_t)0); 	/* Add digital aux event to queue */
+		}
 	}
 	
 	/* Timer 6 period elapsed callback: 10 Hz */

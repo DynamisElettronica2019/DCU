@@ -12,6 +12,7 @@
 #define _12V_POST_DIODE_SENSE_HIGH_GAIN			0.1293f
 #define _5V_DCU_GAIN												0.3237f
 #define _3V3_MCU_GAIN												0.5313f
+#define VBAT_GAIN														4.0f
 #define ANALOG_AUX_1_GAIN										0.641f	
 #define ANALOG_AUX_2_GAIN										0.641f
 #define ANALOG_AUX_3_GAIN										0.641f

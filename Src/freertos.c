@@ -237,7 +237,7 @@ void adc2ConversionTask(void const * argument)
 void digitalAuxManagerTask(void const * argument)
 {
   /* USER CODE BEGIN digitalAuxManagerTask */
-	uint8_t digitalAuxEvent;
+	uint8_t digitalAuxEvent = 0;
 	
   /* Infinite loop */
   for(;;) {
@@ -245,27 +245,15 @@ void digitalAuxManagerTask(void const * argument)
 		
 		switch(digitalAuxEvent) {
 			case DIGITAL_EVENT_AUX_1:
-				if(HAL_GPIO_ReadPin(DIGITAL_AUX_1_GPIO_Port, DIGITAL_AUX_1_Pin) == GPIO_PIN_RESET) {
-					/* TO BE IMPLEMENTED */
-					/* Put here the code to handling digital aux 1 event */
-				}
-				
+				/* Put here the code to handling digital aux 1 event */				
 				break;
 			
 			case DIGITAL_EVENT_AUX_2:
-				if(HAL_GPIO_ReadPin(DIGITAL_AUX_2_GPIO_Port, DIGITAL_AUX_2_Pin) == GPIO_PIN_RESET) {
-					/* TO BE IMPLEMENTED */
-					/* Put here the code to handling digital aux 1 event */
-				}
-				
+				/* Put here the code to handling digital aux 1 event */
 				break;
 			
 			case DIGITAL_EVENT_AUX_3:
-				if(HAL_GPIO_ReadPin(DIGITAL_AUX_3_GPIO_Port, DIGITAL_AUX_3_Pin) == GPIO_PIN_RESET) {
-					/* TO BE IMPLEMENTED */
-					/* Put here the code to handling digital aux 1 event */
-				}
-			
+				/* Put here the code to handling digital aux 1 event */
 				break;
 		}
   }
@@ -287,7 +275,6 @@ void autogearManagerTask(void const * argument)
     xSemaphoreTake(autogearSemaphoreHandle, portMAX_DELAY); 		/* Unlock when interrupt callback is called */
 		
 		if(HAL_GPIO_ReadPin(AUTOGEAR_SWTICH_MCU_GPIO_Port, AUTOGEAR_SWTICH_MCU_Pin) == GPIO_PIN_RESET) {
-			/* TO BE IMPLEMENTED */
 			/* Put here the code to handling autogear event */
 		}
   }

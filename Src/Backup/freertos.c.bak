@@ -48,10 +48,10 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-extern uint32_t adc1BufferRaw[ADC1_RAW_DATA_LEN];					
-extern uint32_t adc2BufferRaw[ADC2_RAW_DATA_LEN];
-extern float adcBufferConvertedDebug[ADC_CONVERTED_DEBUG_DATA_LEN];
-extern float adcBufferConvertedAux[ADC_CONVERTED_AUX_DATA_LEN];
+extern uint32_t adc1BufferRaw [ADC1_RAW_DATA_LEN];					
+extern uint32_t adc2BufferRaw [ADC2_RAW_DATA_LEN];
+extern float adcBufferConvertedDebug [ADC_CONVERTED_DEBUG_DATA_LEN];
+extern float adcBufferConvertedAux [ADC_CONVERTED_AUX_DATA_LEN];
 /* USER CODE END Variables */
 osThreadId aliveHandle;
 osThreadId adc1ConversionHandle;
@@ -190,13 +190,13 @@ void adc1ConversionTask(void const * argument)
   for(;;) {
 		xSemaphoreTake(adc1SemaphoreHandle, portMAX_DELAY); 		/* Unlock when DMA callback is called */
 		HAL_ADC_Stop_DMA(&hadc1);																/* Stop ADC1 conversion and wait for timer to restrt it */
+		adcBufferConvertedDebug[DCU_TEMP_SENSE_POSITION] = dcuTempSenseConversion(adc1BufferRaw[DCU_TEMP_SENSE_POSITION]);
 		adcBufferConvertedDebug[MAIN_CURRENT_SENSE_POSITION] = mainCurrentSenseConversion(adc1BufferRaw[MAIN_CURRENT_SENSE_POSITION]);
 		adcBufferConvertedDebug[DCU_CURRENT_SENSE_POSITION] = dcuCurrentSenseConversion(adc1BufferRaw[DCU_CURRENT_SENSE_POSITION]);
-		adcBufferConvertedDebug[XBEE_CURRENT_SENSE_POSITION] = xbeeCurrentSenseConversion(adc1BufferRaw[XBEE_CURRENT_SENSE_POSITION]);
-		adcBufferConvertedDebug[_3V3_MCU_POSITION] = _3v3SenseConversion(adc1BufferRaw[_3V3_MCU_POSITION]);
 		adcBufferConvertedDebug[_5V_DCU_POSITION] = _5vSenseConversion(adc1BufferRaw[_5V_DCU_POSITION]);
 		adcBufferConvertedDebug[_12V_POST_DIODES_SENSE_POSITION] = _12vSenseConversion(adc1BufferRaw[_12V_POST_DIODES_SENSE_POSITION]);
-		adcBufferConvertedDebug[DCU_TEMP_SENSE_POSITION] = dcuTempSenseConversion(adc1BufferRaw[DCU_TEMP_SENSE_POSITION]);
+		adcBufferConvertedDebug[_3V3_MCU_POSITION] = _3v3SenseConversion(adc1BufferRaw[_3V3_MCU_POSITION]);
+		adcBufferConvertedDebug[XBEE_CURRENT_SENSE_POSITION] = xbeeCurrentSenseConversion(adc1BufferRaw[XBEE_CURRENT_SENSE_POSITION]);
 		adcBufferConvertedDebug[VBAT_CHANNEL_POSITION] = vbatConversion(adc1BufferRaw[VBAT_CHANNEL_POSITION]);
 		/* TO BE IMPLEMENTED */
 		/* Put here the CSV buffer conversion functions */

@@ -51,9 +51,6 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(DIGITAL_AUX_2_GPIO_Port, DIGITAL_AUX_2_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOD, ETH_nRST_Pin|LED_YELLOW_Pin|LED_RED_Pin|LED_GREEN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
@@ -62,15 +59,8 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(USB_5V_ENABLE_GPIO_Port, USB_5V_ENABLE_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : PtPin */
-  GPIO_InitStruct.Pin = DIGITAL_AUX_2_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(DIGITAL_AUX_2_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : PEPin PEPin */
-  GPIO_InitStruct.Pin = DIGITAL_AUX_3_Pin|DIGITAL_AUX_1_Pin;
+  /*Configure GPIO pins : PEPin PEPin PEPin */
+  GPIO_InitStruct.Pin = DIGITAL_AUX_2_Pin|DIGITAL_AUX_3_Pin|DIGITAL_AUX_1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);

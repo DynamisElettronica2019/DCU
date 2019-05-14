@@ -23,10 +23,10 @@
 /* USER CODE BEGIN 0 */
 #include "cmsis_os.h"
 
-uint32_t adc1BufferRaw[ADC1_RAW_DATA_LEN];					
-uint32_t adc2BufferRaw[ADC2_RAW_DATA_LEN];
-float adcBufferConvertedDebug[ADC_CONVERTED_DEBUG_DATA_LEN];
-float adcBufferConvertedAux[ADC_CONVERTED_AUX_DATA_LEN];
+uint32_t adc1BufferRaw [ADC1_RAW_DATA_LEN];					
+uint32_t adc2BufferRaw [ADC2_RAW_DATA_LEN];
+float adcBufferConvertedDebug [ADC_CONVERTED_DEBUG_DATA_LEN];
+float adcBufferConvertedAux [ADC_CONVERTED_AUX_DATA_LEN];
 extern osSemaphoreId adc1SemaphoreHandle;
 extern osSemaphoreId adc2SemaphoreHandle;
 /* USER CODE END 0 */
