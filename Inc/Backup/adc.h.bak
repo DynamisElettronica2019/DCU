@@ -34,30 +34,13 @@ extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
 
 /* USER CODE BEGIN Private defines */
-#define ADC1_NUMBER_OF_CHANNELS 						(uint32_t)8
-#define ADC2_NUMBER_OF_CHANNELS							(uint32_t)3
-#define ADC1_RAW_DATA_LEN 									ADC1_NUMBER_OF_CHANNELS
-#define ADC2_RAW_DATA_LEN 									ADC2_NUMBER_OF_CHANNELS
-#define ADC_CONVERTED_DEBUG_DATA_LEN 				ADC1_NUMBER_OF_CHANNELS
-#define ADC_CONVERTED_AUX_DATA_LEN 					ADC2_NUMBER_OF_CHANNELS
-#define DCU_TEMP_SENSE_POSITION           	(uint8_t)0
-#define MAIN_CURRENT_SENSE_POSITION					(uint8_t)1
-#define DCU_CURRENT_SENSE_POSITION					(uint8_t)2
-#define _5V_DCU_POSITION										(uint8_t)3
-#define _12V_POST_DIODES_SENSE_POSITION			(uint8_t)4
-#define _3V3_MCU_POSITION										(uint8_t)5
-#define XBEE_CURRENT_SENSE_POSITION					(uint8_t)6
-#define VBAT_CHANNEL_POSITION								(uint8_t)7
-#define ANALOG_AUX_3_POSITION								(uint8_t)0
-#define ANALOG_AUX_2_POSITION								(uint8_t)1
-#define ANALOG_AUX_1_POSITION								(uint8_t)2
 /* USER CODE END Private defines */
 
 void MX_ADC1_Init(void);
 void MX_ADC2_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-extern void adcBuffersInit(void);
+	 
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

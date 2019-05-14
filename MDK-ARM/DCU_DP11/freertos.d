@@ -56,3 +56,5 @@ dcu_dp11\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h
 dcu_dp11\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 dcu_dp11\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 dcu_dp11\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
+dcu_dp11\freertos.o: ../Inc/can.h
+dcu_dp11\freertos.o: ../Inc/data.h

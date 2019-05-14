@@ -21,17 +21,14 @@
 #include "can.h"
 
 /* USER CODE BEGIN 0 */
-CAN_TxHeaderTypeDef packetHeader;
+#include "cmsis_os.h"
+
 CAN_FilterTypeDef canFilterConfigHeader;
-HAL_StatusTypeDef filterInitReturn;
-HAL_StatusTypeDef canStartReturn;
-HAL_StatusTypeDef canSendReturn;
-CAN_RxHeaderTypeDef canReceivedMessageHeader0;
-CAN_RxHeaderTypeDef canReceivedMessageHeader1;
-uint32_t packetMailbox;
-uint8_t dataPacket[8];
-uint8_t canReceivedMessageData0[8];
-uint8_t canReceivedMessageData1[8];
+CAN_RxPacketTypeDef currentFifo0ReceivedPacket;
+CAN_RxPacketTypeDef currentFifo1ReceivedPacket;
+BaseType_t canCtrlxHigherPriorityTaskWoken = pdFALSE;
+extern osMessageQId canFifo0QueueHandle;
+extern osMessageQId canFifo1QueueHandle;
 /* USER CODE END 0 */
 
 CAN_HandleTypeDef hcan1;
@@ -131,15 +128,19 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 extern void canStart(void)
 {
 	canFilterConfig();
-	canStartReturn = HAL_CAN_Start(&hcan1);
 	HAL_CAN_ActivateNotification(&hcan1, CAN_IT_TX_MAILBOX_EMPTY);
 	HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
   HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO1_MSG_PENDING);
+	HAL_CAN_Start(&hcan1);
 	return;
 }
 
 extern void canSendDebug(void)
 {
+	uint32_t packetMailbox;
+	CAN_TxHeaderTypeDef packetHeader;
+	uint8_t dataPacket[8];
+	
 	packetHeader.StdId = 0x1E4;
 	packetHeader.RTR = CAN_RTR_DATA;
 	packetHeader.IDE = CAN_ID_STD;
@@ -153,38 +154,73 @@ extern void canSendDebug(void)
 	dataPacket[5] = 0;
 	dataPacket[6] = 1;
 	dataPacket[7] = 8;
-	canSendReturn = HAL_CAN_AddTxMessage(&hcan1, &packetHeader, dataPacket, &packetMailbox);
+	HAL_CAN_AddTxMessage(&hcan1, &packetHeader, dataPacket, &packetMailbox);
 	return;
 }
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-  HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &canReceivedMessageHeader0, canReceivedMessageData0);
-	/* Receive FIFO 0 callback function */
-	return;
+	canCtrlxHigherPriorityTaskWoken = pdFALSE;
+	HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &(currentFifo0ReceivedPacket.CAN_RxPacket_Header), currentFifo0ReceivedPacket.CAN_RxPacket_Data);
+	xQueueSendFromISR(canFifo0QueueHandle, &currentFifo0ReceivedPacket, &canCtrlxHigherPriorityTaskWoken);
+	/* There's no need of calling taskYIELD beacuse RTOS is configured to use PREEMPTION, so the scheduler will always have the higher priority */
 }
+
 
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-  HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO1, &canReceivedMessageHeader1, canReceivedMessageData1);
-	/* Receive FIFO 1 callback function */
-	return;
+	canCtrlxHigherPriorityTaskWoken = pdFALSE;
+	HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO1, &(currentFifo1ReceivedPacket.CAN_RxPacket_Header), currentFifo1ReceivedPacket.CAN_RxPacket_Data); 
+	xQueueSendFromISR(canFifo1QueueHandle, &currentFifo1ReceivedPacket, &canCtrlxHigherPriorityTaskWoken);
+	/* There's no need of calling taskYIELD beacuse RTOS is configured to use PREEMPTION, so the scheduler will always have the higher priority */
 }
 
 static void canFilterConfig(void)
 {
-	/* All pass filter, final config to be implemented */
+	/* The ID starts from the top (Std CAN, 11-bits from the top. 16 - 11 = 5 bit shift) */
 	canFilterConfigHeader.FilterBank = 0;
   canFilterConfigHeader.FilterMode = CAN_FILTERMODE_IDMASK;
   canFilterConfigHeader.FilterScale = CAN_FILTERSCALE_32BIT;
-	canFilterConfigHeader.FilterIdHigh = (0x000 << 5);
+	canFilterConfigHeader.FilterIdHigh = (0x0000 << 5);
   canFilterConfigHeader.FilterIdLow = 0x0000;
-  canFilterConfigHeader.FilterMaskIdHigh = (0x000 << 5);
+	canFilterConfigHeader.FilterMaskIdHigh = (0x0001 << 5);
   canFilterConfigHeader.FilterMaskIdLow = 0x0000;
 	canFilterConfigHeader.FilterFIFOAssignment = CAN_RX_FIFO0;
   canFilterConfigHeader.FilterActivation = ENABLE;	
   canFilterConfigHeader.SlaveStartFilterBank = 14;
-	filterInitReturn = HAL_CAN_ConfigFilter(&hcan1, &canFilterConfigHeader);
+	HAL_CAN_ConfigFilter(&hcan1, &canFilterConfigHeader);
+	
+	/* The ID starts from the top (Std CAN, 11-bits from the top. 16 - 11 = 5 bit shift) */
+  canFilterConfigHeader.FilterBank = 1;
+  canFilterConfigHeader.FilterMode = CAN_FILTERMODE_IDMASK;
+  canFilterConfigHeader.FilterScale = CAN_FILTERSCALE_32BIT;
+	canFilterConfigHeader.FilterIdHigh = (0x0001 << 5);
+  canFilterConfigHeader.FilterIdLow = 0x0000;
+	canFilterConfigHeader.FilterMaskIdHigh = (0x0001 << 5);
+  canFilterConfigHeader.FilterMaskIdLow = 0x0000;
+	canFilterConfigHeader.FilterFIFOAssignment = CAN_RX_FIFO1;
+  canFilterConfigHeader.FilterActivation = ENABLE;	
+  canFilterConfigHeader.SlaveStartFilterBank = 14;
+	HAL_CAN_ConfigFilter(&hcan1, &canFilterConfigHeader);
+	
+	return;
+}
+
+void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *hcan)
+{
+	/* Put here the transmission complete managing code */
+	return;
+}
+
+void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef *hcan)
+{
+	/* Put here the transmission complete managing code */
+	return;
+}
+
+void HAL_CAN_TxMailbox2CompleteCallback(CAN_HandleTypeDef *hcan)
+{
+	/* Put here the transmission complete managing code */
 	return;
 }
 

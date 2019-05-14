@@ -35,7 +35,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "data.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -123,6 +123,7 @@ int main(void)
 	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET); 		/* Yellow LED off as default */
 	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET); 					/* Red LED off as default */
 	canStart();																																	/* CAN filter config and start */
+	packetCounterReset();																												/* Reset the CAN packets recevide counter */
 	HAL_TIM_Base_Start_IT(&htim5); 																							/* Start timer 5 in interrupt mode */
 	HAL_TIM_Base_Start_IT(&htim6); 																							/* Start timer 6 in interrupt mode */
 	HAL_TIM_Base_Start_IT(&htim7); 																							/* Start timer 7 in interrupt mode */
@@ -241,11 +242,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	/* Timer 5 period elapsed callback: 1 Hz */
 	if (htim->Instance == TIM5) {
 		HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
-		canSendDebug();
 	}
 	
 	/* Timer 6 period elapsed callback: 10 Hz */
 	if (htim->Instance == TIM6) {
+		HAL_GPIO_TogglePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin);
+		canSendDebug();
 	}
 	
 	/* Timer 7 period elapsed callback: 100 Hz */
