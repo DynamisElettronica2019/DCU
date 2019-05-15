@@ -25,4 +25,6 @@
 #define SET_RTC_ID                  	(uint8_t)'R'
 #define CMD_READ_ERR_ID          			(uint8_t)'B'
 
+#define UART1_CLEAR_FLAG							(uint8_t)'C'
+
 #endif

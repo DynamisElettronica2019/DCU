@@ -150,23 +150,23 @@ void MX_FREERTOS_Init(void) {
   aliveHandle = osThreadCreate(osThread(alive), NULL);
 
   /* definition and creation of SendStates */
-  osThreadDef(SendStates, SendStatesFunc, osPriorityIdle, 0, 128);
+  osThreadDef(SendStates, SendStatesFunc, osPriorityNormal, 0, 128);
   SendStatesHandle = osThreadCreate(osThread(SendStates), NULL);
 
   /* definition and creation of SendData */
-  osThreadDef(SendData, SendDataFunc, osPriorityIdle, 0, 128);
+  osThreadDef(SendData, SendDataFunc, osPriorityNormal, 0, 128);
   SendDataHandle = osThreadCreate(osThread(SendData), NULL);
 
   /* definition and creation of ReceiveTelem */
-  osThreadDef(ReceiveTelem, ReceiveTelemFunc, osPriorityIdle, 0, 128);
+  osThreadDef(ReceiveTelem, ReceiveTelemFunc, osPriorityAboveNormal, 0, 128);
   ReceiveTelemHandle = osThreadCreate(osThread(ReceiveTelem), NULL);
 
   /* definition and creation of SendError */
-  osThreadDef(SendError, SendErrorFunc, osPriorityIdle, 0, 128);
+  osThreadDef(SendError, SendErrorFunc, osPriorityAboveNormal, 0, 128);
   SendErrorHandle = osThreadCreate(osThread(SendError), NULL);
 
   /* definition and creation of SendFollowingData */
-  osThreadDef(SendFollowingData, SendFollowingDataFunc, osPriorityIdle, 0, 128);
+  osThreadDef(SendFollowingData, SendFollowingDataFunc, osPriorityNormal, 0, 128);
   SendFollowingDataHandle = osThreadCreate(osThread(SendFollowingData), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
