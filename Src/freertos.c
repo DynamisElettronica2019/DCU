@@ -140,6 +140,8 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+	uint8_t usart1LockFlag = UART1_CLEAR_FLAG;
+	xQueueSend(Usart1LockQueueHandle, &usart1LockFlag, 0);
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
