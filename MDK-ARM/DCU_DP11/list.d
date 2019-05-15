@@ -1,8 +1,8 @@
 dcu_dp11\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/list.c
-dcu_dp11\list.o: C:\Keil_v5\ARM\ARM_Compiler_5.06u6\Bin\..\include\stdlib.h
+dcu_dp11\list.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
 dcu_dp11\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-dcu_dp11\list.o: C:\Keil_v5\ARM\ARM_Compiler_5.06u6\Bin\..\include\stddef.h
-dcu_dp11\list.o: C:\Keil_v5\ARM\ARM_Compiler_5.06u6\Bin\..\include\stdint.h
+dcu_dp11\list.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+dcu_dp11\list.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 dcu_dp11\list.o: ../Inc/FreeRTOSConfig.h
 dcu_dp11\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 dcu_dp11\list.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
