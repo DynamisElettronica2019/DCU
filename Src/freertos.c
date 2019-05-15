@@ -95,7 +95,7 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
-	xSemaphoreTake(saveUsbSemaphoreHandle, portMAX_DELAY);														/* Start with the task locked */
+	xSemaphoreTake(saveUsbSemaphoreHandle, portMAX_DELAY);				/* Start with the task locked */
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -147,12 +147,17 @@ void MX_FREERTOS_Init(void) {
 /* USER CODE END Header_aliveTask */
 void aliveTask(void const * argument)
 {
-
   /* USER CODE BEGIN aliveTask */
+	uint32_t notifyValue;
+	
   /* Infinite loop */
   for(;;) {
-    HAL_GPIO_TogglePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin);
-		vTaskDelay(500 / portTICK_PERIOD_MS);
+		xTaskNotifyWait(pdFALSE, 0xFF, &notifyValue, portMAX_DELAY);
+		
+		if((notifyValue & 0x01) != 0x00) {
+			HAL_GPIO_TogglePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin);	
+			notifyValue = 0;
+		}
   }
   /* USER CODE END aliveTask */
 }

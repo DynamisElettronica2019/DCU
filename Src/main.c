@@ -57,7 +57,10 @@
 
 /* USER CODE BEGIN PV */
 uint8_t startAcquisitionCommand = ACQUISITION_IDLE_REQUEST;
-BaseType_t  startAcquisition_CtrlxHigherPriorityTaskWoken = pdFALSE;
+BaseType_t alive_xHigherPriorityTaskWoken = pdFALSE;
+BaseType_t startAcquisition_CtrlxHigherPriorityTaskWoken = pdFALSE;
+BaseType_t USB_xHigherPriorityTaskWoken = pdFALSE;
+extern osThreadId aliveHandle;
 extern osSemaphoreId saveUsbSemaphoreHandle;
 extern osMessageQId startAcquisitionEventHandle;
 /* USER CODE END PV */
@@ -258,6 +261,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	
 	/* Timer 6 period elapsed callback: 10 Hz */
 	if(htim->Instance == TIM6) {
+		
+		/* Alive task: LED blinking */
+		if(aliveHandle != NULL) {
+			xTaskNotifyFromISR(aliveHandle, 0x01, eSetBits, &alive_xHigherPriorityTaskWoken);
+			portYIELD_FROM_ISR(alive_xHigherPriorityTaskWoken);
+		}
 	}
 	
 	/* Timer 7 period elapsed callback: 100 Hz */
@@ -265,12 +274,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		
 		/* Timer 7 period elapsed callback: 100 Hz */
 		if(htim->Instance == TIM7) {
-			BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 			
 			/* USB saving task */
 			if(saveUsbSemaphoreHandle != NULL) {
-				xSemaphoreGiveFromISR(saveUsbSemaphoreHandle, &xHigherPriorityTaskWoken);
-				portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+				xSemaphoreGiveFromISR(saveUsbSemaphoreHandle, &USB_xHigherPriorityTaskWoken);
+				portYIELD_FROM_ISR(USB_xHigherPriorityTaskWoken);
 			}
 		}
 	}
