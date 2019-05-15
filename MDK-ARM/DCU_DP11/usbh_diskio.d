@@ -39,12 +39,16 @@ dcu_dp11\usbh_diskio.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_pwr.h
 dcu_dp11\usbh_diskio.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_pwr_ex.h
 dcu_dp11\usbh_diskio.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_rtc.h
 dcu_dp11\usbh_diskio.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_rtc_ex.h
+dcu_dp11\usbh_diskio.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_sd.h
+dcu_dp11\usbh_diskio.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_sdmmc.h
 dcu_dp11\usbh_diskio.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_tim.h
 dcu_dp11\usbh_diskio.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_tim_ex.h
 dcu_dp11\usbh_diskio.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart.h
 dcu_dp11\usbh_diskio.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart_ex.h
 dcu_dp11\usbh_diskio.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_hcd.h
 dcu_dp11\usbh_diskio.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_usb.h
+dcu_dp11\usbh_diskio.o: ../Inc/bsp_driver_sd.h
+dcu_dp11\usbh_diskio.o: ../Inc/fatfs_platform.h
 dcu_dp11\usbh_diskio.o: ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_core.h
 dcu_dp11\usbh_diskio.o: ../Inc/usbh_conf.h
 dcu_dp11\usbh_diskio.o: C:\Keil_v5\ARM\ARM_Compiler_5.06u6\Bin\..\include\stdio.h

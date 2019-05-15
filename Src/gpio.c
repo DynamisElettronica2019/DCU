@@ -36,12 +36,6 @@
         * Output
         * EVENT_OUT
         * EXTI
-     PC8   ------> SDMMC1_D0
-     PC9   ------> SDMMC1_D1
-     PC10   ------> SDMMC1_D2
-     PC11   ------> SDMMC1_D3
-     PC12   ------> SDMMC1_CK
-     PD2   ------> SDMMC1_CMD
 */
 void MX_GPIO_Init(void)
 {
@@ -95,16 +89,6 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(IMU_nRST_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PCPin PCPin PCPin PCPin 
-                           PCPin */
-  GPIO_InitStruct.Pin = uSD_D0_Pin|uSD_D1_Pin|uSD_D2_Pin|uSD_D3_Pin 
-                          |uSD_CK_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-  GPIO_InitStruct.Alternate = GPIO_AF12_SDMMC1;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
   /*Configure GPIO pins : PAPin PAPin */
   GPIO_InitStruct.Pin = AUTOGEAR_SWTICH_MCU_Pin|USB_OVERCURRENT_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
@@ -123,14 +107,6 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(uSD_DETECTED_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : PtPin */
-  GPIO_InitStruct.Pin = uSD_CMD_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-  GPIO_InitStruct.Alternate = GPIO_AF12_SDMMC1;
-  HAL_GPIO_Init(uSD_CMD_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI9_5_IRQn, 6, 0);

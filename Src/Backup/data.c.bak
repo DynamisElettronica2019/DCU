@@ -13,7 +13,12 @@ extern inline void startAcquisitionStateMachine(uint8_t startAcquisitionEvent)
 	/* NOTE: Events are coded using chars NOT numbers! */
 	switch(acquisitionState) {
 		case ACQUISITION_OFF_STATE:
-			USB_CloseFile(); 			/* Check if acquisition is on and close USB file */
+			USB_CloseFile(); 			/* Check if acquisition is on, close USB file and set the state variable */
+			
+			/* State LED coding, only for debug purposes */
+			HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_SET); 					/* Green LED on */
+			HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET); 			/* Yellow LED off */
+			HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET); 						/* Red LED off */
 
 			/* Get next state, based on the request received */
 			switch(startAcquisitionEvent) {
@@ -41,7 +46,13 @@ extern inline void startAcquisitionStateMachine(uint8_t startAcquisitionEvent)
 			break;
 		
 		case ACQUISITION_ON_FROM_SW_STATE:
-			USB_OpenFile(); 			/* Check if acquisition is off and open USB file */
+			USB_OpenFile(); 			/* Check if acquisition is off, open USB file and set the state variable */
+		
+			/* State LED coding, only for debug purposes */
+			HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_SET); 					/* Green LED on */
+			HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_SET); 				/* Yellow LED on */
+			HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET); 						/* Red LED off */
+
 			
 			/* Get next state, based on the request received */
 			if((startAcquisitionEvent == ACQUISITION_OFF_SW_REQUEST) || 
@@ -55,7 +66,12 @@ extern inline void startAcquisitionStateMachine(uint8_t startAcquisitionEvent)
 			break;
 		
 		case ACQUISITION_ON_FROM_TELEMETRY_STATE:
-			USB_OpenFile(); 			/* Check if acquisition is off and open USB file */
+			USB_OpenFile(); 			/* Check if acquisition is off, open USB file and set the state variable */
+		
+			/* State LED coding, only for debug purposes */
+			HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET); 				/* Green LED off */
+			HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_SET); 				/* Yellow LED on */
+			HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET); 						/* Red LED off */
 			
 			/* Get next state, based on the request received */
 					if((startAcquisitionEvent == ACQUISITION_OFF_TELEMETRY_REQUEST) || 
@@ -69,7 +85,12 @@ extern inline void startAcquisitionStateMachine(uint8_t startAcquisitionEvent)
 			break;
 		
 		case ACQUISITION_ON_FROM_AUTO_STATE:
-			USB_OpenFile(); 			/* Check if acquisition is off and open USB file */
+			USB_OpenFile(); 			/* Check if acquisition is off, open USB file and set the state variable */
+		
+			/* State LED coding, only for debug purposes */
+			HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET); 				/* Green LED off */
+			HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET); 			/* Yellow LED off */
+			HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET); 							/* Red LED on */
 			
 			/* Get next state, based on the request received */
 			if((startAcquisitionEvent == ACQUISITION_OFF_SW_REQUEST) || 
@@ -84,7 +105,12 @@ extern inline void startAcquisitionStateMachine(uint8_t startAcquisitionEvent)
 			break;
 		
 		case ACQUISITION_ON_FROM_DEBUG_STATE:
-			USB_OpenFile(); 			/* Check if acquisition is off and open USB file */
+			USB_OpenFile(); 			/* Check if acquisition is off, open USB file and set the state variable */
+		
+			/* State LED coding, only for debug purposes */
+			HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET); 				/* Green LED off */
+			HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_SET); 				/* Yellow LED on */
+			HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET); 							/* Red LED on */
 			
 			/* Get next state, based on the request received */
 			if(startAcquisitionEvent == ACQUISITION_OFF_DEBUG_REQUEST) {
@@ -98,6 +124,12 @@ extern inline void startAcquisitionStateMachine(uint8_t startAcquisitionEvent)
 		default:
 			/* Should be never go there, but anyway reset the state machine */
 			/* Put here error managing code */
+		
+			/* State LED coding, only for debug purposes */
+			HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_SET); 					/* Green LED off */
+			HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_SET); 				/* Yellow LED on */
+			HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET); 							/* Red LED on */
+			
 			acquisitionState = ACQUISITION_OFF_STATE;
 			break;
 	}
@@ -170,7 +202,7 @@ static inline void USB_OpenFile(void)
 		openResult = f_open(&USBHFile, "DynamisPRC_USB_test.txt", FA_CREATE_ALWAYS | FA_WRITE);
 	
 		if(openResult == FR_OK) {
-			HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
+			//HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
 			setAcquisitionState();				/* Update of the status packet */
 			/* Put here the code to manage errors */
 		}
@@ -187,7 +219,7 @@ static inline void USB_CloseFile(void)
 		closeResult = f_close(&USBHFile);
 		
 		if(closeResult == FR_OK) {
-			HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
+			//HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
 			resetAcquisitionState();			/* Update of the status packet */
 			/* Put here the code to manage errors */
 		}

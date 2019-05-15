@@ -14,6 +14,7 @@
 #define ACQUISITION_OFF_TELEMETRY_REQUEST 		(uint8_t)'B'
 #define ACQUISITION_OFF_AUTO_REQUEST 					(uint8_t)'C'
 #define ACQUISITION_OFF_DEBUG_REQUEST 				(uint8_t)'D'
+#define ACQUISITION_IDLE_REQUEST							(uint8_t)'E'
 
 #define IDLE_COMMAND													(uint8_t)'I'
 #define ACQUISITION_ON_SW_COMMAND							(uint8_t)'S'

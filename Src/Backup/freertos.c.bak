@@ -96,7 +96,7 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
 	xSemaphoreTake(saveUsbSemaphoreHandle, portMAX_DELAY);			/* Start with the task locked */
-	/* USER CODE END RTOS_SEMAPHORES */
+  /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
@@ -147,10 +147,11 @@ void MX_FREERTOS_Init(void) {
 /* USER CODE END Header_aliveTask */
 void aliveTask(void const * argument)
 {
+
   /* USER CODE BEGIN aliveTask */
   /* Infinite loop */
   for(;;) {
-    HAL_GPIO_TogglePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin);
+    //HAL_GPIO_TogglePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin);
 		vTaskDelay(500 / portTICK_PERIOD_MS);
   }
   /* USER CODE END aliveTask */
@@ -218,7 +219,6 @@ void usbManageTask(void const * argument)
 					break;
 	    
 				default:
-					/* Put here the code to manage errors */
 					break;
 			}
 		}
@@ -236,13 +236,13 @@ void usbManageTask(void const * argument)
 void startAcquisitionStateMachineTask(void const * argument)
 {
   /* USER CODE BEGIN startAcquisitionStateMachineTask */
-	uint8_t startAcquisitionEvent;
+	//uint8_t startAcquisitionEvent;
 	
   /* Infinite loop */
   for(;;) {
-		if(xQueueReceive(startAcquisitionEventQueueHandle, &startAcquisitionEvent, portMAX_DELAY)) {
-			startAcquisitionStateMachine(startAcquisitionEvent);
-		}
+		//if(xQueueReceive(startAcquisitionEventQueueHandle, &startAcquisitionEvent, portMAX_DELAY)) {
+			
+		//}
   }
   /* USER CODE END startAcquisitionStateMachineTask */
 }

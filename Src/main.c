@@ -27,6 +27,7 @@
 #include "fatfs.h"
 #include "i2c.h"
 #include "rtc.h"
+#include "sdmmc.h"
 #include "tim.h"
 #include "usart.h"
 #include "usb_host.h"
@@ -55,10 +56,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint8_t startAcquisitionCommand;
-FRESULT openResult;
-FRESULT closeResult;
-BaseType_t startAcquisition_CtrlxHigherPriorityTaskWoken;
+uint8_t startAcquisitionCommand = ACQUISITION_IDLE_REQUEST;
+BaseType_t startAcquisition_CtrlxHigherPriorityTaskWoken = pdFALSE;
 extern osSemaphoreId saveUsbSemaphoreHandle;
 extern osMessageQId startAcquisitionEventQueueHandle;
 /* USER CODE END PV */
@@ -116,6 +115,7 @@ int main(void)
   MX_CAN1_Init();
   MX_I2C4_Init();
   MX_RTC_Init();
+  MX_SDMMC1_SD_Init();
   MX_TIM5_Init();
   MX_TIM6_Init();
   MX_TIM7_Init();
@@ -203,7 +203,7 @@ void SystemClock_Config(void)
   }
   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_RTC|RCC_PERIPHCLK_USART1
                               |RCC_PERIPHCLK_USART2|RCC_PERIPHCLK_I2C4
-                              |RCC_PERIPHCLK_CLK48;
+                              |RCC_PERIPHCLK_SDMMC1|RCC_PERIPHCLK_CLK48;
   PeriphClkInitStruct.PLLSAI.PLLSAIN = 192;
   PeriphClkInitStruct.PLLSAI.PLLSAIR = 2;
   PeriphClkInitStruct.PLLSAI.PLLSAIQ = 2;
@@ -215,6 +215,7 @@ void SystemClock_Config(void)
   PeriphClkInitStruct.Usart2ClockSelection = RCC_USART2CLKSOURCE_SYSCLK;
   PeriphClkInitStruct.I2c4ClockSelection = RCC_I2C4CLKSOURCE_SYSCLK;
   PeriphClkInitStruct.Clk48ClockSelection = RCC_CLK48SOURCE_PLLSAIP;
+  PeriphClkInitStruct.Sdmmc1ClockSelection = RCC_SDMMC1CLKSOURCE_CLK48;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -228,7 +229,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	/* Start acquisition state machine test, only for debug purposes */
 	/* NOTE: Events are coded using chars NOT numbers! */
 	startAcquisition_CtrlxHigherPriorityTaskWoken = pdFALSE;
-	xQueueSendFromISR(startAcquisitionEventQueueHandle, &startAcquisitionCommand, &startAcquisition_CtrlxHigherPriorityTaskWoken);
 	HAL_UART_Receive_IT(&huart1, &startAcquisitionCommand, 1);
 }
 
@@ -258,22 +258,26 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	
 	/* Timer 6 period elapsed callback: 10 Hz */
 	if(htim->Instance == TIM6) {
+		
+		/* Start acquisition state machine */
+		startAcquisitionStateMachine(startAcquisitionCommand);
+		startAcquisitionCommand = ACQUISITION_IDLE_REQUEST;
 	}
 	
 	/* Timer 7 period elapsed callback: 100 Hz */
 	if(htim->Instance == TIM7) {
 		
-		/* USB saving task */
-		if(getAcquisitionState() == STATE_ON) {
-			BaseType_t USB_SavingHigherPriorityTaskWoken = pdFALSE;
+		/* Timer 7 period elapsed callback: 100 Hz */
+		if(htim->Instance == TIM7) {
+			BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 			
+			/* USB saving task */
 			if(saveUsbSemaphoreHandle != NULL) {
-				xSemaphoreGiveFromISR(saveUsbSemaphoreHandle, &USB_SavingHigherPriorityTaskWoken);
-				portYIELD_FROM_ISR(USB_SavingHigherPriorityTaskWoken);
+				xSemaphoreGiveFromISR(saveUsbSemaphoreHandle, &xHigherPriorityTaskWoken);
+				portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 			}
 		}
 	}
-
   /* USER CODE END Callback 1 */
 }
 
