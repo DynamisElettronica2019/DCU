@@ -1,13 +1,17 @@
 #include "data.h"
 
-static uint32_t packetsReceivedCounter [256];
+uint32_t packetsReceivedCounter1;
+uint32_t packetsReceivedCounter2;
 
 
 extern void packetCounterReset(void)
 {
-	for(uint16_t i = 0; i < 256; i++) {
+	/*for(uint16_t i = 0; i < 256; i++) {
 		packetsReceivedCounter[i] = 0;
-	}
+	}*/
+	
+	packetsReceivedCounter1 = 0;
+	packetsReceivedCounter2 = 0;
 	
 	return;
 }
@@ -21,11 +25,15 @@ extern inline void canDataParser(CAN_RxPacketTypeDef *unpackedData)
 //	uint16_t data4 = (unpackedData->CAN_RxPacket_Data[6] << 8) | unpackedData->CAN_RxPacket_Data[7]; 			/* Fourth data in the packet */
 	
 	/* Manage the conversions of all the data types */
-	/*switch(unpackedData->CAN_RxPacket_Header.StdId) {
-		case :
-			packetsReceivedCounter[0]++;
+	switch(unpackedData->CAN_RxPacket_Header.StdId) {
+		case 0x1F4:
+			packetsReceivedCounter1++;
 			break;
-	}*/
+		
+		case 0x1A4:
+			packetsReceivedCounter2++;
+			break;
+	}
 	
 	return;
 }

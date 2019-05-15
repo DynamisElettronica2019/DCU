@@ -151,17 +151,12 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>filterInitReturn</ItemText>
+          <ItemText>packetsReceivedCounter1</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>canStartReturn</ItemText>
-        </Ww>
-        <Ww>
-          <count>2</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>canSendReturn</ItemText>
+          <ItemText>packetsReceivedCounter2</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
