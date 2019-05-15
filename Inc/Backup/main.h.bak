@@ -55,13 +55,7 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-/*
-/ Usart function prototypes
-*/
-void Usart1TxCallback(void);
-void Usart1RxCallback(void);
-void StateSendTimCallback(void);
-void DataSendTimCallback(void);
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -139,14 +133,14 @@ void DataSendTimCallback(void);
 #define uSD_D3_GPIO_Port GPIOC
 #define uSD_CK_Pin GPIO_PIN_12
 #define uSD_CK_GPIO_Port GPIOC
-#define LED_YELLOW_Pin GPIO_PIN_1
-#define LED_YELLOW_GPIO_Port GPIOD
+#define LED_GREEN_Pin GPIO_PIN_1
+#define LED_GREEN_GPIO_Port GPIOD
 #define uSD_CMD_Pin GPIO_PIN_2
 #define uSD_CMD_GPIO_Port GPIOD
 #define LED_RED_Pin GPIO_PIN_3
 #define LED_RED_GPIO_Port GPIOD
-#define LED_GREEN_Pin GPIO_PIN_4
-#define LED_GREEN_GPIO_Port GPIOD
+#define LED_YELLOW_Pin GPIO_PIN_4
+#define LED_YELLOW_GPIO_Port GPIOD
 #define USART_GPS_TX_Pin GPIO_PIN_5
 #define USART_GPS_TX_GPIO_Port GPIOD
 #define USART_GPS_RX_Pin GPIO_PIN_6

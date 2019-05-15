@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=C:/Users/marco/Documents/STM32/DCU/Inc
+HeaderPath=C:/Users/orsa1/Documents/DCUTelem/DCU/Inc
 HeaderFiles=gpio.h;adc.h;can.h;dma.h;ffconf.h;bsp_driver_sd.h;sd_diskio.h;fatfs.h;fatfs_platform.h;usbh_diskio.h;FreeRTOSConfig.h;i2c.h;rtc.h;sdmmc.h;tim.h;usart.h;usb_host.h;usbh_conf.h;usbh_platform.h;stm32f7xx_it.h;stm32f7xx_hal_conf.h;main.h;
-SourcePath=C:/Users/marco/Documents/STM32/DCU/Src
+SourcePath=C:/Users/orsa1/Documents/DCUTelem/DCU/Src
 SourceFiles=gpio.c;adc.c;can.c;dma.c;bsp_driver_sd.c;sd_diskio.c;fatfs.c;fatfs_platform.c;usbh_diskio.c;freertos.c;i2c.c;rtc.c;sdmmc.c;tim.c;usart.c;usb_host.c;usbh_conf.c;usbh_platform.c;stm32f7xx_it.c;stm32f7xx_hal_msp.c;stm32f7xx_hal_timebase_tim.c;main.c;
 
 [PreviousLibFiles]

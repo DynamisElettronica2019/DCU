@@ -26,8 +26,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */     
-#include "user_defines.h"
 #include "usart.h"
+#include "data.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,10 +47,10 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-uint8_t dcuStateBuffer[BUFFER_STATE_LEN] = "[S;0;0;0;0;0;0;0;0]";
-uint8_t blockBuffer [BUFFER_BLOCK_LEN] = "[C;000000;000.0;000.0;000.0;000.0;000;000;000;000;000;000;000;00.0;0;00000;000;000;000.0;000.0;0000.0;0;0;000;0;00000;00000;0.000;00000;0;0;000;000;00.00;00000;00.0;00.00;00000;00.0;00000;00.00;0000;00.00;00000;00000;00000;000;000;000;000;000;000;000;000;000;000;000;000;0000.00;0000.00;000.00;0000.00;0000.00;0000.00;000;000;0;0;0;000;000;00000;00000;00000;00000;00000;00000;000;0000;000;0000;000;0000;000;0000;000;0000000000;0000000;0000000;0000000;000000000000000000000000000000000000000000000000000000000000]";
-uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
-uint8_t setRtcReceivedBuffer [BUFFER_RTC_SET_LEN];
+extern uint8_t dcuStateBuffer[BUFFER_STATE_LEN];
+extern uint8_t blockBuffer [BUFFER_BLOCK_LEN];
+extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
+extern uint8_t setRtcReceivedBuffer [BUFFER_RTC_SET_LEN];
 /* USER CODE END Variables */
 osThreadId aliveHandle;
 osThreadId SendStatesHandle;
@@ -60,10 +60,10 @@ osThreadId SendErrorHandle;
 osThreadId SendFollowingDataHandle;
 osMessageQId ErrorQueueHandle;
 osMessageQId Usart1TxModeQueueHandle;
+osMessageQId Usart1LockQueueHandle;
 osSemaphoreId sendDataSemaphoreHandle;
 osSemaphoreId sendStateSemaphoreHandle;
 osSemaphoreId receiveCommandSemaphoreHandle;
-osSemaphoreId uart1SemHandle;
 osSemaphoreId sendFollowingDataSemaphoreHandle;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -109,10 +109,6 @@ void MX_FREERTOS_Init(void) {
   osSemaphoreDef(receiveCommandSemaphore);
   receiveCommandSemaphoreHandle = osSemaphoreCreate(osSemaphore(receiveCommandSemaphore), 1);
 
-  /* definition and creation of uart1Sem */
-  osSemaphoreDef(uart1Sem);
-  uart1SemHandle = osSemaphoreCreate(osSemaphore(uart1Sem), 1);
-
   /* definition and creation of sendFollowingDataSemaphore */
   osSemaphoreDef(sendFollowingDataSemaphore);
   sendFollowingDataSemaphoreHandle = osSemaphoreCreate(osSemaphore(sendFollowingDataSemaphore), 1);
@@ -137,6 +133,10 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of Usart1TxModeQueue */
   osMessageQDef(Usart1TxModeQueue, 1, uint8_t);
   Usart1TxModeQueueHandle = osMessageCreate(osMessageQ(Usart1TxModeQueue), NULL);
+
+  /* definition and creation of Usart1LockQueue */
+  osMessageQDef(Usart1LockQueue, 1, uint8_t);
+  Usart1LockQueueHandle = osMessageCreate(osMessageQ(Usart1LockQueue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -353,16 +353,16 @@ void SendErrorFunc(void const * argument)
 {
   /* USER CODE BEGIN SendErrorFunc */
 	uint8_t queueLetter;
-	uint8_t errorMsg[ERROR_MSG_LEN] = ERROR_MSG; 																					/* Set standard error message to be edited later */
-	uint8_t normalTxModeFlag = NORMAL_MODE_TX_FLAG; 																			/* Setting flag identifier to put later into the queue */
+	uint8_t errorMsg[ERROR_MSG_LEN] = ERROR_MSG; 																						/* Set standard error message to be edited later */
+	uint8_t normalTxModeFlag = NORMAL_MODE_TX_FLAG; 																				/* Setting flag identifier to put later into the queue */
   
 	/* Infinite loop */
   for(;;) {
-    xQueueReceive(ErrorQueueHandle, &queueLetter, portMAX_DELAY); 											/* Wait for error, get the identifier char from the queue */
-    errorMsg[ERROR_MSG_IDENTIFIER_POS] = queueLetter; 																	/* Set error identifier into the message */
-		xSemaphoreTake(uart1SemHandle, portMAX_DELAY); 																			/* Lock if DMA is in use */
-		xQueueSend(Usart1TxModeQueueHandle, (void *) &normalTxModeFlag, (TickType_t)0); 		/* Add flag to queue */
-		HAL_UART_Transmit_DMA(&huart1, errorMsg, ERROR_MSG_LEN); 														/* Transmit error message */
+    xQueueReceive(ErrorQueueHandle, &queueLetter, portMAX_DELAY); 												/* Wait for error, get the identifier char from the queue */
+    errorMsg[ERROR_MSG_IDENTIFIER_POS] = queueLetter; 																		/* Set error identifier into the message */
+		xSemaphoreTake(uart1SemHandle, portMAX_DELAY); 																				/* Lock if DMA is in use */
+		xQueueSend(Usart1TxModeQueueHandle, (void *) &normalTxModeFlag, (TickType_t)0); 			/* Add flag to queue */
+		HAL_UART_Transmit_DMA(&huart1, errorMsg, ERROR_MSG_LEN); 															/* Transmit error message */
   }
   /* USER CODE END SendErrorFunc */
 }
@@ -377,13 +377,13 @@ void SendErrorFunc(void const * argument)
 void SendFollowingDataFunc(void const * argument)
 {
   /* USER CODE BEGIN SendFollowingDataFunc */
-	uint8_t normalTxModeFlag = NORMAL_MODE_TX_FLAG; 																			/* Setting flag identifier to put later into the queue */
+	uint8_t normalTxModeFlag = NORMAL_MODE_TX_FLAG; 																				/* Setting flag identifier to put later into the queue */
   
 	/* Infinite loop */
   for(;;) {
-    xSemaphoreTake(sendFollowingDataSemaphoreHandle, portMAX_DELAY); 										/* Unlock when first part tx is completed, unlocked from tx complete callback */
-		xQueueSend(Usart1TxModeQueueHandle, (void *)&normalTxModeFlag, (TickType_t)0); 			/* Add flag to queue */
-		HAL_UART_Transmit_DMA(&huart1, blockBuffer + HALF_DATA_INDEX, HALF_DATA_INDEX); 		/* Transmit second half of data message */
+    xSemaphoreTake(sendFollowingDataSemaphoreHandle, portMAX_DELAY); 											/* Unlock when first part tx is completed, unlocked from tx complete callback */
+		xQueueSend(Usart1TxModeQueueHandle, (void *)&normalTxModeFlag, (TickType_t)0); 				/* Add flag to queue */
+		HAL_UART_Transmit_DMA(&huart1, blockBuffer + HALF_DATA_INDEX, HALF_DATA_INDEX); 			/* Transmit second half of data message */
   }
   /* USER CODE END SendFollowingDataFunc */
 }

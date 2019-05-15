@@ -60,10 +60,10 @@ osThreadId SendErrorHandle;
 osThreadId SendFollowingDataHandle;
 osMessageQId ErrorQueueHandle;
 osMessageQId Usart1TxModeQueueHandle;
+osMessageQId Usart1LockQueueHandle;
 osSemaphoreId sendDataSemaphoreHandle;
 osSemaphoreId sendStateSemaphoreHandle;
 osSemaphoreId receiveCommandSemaphoreHandle;
-osSemaphoreId uart1SemHandle;
 osSemaphoreId sendFollowingDataSemaphoreHandle;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -109,10 +109,6 @@ void MX_FREERTOS_Init(void) {
   osSemaphoreDef(receiveCommandSemaphore);
   receiveCommandSemaphoreHandle = osSemaphoreCreate(osSemaphore(receiveCommandSemaphore), 1);
 
-  /* definition and creation of uart1Sem */
-  osSemaphoreDef(uart1Sem);
-  uart1SemHandle = osSemaphoreCreate(osSemaphore(uart1Sem), 1);
-
   /* definition and creation of sendFollowingDataSemaphore */
   osSemaphoreDef(sendFollowingDataSemaphore);
   sendFollowingDataSemaphoreHandle = osSemaphoreCreate(osSemaphore(sendFollowingDataSemaphore), 1);
@@ -137,6 +133,10 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of Usart1TxModeQueue */
   osMessageQDef(Usart1TxModeQueue, 1, uint8_t);
   Usart1TxModeQueueHandle = osMessageCreate(osMessageQ(Usart1TxModeQueue), NULL);
+
+  /* definition and creation of Usart1LockQueue */
+  osMessageQDef(Usart1LockQueue, 1, uint8_t);
+  Usart1LockQueueHandle = osMessageCreate(osMessageQ(Usart1LockQueue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
