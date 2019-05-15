@@ -27,7 +27,6 @@
 #include "fatfs.h"
 #include "i2c.h"
 #include "rtc.h"
-#include "sdmmc.h"
 #include "tim.h"
 #include "usart.h"
 #include "usb_host.h"
@@ -35,8 +34,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "fatfs.h"
-#include "usb_host.h"
 #include "data.h"
 /* USER CODE END Includes */
 
@@ -61,7 +58,9 @@
 uint8_t startAcquisitionCommand;
 FRESULT openResult;
 FRESULT closeResult;
+BaseType_t startAcquisition_CtrlxHigherPriorityTaskWoken;
 extern osSemaphoreId saveUsbSemaphoreHandle;
+extern osMessageQId startAcquisitionEventQueueHandle;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -117,7 +116,6 @@ int main(void)
   MX_CAN1_Init();
   MX_I2C4_Init();
   MX_RTC_Init();
-  MX_SDMMC1_SD_Init();
   MX_TIM5_Init();
   MX_TIM6_Init();
   MX_TIM7_Init();
@@ -149,7 +147,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-		
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -205,7 +203,7 @@ void SystemClock_Config(void)
   }
   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_RTC|RCC_PERIPHCLK_USART1
                               |RCC_PERIPHCLK_USART2|RCC_PERIPHCLK_I2C4
-                              |RCC_PERIPHCLK_SDMMC1|RCC_PERIPHCLK_CLK48;
+                              |RCC_PERIPHCLK_CLK48;
   PeriphClkInitStruct.PLLSAI.PLLSAIN = 192;
   PeriphClkInitStruct.PLLSAI.PLLSAIR = 2;
   PeriphClkInitStruct.PLLSAI.PLLSAIQ = 2;
@@ -217,7 +215,6 @@ void SystemClock_Config(void)
   PeriphClkInitStruct.Usart2ClockSelection = RCC_USART2CLKSOURCE_SYSCLK;
   PeriphClkInitStruct.I2c4ClockSelection = RCC_I2C4CLKSOURCE_SYSCLK;
   PeriphClkInitStruct.Clk48ClockSelection = RCC_CLK48SOURCE_PLLSAIP;
-  PeriphClkInitStruct.Sdmmc1ClockSelection = RCC_SDMMC1CLKSOURCE_CLK48;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -227,43 +224,11 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{	
-	/* To be implemented as state machine in a separate task, using queue */
-	switch(startAcquisitionCommand)
-	{
-		case ACQUISITION_ON_TELEMETRY_COMMAND:
-			if((getAcquisitionState() == STATE_OFF) && (getUsbReadyState() == STATE_ON)){
-				openResult = f_open(&USBHFile, "DynamisPRC_USB_test.txt", FA_CREATE_ALWAYS | FA_WRITE);
-				
-				if(openResult == FR_OK) {
-				HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
-				setAcquisitionState();				/* Update of the status packet */
-				/* Put here the code to manage errors */
-				}
-			}
-			
-			startAcquisitionCommand = IDLE_COMMAND;
-			break;
-		
-		case ACQUISITION_OFF_TELEMETRY_COMMAND:
-			if((getAcquisitionState() == STATE_ON) && (getUsbReadyState() == STATE_ON)) {
-				closeResult = f_close(&USBHFile);
-				
-				if(openResult == FR_OK) {
-					HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
-					resetAcquisitionState();			/* Update of the status packet */
-					/* Put here the code to manage errors */
-				}
-			}
-			
-			startAcquisitionCommand = IDLE_COMMAND;
-			break;
-		
-		default:
-			startAcquisitionCommand = IDLE_COMMAND;
-			break;
-	}
-	
+{
+	/* Start acquisition state machine test, only for debug purposes */
+	/* NOTE: Events are coded using chars NOT numbers! */
+	startAcquisition_CtrlxHigherPriorityTaskWoken = pdFALSE;
+	xQueueSendFromISR(startAcquisitionEventQueueHandle, &startAcquisitionCommand, &startAcquisition_CtrlxHigherPriorityTaskWoken);
 	HAL_UART_Receive_IT(&huart1, &startAcquisitionCommand, 1);
 }
 
@@ -297,12 +262,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	
 	/* Timer 7 period elapsed callback: 100 Hz */
 	if(htim->Instance == TIM7) {
-		BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 		
 		/* USB saving task */
-		if(saveUsbSemaphoreHandle != NULL) {
-			xSemaphoreGiveFromISR(saveUsbSemaphoreHandle, &xHigherPriorityTaskWoken);
-			portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+		if(getAcquisitionState() == STATE_ON) {
+			BaseType_t USB_SavingHigherPriorityTaskWoken = pdFALSE;
+			
+			if(saveUsbSemaphoreHandle != NULL) {
+				xSemaphoreGiveFromISR(saveUsbSemaphoreHandle, &USB_SavingHigherPriorityTaskWoken);
+				portYIELD_FROM_ISR(USB_SavingHigherPriorityTaskWoken);
+			}
 		}
 	}
 
