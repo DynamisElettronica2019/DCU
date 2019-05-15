@@ -57,9 +57,9 @@
 
 /* USER CODE BEGIN PV */
 uint8_t startAcquisitionCommand = ACQUISITION_IDLE_REQUEST;
-BaseType_t startAcquisition_CtrlxHigherPriorityTaskWoken = pdFALSE;
+BaseType_t  startAcquisition_CtrlxHigherPriorityTaskWoken = pdFALSE;
 extern osSemaphoreId saveUsbSemaphoreHandle;
-extern osMessageQId startAcquisitionEventQueueHandle;
+extern osMessageQId startAcquisitionEventHandle;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -228,7 +228,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	/* Start acquisition state machine test, only for debug purposes */
 	/* NOTE: Events are coded using chars NOT numbers! */
-	startAcquisition_CtrlxHigherPriorityTaskWoken = pdFALSE;
+	xQueueSendFromISR(startAcquisitionEventHandle, &startAcquisitionCommand, &startAcquisition_CtrlxHigherPriorityTaskWoken);
 	HAL_UART_Receive_IT(&huart1, &startAcquisitionCommand, 1);
 }
 
@@ -258,10 +258,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	
 	/* Timer 6 period elapsed callback: 10 Hz */
 	if(htim->Instance == TIM6) {
-		
-		/* Start acquisition state machine */
-		startAcquisitionStateMachine(startAcquisitionCommand);
-		startAcquisitionCommand = ACQUISITION_IDLE_REQUEST;
 	}
 	
 	/* Timer 7 period elapsed callback: 100 Hz */

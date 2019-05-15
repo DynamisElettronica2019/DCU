@@ -57,7 +57,9 @@ extern uint8_t dcuStateBuffer[BUFFER_STATE_LEN];
 osThreadId aliveHandle;
 osThreadId saveUsbHandle;
 osThreadId usbManagerHandle;
+osThreadId startAcquisitionStateMachineHandle;
 osMessageQId usbEventQueueHandle;
+osMessageQId startAcquisitionEventHandle;
 osSemaphoreId saveUsbSemaphoreHandle;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -68,6 +70,7 @@ osSemaphoreId saveUsbSemaphoreHandle;
 void aliveTask(void const * argument);
 void saveUsbTask(void const * argument);
 void usbManageTask(void const * argument);
+void startAcquisitionStateMachineTask(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -92,7 +95,7 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
-	xSemaphoreTake(saveUsbSemaphoreHandle, portMAX_DELAY);			/* Start with the task locked */
+	xSemaphoreTake(saveUsbSemaphoreHandle, portMAX_DELAY);														/* Start with the task locked */
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -103,6 +106,10 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of usbEventQueue */
   osMessageQDef(usbEventQueue, 8, uint8_t);
   usbEventQueueHandle = osMessageCreate(osMessageQ(usbEventQueue), NULL);
+
+  /* definition and creation of startAcquisitionEvent */
+  osMessageQDef(startAcquisitionEvent, 8, uint8_t);
+  startAcquisitionEventHandle = osMessageCreate(osMessageQ(startAcquisitionEvent), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -118,8 +125,12 @@ void MX_FREERTOS_Init(void) {
   saveUsbHandle = osThreadCreate(osThread(saveUsb), NULL);
 
   /* definition and creation of usbManager */
-  osThreadDef(usbManager, usbManageTask, osPriorityLow, 0, 128);
+  osThreadDef(usbManager, usbManageTask, osPriorityNormal, 0, 128);
   usbManagerHandle = osThreadCreate(osThread(usbManager), NULL);
+
+  /* definition and creation of startAcquisitionStateMachine */
+  osThreadDef(startAcquisitionStateMachine, startAcquisitionStateMachineTask, osPriorityNormal, 0, 128);
+  startAcquisitionStateMachineHandle = osThreadCreate(osThread(startAcquisitionStateMachine), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -213,6 +224,31 @@ void usbManageTask(void const * argument)
 		}
 	}
   /* USER CODE END usbManageTask */
+}
+
+/* USER CODE BEGIN Header_startAcquisitionStateMachineTask */
+/**
+* @brief Function implementing the startAcquisitionStateMachine thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_startAcquisitionStateMachineTask */
+void startAcquisitionStateMachineTask(void const * argument)
+{
+  /* USER CODE BEGIN startAcquisitionStateMachineTask */
+	uint8_t startAcquisitionEvent = ACQUISITION_IDLE_REQUEST;
+
+  /* Infinite loop */
+  for(;;) {
+		startAcquisitionStateMachine(startAcquisitionEvent);
+		
+		/* Start acquisition state machine, called at 100 Hz */
+		/* NOTE: Events are coded using chars NOT numbers! */
+		if(xQueueReceive(startAcquisitionEventHandle, &startAcquisitionEvent, 10 / portTICK_PERIOD_MS) != pdTRUE) {
+			startAcquisitionEvent = ACQUISITION_IDLE_REQUEST;
+		}
+  }
+  /* USER CODE END startAcquisitionStateMachineTask */
 }
 
 /* Private application code --------------------------------------------------*/
