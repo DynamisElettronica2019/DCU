@@ -72,8 +72,8 @@ extern inline void canDataParser(CAN_RxPacketTypeDef *unpackedData)
 			intToStringUnsigned(data4, &blockBuffer[BATTERY_VOLTAGE_CSV_INDEX], 5);
 			break;
 		
-		case EFI_GEAR_RPM_TPS_APPS_ID:
-			CAN_ReceivedPacketsCounter[EFI_GEAR_RPM_TPS_APPS_ID_COUNTER_INDEX]++;
+		case EFI_GEAR_RPM_TPS_PH2O_ID:
+			CAN_ReceivedPacketsCounter[EFI_MANUAL_LIMITER_FAN_H2O_PIT_LANE_COUNTER_INDEX]++;
 			intToStringUnsigned(data1, &blockBuffer[GEAR_CSV_INDEX], 5);
 			intToStringUnsigned(data2, &blockBuffer[RPM_CSV_INDEX], 5);
 			intToStringUnsigned(data3, &blockBuffer[TPS1_CSV_INDEX], 5);
@@ -87,7 +87,7 @@ extern inline void canDataParser(CAN_RxPacketTypeDef *unpackedData)
 			intToStringUnsigned(data3, &blockBuffer[SLIP_CSV_INDEX], 5);
 			break;
 		
-		case EFI_FUEL_FAN_H2O_LAUNCH_ID:
+		case EFI_FUEL_FAN_H2O_LAUNCH_ID_COUNTER_INDEX:
 			CAN_ReceivedPacketsCounter[EFI_FUEL_FAN_H2O_LAUNCH_ID_COUNTER_INDEX]++;
 			intToStringUnsigned(data1, &blockBuffer[MANUAL_LIMITER_ACTIVE_CSV_INDEX], 5);
 			intToStringUnsigned(data2, &blockBuffer[FAN_CSV_INDEX], 5);
