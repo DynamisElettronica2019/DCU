@@ -44,7 +44,8 @@ void MX_CAN1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 extern void canStart(void);
-extern void canSendDebug(void);
+extern inline void CAN_acquisitionOnSend(void);
+extern inline void CAN_acquisitionOffSend(void);
 static void canFilterConfig(void);
 /* USER CODE END Prototypes */
 

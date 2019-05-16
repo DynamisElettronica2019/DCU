@@ -151,12 +151,7 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>packetsReceivedCounter1</ItemText>
-        </Ww>
-        <Ww>
-          <count>1</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>packetsReceivedCounter2</ItemText>
+          <ItemText>blockBuffer</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>

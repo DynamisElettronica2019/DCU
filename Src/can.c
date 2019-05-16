@@ -22,6 +22,7 @@
 
 /* USER CODE BEGIN 0 */
 #include "cmsis_os.h"
+#include "id_can.h"
 
 CAN_FilterTypeDef canFilterConfigHeader;
 CAN_RxPacketTypeDef currentFifo0ReceivedPacket;
@@ -135,25 +136,36 @@ extern void canStart(void)
 	return;
 }
 
-extern void canSendDebug(void)
+extern inline void CAN_acquisitionOnSend(void)
 {
 	uint32_t packetMailbox;
 	CAN_TxHeaderTypeDef packetHeader;
 	uint8_t dataPacket[8];
 	
-	packetHeader.StdId = 0x1E4;
+	packetHeader.StdId = DCU_ACQUISITION_SW_ID;
 	packetHeader.RTR = CAN_RTR_DATA;
 	packetHeader.IDE = CAN_ID_STD;
-	packetHeader.DLC = 8;
+	packetHeader.DLC = 2;
 	packetHeader.TransmitGlobalTime = DISABLE;
-	dataPacket[0] = 5;
-	dataPacket[1] = 4;
-	dataPacket[2] = 3;
-	dataPacket[3] = 7;
-	dataPacket[4] = 9;
-	dataPacket[5] = 0;
-	dataPacket[6] = 1;
-	dataPacket[7] = 8;
+	dataPacket[0] = 0;
+	dataPacket[1] = 1;
+	HAL_CAN_AddTxMessage(&hcan1, &packetHeader, dataPacket, &packetMailbox);
+	return;
+}
+
+extern inline void CAN_acquisitionOffSend(void)
+{
+	uint32_t packetMailbox;
+	CAN_TxHeaderTypeDef packetHeader;
+	uint8_t dataPacket[8];
+	
+	packetHeader.StdId = DCU_ACQUISITION_SW_ID;
+	packetHeader.RTR = CAN_RTR_DATA;
+	packetHeader.IDE = CAN_ID_STD;
+	packetHeader.DLC = 2;
+	packetHeader.TransmitGlobalTime = DISABLE;
+	dataPacket[0] = 0;
+	dataPacket[1] = 0;
 	HAL_CAN_AddTxMessage(&hcan1, &packetHeader, dataPacket, &packetMailbox);
 	return;
 }
@@ -163,6 +175,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	canCtrlxHigherPriorityTaskWoken = pdFALSE;
 	HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &(currentFifo0ReceivedPacket.CAN_RxPacket_Header), currentFifo0ReceivedPacket.CAN_RxPacket_Data);
 	xQueueSendFromISR(canFifo0QueueHandle, &currentFifo0ReceivedPacket, &canCtrlxHigherPriorityTaskWoken);
+	HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
 	/* There's no need of calling taskYIELD beacuse RTOS is configured to use PREEMPTION, so the scheduler will always have the higher priority */
 }
 
@@ -172,6 +185,7 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	canCtrlxHigherPriorityTaskWoken = pdFALSE;
 	HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO1, &(currentFifo1ReceivedPacket.CAN_RxPacket_Header), currentFifo1ReceivedPacket.CAN_RxPacket_Data); 
 	xQueueSendFromISR(canFifo1QueueHandle, &currentFifo1ReceivedPacket, &canCtrlxHigherPriorityTaskWoken);
+	HAL_GPIO_TogglePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin);
 	/* There's no need of calling taskYIELD beacuse RTOS is configured to use PREEMPTION, so the scheduler will always have the higher priority */
 }
 

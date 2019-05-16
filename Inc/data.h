@@ -3,10 +3,13 @@
 
 #include "can.h"
 
+#define CHANNEL_SEPARATION														(uint8_t)';'
 #define DECIMAL_SEPARATOR 														(uint8_t)'.'
 
 #define NUMBER_OF_RECEIVED_PACKETS										(uint8_t)25
 #define NUMBER_OF_ACQUIRED_CHANNELS										(uint8_t)91
+#define BUFFER_STATE_LEN 															(uint8_t)19
+#define BUFFER_BLOCK_LEN 															(uint16_t)1024
 
 #define EFI_HALL_WHEEL_ID_COUNTER_INDEX 							(uint8_t)0
 #define EFI_WATER_TEMPERATURE_ID_COUNTER_INDEX 				(uint8_t)1
@@ -35,101 +38,207 @@
 #define GCU_DEBUG_2_ID_COUNTER_INDEX 									(uint8_t)24
 
 #define HALL_EFFECT_FR_CSV_INDEX 											(uint16_t)0
-#define HALL_EFFECT_FL_CSV_INDEX 											(uint16_t)1
-#define HALL_EFFECT_RR_CSV_INDEX 											(uint16_t)2
-#define HALL_EFFECT_RL_CSV_INDEX 											(uint16_t)3
-#define T_H20_SX_IN_CSV_INDEX 												(uint16_t)4
-#define T_H20_SX_OUT_CSV_INDEX 												(uint16_t)5
-#define T_H20_DX_IN_CSV_INDEX 												(uint16_t)6
-#define T_H20_DX_OUT_CSV_INDEX												(uint16_t)7
-#define T_OIL_IN_CSV_INDEX 														(uint16_t)8
-#define T_OIL_OUT_CSV_INDEX 													(uint16_t)9
-#define T_H20_ENGINE_CSV_INDEX 												(uint16_t)10
-#define BATTERY_VOLTAGE_CSV_INDEX 										(uint16_t)11
-#define GEAR_CSV_INDEX 																(uint16_t)12
-#define RPM_CSV_INDEX 																(uint16_t)13
-#define TPS1_CSV_INDEX 																(uint16_t)14
-#define PH2O_CSV_INDEX 																(uint16_t)15
-#define VH_SPEED_CSV_INDEX 														(uint16_t)16
-#define SLIP_TARGET_CSV_INDEX 												(uint16_t)17
-#define SLIP_CSV_INDEX																(uint16_t)18
-#define MANUAL_LIMITER_ACTIVE_CSV_INDEX 							(uint16_t)19
-#define FAN_CSV_INDEX 																(uint16_t)20
-#define H20_PUMP_DUTY_CYCLE_CSV_INDEX 								(uint16_t)21
-#define PIT_LANE_ACTIVE_CSV_INDEX 										(uint16_t)22
-#define FUEL_PRESSURE_CSV_INDEX 											(uint16_t)23
-#define OIL_PRESSURE_CSV_INDEX 												(uint16_t)24
-#define LAMBDA_CSV_INDEX 															(uint16_t)25
-#define FLAG_SMOT_CSV_INDEX 													(uint16_t)26
-#define L_FUEL_CSV_INDEX 															(uint16_t)27
-#define T_SCARICO_1_CSV_INDEX 												(uint16_t)28
-#define T_SCARICO_2_CSV_INDEX 												(uint16_t)29
+#define HALL_EFFECT_FL_CSV_INDEX 											(uint16_t)6
+#define HALL_EFFECT_RR_CSV_INDEX 											(uint16_t)12
+#define HALL_EFFECT_RL_CSV_INDEX 											(uint16_t)18
+#define T_H20_SX_IN_CSV_INDEX 												(uint16_t)24
+#define T_H20_SX_OUT_CSV_INDEX 												(uint16_t)30
+#define T_H20_DX_IN_CSV_INDEX 												(uint16_t)36
+#define T_H20_DX_OUT_CSV_INDEX												(uint16_t)42
+#define T_OIL_IN_CSV_INDEX 														(uint16_t)48
+#define T_OIL_OUT_CSV_INDEX 													(uint16_t)54
+#define T_H20_ENGINE_CSV_INDEX 												(uint16_t)60
+#define BATTERY_VOLTAGE_CSV_INDEX 										(uint16_t)66
+#define GEAR_CSV_INDEX 																(uint16_t)72
+#define RPM_CSV_INDEX 																(uint16_t)78
+#define TPS1_CSV_INDEX 																(uint16_t)84
+#define PH2O_CSV_INDEX 																(uint16_t)90
+#define VH_SPEED_CSV_INDEX 														(uint16_t)96
+#define SLIP_TARGET_CSV_INDEX 												(uint16_t)102
+#define SLIP_CSV_INDEX																(uint16_t)108
+#define MANUAL_LIMITER_ACTIVE_CSV_INDEX 							(uint16_t)114
+#define FAN_CSV_INDEX 																(uint16_t)120
+#define H20_PUMP_DUTY_CYCLE_CSV_INDEX 								(uint16_t)126
+#define PIT_LANE_ACTIVE_CSV_INDEX 										(uint16_t)132
+#define FUEL_PRESSURE_CSV_INDEX 											(uint16_t)138
+#define OIL_PRESSURE_CSV_INDEX 												(uint16_t)144
+#define LAMBDA_CSV_INDEX 															(uint16_t)150
+#define FLAG_SMOT_CSV_INDEX 													(uint16_t)156
+#define L_FUEL_CSV_INDEX 															(uint16_t)162
+#define T_SCARICO_1_CSV_INDEX 												(uint16_t)168
+#define T_SCARICO_2_CSV_INDEX 												(uint16_t)174
+#define LINEARE_FR_CSV_INDEX 													(uint16_t)180
+#define LOAD_CELL_FR_CSV_INDEX 												(uint16_t)186
+#define BPS_FRONT_CSV_INDEX 													(uint16_t)192
+#define APPS_CSV_INDEX 																(uint16_t)198
+#define LINEARE_FL_CSV_INDEX													(uint16_t)204
+#define LOAD_CELL_FL_CSV_INDEX 												(uint16_t)210
+#define BPS_REAR_CSV_INDEX 														(uint16_t)216
+#define STEERING_WHEEL_ANGLE_CSV_INDEX 								(uint16_t)222
+#define LINEARE_RL_CSV_INDEX 													(uint16_t)228
+#define LOAD_CELL_RL_CSV_INDEX 												(uint16_t)234
+#define LINEARE_RR_CSV_INDEX 													(uint16_t)240
+#define LOAD_CELL_RR_CSV_INDEX 												(uint16_t)246
+#define IR1_FL_CSV_INDEX 															(uint16_t)252
+#define IR2_FL_CSV_INDEX 															(uint16_t)258
+#define IR3_FL_CSV_INDEX 															(uint16_t)264
+#define IR1_FR_CSV_INDEX 															(uint16_t)270
+#define IR2_FR_CSV_INDEX 															(uint16_t)276
+#define IR3_FR_CSV_INDEX 															(uint16_t)282
+#define IR1_RL_CSV_INDEX 															(uint16_t)288
+#define IR2_RL_CSV_INDEX 															(uint16_t)294
+#define IR3_RL_CSV_INDEX 															(uint16_t)300
+#define IR1_RR_CSV_INDEX 															(uint16_t)306
+#define IR2_RR_CSV_INDEX 															(uint16_t)312
+#define IR3_RR_CSV_INDEX 															(uint16_t)318
+#define IMU1_ACC_X_CSV_INDEX 													(uint16_t)324
+#define IMU1_ACC_Y_CSV_INDEX 													(uint16_t)330
+#define IMU1_GYR_X_CSV_INDEX 													(uint16_t)336
+#define IMU1_GYR_Z_CSV_INDEX 													(uint16_t)342
+#define IMU1_HEADING_CSV_INDEX 												(uint16_t)348
+#define IMU1_ACC_Z_CSV_INDEX 													(uint16_t)354
+#define IMU1_GYR_Y_CSV_INDEX 													(uint16_t)360
+#define IMU2_ACC_X_CSV_INDEX 													(uint16_t)366
+#define IMU2_ACC_Y_CSV_INDEX 													(uint16_t)372
+#define IMU2_GYR_X_CSV_INDEX 													(uint16_t)378
+#define IMU2_GYR_Z_CSV_INDEX 													(uint16_t)384
+#define IMU2_HEADING_CSV_INDEX 												(uint16_t)390
+#define IMU2_ACC_Z_CSV_INDEX 													(uint16_t)396
+#define IMU2_GYR_Y_CSV_INDEX 													(uint16_t)402
+#define IMU_DCU_ACC_X_CSV_INDEX 											(uint16_t)408
+#define IMU_DCU_ACC_Y_CSV_INDEX 											(uint16_t)414
+#define IMU_DCU_GYR_X_CSV_INDEX 											(uint16_t)420
+#define IMU_DCU_GYR_Z_CSV_INDEX 											(uint16_t)426
+#define IMU_DCU_HEADING_CSV_INDEX 										(uint16_t)432
+#define IMU_DCU_ACC_Z_CSV_INDEX 											(uint16_t)438
+#define IMU_DCU_GYR_Y_CSV_INDEX 											(uint16_t)444
+#define DAU_FR_TEMP_CSV_INDEX 												(uint16_t)450
+#define DAU_FR_CURRENT_CSV_INDEX 											(uint16_t)456
+#define DAU_FL_TEMP_CSV_INDEX 												(uint16_t)462
+#define DAU_FL_CURRENT_CSV_INDEX 											(uint16_t)468
+#define DAU_REAR_TEMP_CSV_INDEX 											(uint16_t)474
+#define DAU_REAR_CURRENT_CSV_INDEX 										(uint16_t)480
+#define SW_TEMP_CSV_INDEX 														(uint16_t)486
+#define SW_CURRENT_CSV_INDEX 													(uint16_t)492
+#define GCU_TEMP_CSV_INDEX 														(uint16_t)498
+#define GCU_CURR_CSV_INDEX 														(uint16_t)504
+#define H2O_PUMP_CURRENT_CSV_INDEX 										(uint16_t)510
+#define FUEL_PUMP_CURRENT_CSV_INDEX 									(uint16_t)516
+#define GEARMOTOR_CURRENT_CSV_INDEX 									(uint16_t)522
+#define CLUTCH_CURRENT_CSV_INDEX 											(uint16_t)528
+#define FAN_SX_CURRENT_CSV_INDEX 											(uint16_t)534
+#define FAN_DX_CURRENT_CSV_INDEX 											(uint16_t)540
+#define DCU_TEMP_CSV_INDEX 														(uint16_t)546
+#define DCU_CURRENT_CSV_INDEX 												(uint16_t)552
+#define XBEE_CURRENT_CSV_INDEX 												(uint16_t)558
+#define DUC_3V3_CURRENT_CSV_INDEX 										(uint16_t)564
+#define DCU_12V_VOLTAGE_CSV_INDEX 										(uint16_t)570
+#define DCU_5V_VOLTAGE_CSV_INDEX 											(uint16_t)576
+#define DCU_3V3_VOLTAGE_CSV_INDEX 										(uint16_t)582
+#define END_CSV_INDEX 																(uint16_t)588
 
-#define LINEARE_FR_CSV_INDEX 													(uint16_t)30
-#define LOAD_CELL_FR_CSV_INDEX 												(uint16_t)31
-#define BPS_FRONT_CSV_INDEX 													(uint16_t)32
-#define APPS_CSV_INDEX 																(uint16_t)33
-#define LINEARE_FL_CSV_INDEX													(uint16_t)34
-#define LOAD_CELL_FL_CSV_INDEX 												(uint16_t)35
-#define BPS_REAR_CSV_INDEX 														(uint16_t)36
-#define STEERING_WHEEL_ANGLE_CSV_INDEX 								(uint16_t)37
-#define LINEARE_RL_CSV_INDEX 													(uint16_t)38
-#define LOAD_CELL_RL_CSV_INDEX 												(uint16_t)39
-#define LINEARE_RR_CSV_INDEX 													(uint16_t)40
-#define LOAD_CELL_RR_CSV_INDEX 												(uint16_t)41
-#define IR1_FL_CSV_INDEX 															(uint16_t)42
-#define IR2_FL_CSV_INDEX 															(uint16_t)43
-#define IR3_FL_CSV_INDEX 															(uint16_t)44
-#define IR1_FR_CSV_INDEX 															(uint16_t)45
-#define IR2_FR_CSV_INDEX 															(uint16_t)46
-#define IR3_FR_CSV_INDEX 															(uint16_t)47
-#define IR1_RL_CSV_INDEX 															(uint16_t)48
-#define IR2_RL_CSV_INDEX 															(uint16_t)49
-#define IR3_RL_CSV_INDEX 															(uint16_t)50
-#define IR1_RR_CSV_INDEX 															(uint16_t)51
-#define IR2_RR_CSV_INDEX 															(uint16_t)52
-#define IR3_RR_CSV_INDEX 															(uint16_t)53
-
-#define IMU1_ACC_X_CSV_INDEX 													(uint16_t)54
-#define IMU1_ACC_Y_CSV_INDEX 													(uint16_t)55
-#define IMU1_GYR_X_CSV_INDEX 													(uint16_t)56
-#define IMU1_GYR_Z_CSV_INDEX 													(uint16_t)57
-#define IMU1_HEADING_CSV_INDEX 												(uint16_t)58
-#define IMU1_ACC_Z_CSV_INDEX 													(uint16_t)59
-#define IMU1_GYR_Y_CSV_INDEX 													(uint16_t)60
-#define IMU2_ACC_X_CSV_INDEX 													(uint16_t)61
-#define IMU2_ACC_Y_CSV_INDEX 													(uint16_t)62
-#define IMU2_GYR_X_CSV_INDEX 													(uint16_t)63
-#define IMU2_GYR_Z_CSV_INDEX 													(uint16_t)64
-#define IMU2_HEADING_CSV_INDEX 												(uint16_t)65
-#define IMU2_ACC_Z_CSV_INDEX 													(uint16_t)66
-#define IMU2_GYR_Y_CSV_INDEX 													(uint16_t)67
-
-#define DAU_FR_TEMP_CSV_INDEX 												(uint16_t)68
-#define DAU_FR_CURRENT_CSV_INDEX 											(uint16_t)69
-#define DAU_FL_TEMP_CSV_INDEX 												(uint16_t)70
-#define DAU_FL_CURRENT_CSV_INDEX 											(uint16_t)71
-#define DAU_REAR_TEMP_CSV_INDEX 											(uint16_t)72
-#define DAU_REAR_CURRENT_CSV_INDEX 										(uint16_t)73
-#define SW_TEMP_CSV_INDEX 														(uint16_t)74
-#define SW_CURRENT_CSV_INDEX 													(uint16_t)75
-#define GCU_TEMP_CSV_INDEX 														(uint16_t)76
-#define GCU_CURR_CSV_INDEX 														(uint16_t)77
-#define H2O_PUMP_CURRENT_CSV_INDEX 										(uint16_t)78
-#define FUEL_PUMP_CURRENT_CSV_INDEX 									(uint16_t)79
-#define GEARMOTOR_CURRENT_CSV_INDEX 									(uint16_t)80
-#define CLUTCH_CURRENT_CSV_INDEX 											(uint16_t)81
-#define FAN_SX_CURRENT_CSV_INDEX 											(uint16_t)82
-#define FAN_DX_CURRENT_CSV_INDEX 											(uint16_t)83
-#define DCU_TEMP_CSV_INDEX 														(uint16_t)84
-#define DCU_CURRENT_CSV_INDEX 												(uint16_t)85
-#define XBEE_CURRENT_CSV_INDEX 												(uint16_t)86
-#define DUC_3V3_CURRENT_CSV_INDEX 										(uint16_t)87
-#define DCU_12V_VOLTAGE_CSV_INDEX 										(uint16_t)88
-#define DCU_5V_VOLTAGE_CSV_INDEX 											(uint16_t)89
-#define DCU_3V3_VOLTAGE_CSV_INDEX 										(uint16_t)90
+//#define HALL_EFFECT_FR_CSV_SEPARATOR									(HALL_EFFECT_FR_CSV_INDEX - 1)
+#define HALL_EFFECT_FL_CSV_SEPARATOR									(HALL_EFFECT_FL_CSV_INDEX - 1)
+#define HALL_EFFECT_RR_CSV_SEPARATOR 									(HALL_EFFECT_RR_CSV_INDEX - 1)
+#define HALL_EFFECT_RL_CSV_SEPARATOR 									(HALL_EFFECT_RL_CSV_INDEX - 1)
+#define T_H20_SX_IN_CSV_SEPARATOR 										(T_H20_SX_IN_CSV_INDEX - 1)
+#define T_H20_SX_OUT_CSV_SEPARATOR 										(T_H20_SX_OUT_CSV_INDEX - 1)
+#define T_H20_DX_IN_CSV_SEPARATOR											(T_H20_DX_IN_CSV_INDEX - 1)
+#define T_H20_DX_OUT_CSV_SEPARATOR										(T_H20_DX_OUT_CSV_INDEX - 1)
+#define T_OIL_IN_CSV_SEPARATOR 												(T_OIL_IN_CSV_INDEX - 1)
+#define T_OIL_OUT_CSV_SEPARATOR												(T_OIL_OUT_CSV_INDEX - 1)
+#define T_H20_ENGINE_CSV_SEPARATOR										(T_H20_ENGINE_CSV_INDEX - 1)
+#define BATTERY_VOLTAGE_CSV_SEPARATOR								  (BATTERY_VOLTAGE_CSV_INDEX - 1)
+#define GEAR_CSV_SEPARATOR														(GEAR_CSV_INDEX - 1)
+#define RPM_CSV_SEPARATOR 														(RPM_CSV_INDEX - 1)
+#define TPS1_CSV_SEPARATOR 														(TPS1_CSV_INDEX - 1)
+#define PH2O_CSV_SEPARATOR 														(PH2O_CSV_INDEX - 1)
+#define VH_SPEED_CSV_SEPARATOR 												(VH_SPEED_CSV_INDEX - 1)
+#define SLIP_TARGET_CSV_SEPARATOR 										(SLIP_TARGET_CSV_INDEX - 1)
+#define SLIP_CSV_SEPARATOR														(SLIP_CSV_INDEX - 1)
+#define MANUAL_LIMITER_ACTIVE_CSV_SEPARATOR 					(MANUAL_LIMITER_ACTIVE_CSV_INDEX - 1)
+#define FAN_CSV_SEPARATOR															(FAN_CSV_INDEX - 1)
+#define H20_PUMP_DUTY_CYCLE_CSV_SEPARATOR 						(H20_PUMP_DUTY_CYCLE_CSV_INDEX - 1)
+#define PIT_LANE_ACTIVE_CSV_SEPARATOR 								(PIT_LANE_ACTIVE_CSV_INDEX - 1)
+#define FUEL_PRESSURE_CSV_SEPARATOR 									(FUEL_PRESSURE_CSV_INDEX - 1)
+#define OIL_PRESSURE_CSV_SEPARATOR 										(OIL_PRESSURE_CSV_INDEX - 1)
+#define LAMBDA_CSV_SEPARATOR 													(LAMBDA_CSV_INDEX - 1)
+#define FLAG_SMOT_CSV_SEPARATOR 											(FLAG_SMOT_CSV_INDEX - 1)
+#define L_FUEL_CSV_SEPARATOR 													(L_FUEL_CSV_INDEX - 1)
+#define T_SCARICO_1_CSV_SEPARATOR 										(T_SCARICO_1_CSV_INDEX - 1)
+#define T_SCARICO_2_CSV_SEPARATOR 										(T_SCARICO_2_CSV_INDEX - 1)
+#define LINEARE_FR_CSV_SEPARATOR 											(LINEARE_FR_CSV_INDEX - 1)
+#define LOAD_CELL_FR_CSV_SEPARATOR										(LOAD_CELL_FR_CSV_INDEX - 1)
+#define BPS_FRONT_CSV_SEPARATOR 											(BPS_FRONT_CSV_INDEX - 1)
+#define APPS_CSV_SEPARATOR 														(APPS_CSV_INDEX - 1)
+#define LINEARE_FL_CSV_SEPARATOR											(LINEARE_FL_CSV_INDEX - 1)
+#define LOAD_CELL_FL_CSV_SEPARATOR 										(LOAD_CELL_FL_CSV_INDEX - 1)
+#define BPS_REAR_CSV_SEPARATOR 												(BPS_REAR_CSV_INDEX - 1)
+#define STEERING_WHEEL_ANGLE_CSV_SEPARATOR 						(STEERING_WHEEL_ANGLE_CSV_INDEX - 1)
+#define LINEARE_RL_CSV_SEPARATOR 											(LINEARE_RL_CSV_INDEX - 1)
+#define LOAD_CELL_RL_CSV_SEPARATOR 										(LOAD_CELL_RL_CSV_INDEX - 1)
+#define LINEARE_RR_CSV_SEPARATOR 											(LINEARE_RR_CSV_INDEX - 1)
+#define LOAD_CELL_RR_CSV_SEPARATOR 										(LOAD_CELL_RR_CSV_INDEX - 1)
+#define IR1_FL_CSV_SEPARATOR 													(IR1_FL_CSV_INDEX - 1)
+#define IR2_FL_CSV_SEPARATOR 													(IR2_FL_CSV_INDEX - 1)
+#define IR3_FL_CSV_SEPARATOR 													(IR3_FL_CSV_INDEX - 1)
+#define IR1_FR_CSV_SEPARATOR 													(IR1_FR_CSV_INDEX - 1)
+#define IR2_FR_CSV_SEPARATOR 													(IR2_FR_CSV_INDEX - 1)
+#define IR3_FR_CSV_SEPARATOR 													(IR3_FR_CSV_INDEX - 1)
+#define IR1_RL_CSV_SEPARATOR 													(IR1_RL_CSV_INDEX - 1)
+#define IR2_RL_CSV_SEPARATOR 													(IR2_RL_CSV_INDEX - 1)
+#define IR3_RL_CSV_SEPARATOR 													(IR3_RL_CSV_INDEX - 1)
+#define IR1_RR_CSV_SEPARATOR 													(IR1_RR_CSV_INDEX - 1)
+#define IR2_RR_CSV_SEPARATOR 													(IR2_RR_CSV_INDEX - 1)
+#define IR3_RR_CSV_SEPARATOR 													(IR3_RR_CSV_INDEX - 1)
+#define IMU1_ACC_X_CSV_SEPARATOR 											(IMU1_ACC_X_CSV_INDEX - 1)
+#define IMU1_ACC_Y_CSV_SEPARATOR 											(IMU1_ACC_Y_CSV_INDEX - 1)
+#define IMU1_GYR_X_CSV_SEPARATOR 											(IMU1_GYR_X_CSV_INDEX - 1)
+#define IMU1_GYR_Z_CSV_SEPARATOR 											(IMU1_GYR_Z_CSV_INDEX - 1)
+#define IMU1_HEADING_CSV_SEPARATOR 										(IMU1_HEADING_CSV_INDEX - 1)
+#define IMU1_ACC_Z_CSV_SEPARATOR 											(IMU1_ACC_Z_CSV_INDEX - 1)
+#define IMU1_GYR_Y_CSV_SEPARATOR 											(IMU1_GYR_Y_CSV_INDEX - 1)
+#define IMU2_ACC_X_CSV_SEPARATOR 											(IMU2_ACC_X_CSV_INDEX - 1)
+#define IMU2_ACC_Y_CSV_SEPARATOR 											(IMU2_ACC_Y_CSV_INDEX - 1)
+#define IMU2_GYR_X_CSV_SEPARATOR 											(IMU2_GYR_X_CSV_INDEX - 1)
+#define IMU2_GYR_Z_CSV_SEPARATOR 											(IMU2_GYR_Z_CSV_INDEX - 1)
+#define IMU2_HEADING_CSV_SEPARATOR 										(IMU2_HEADING_CSV_INDEX - 1)
+#define IMU2_ACC_Z_CSV_SEPARATOR 											(IMU2_ACC_Z_CSV_INDEX - 1)
+#define IMU2_GYR_Y_CSV_SEPARATOR 											(IMU2_GYR_Y_CSV_INDEX - 1)
+#define IMU_DCU_ACC_X_CSV_SEPARATOR 									(IMU_DCU_ACC_X_CSV_INDEX - 1)
+#define IMU_DCU_ACC_Y_CSV_SEPARATOR 									(IMU_DCU_ACC_Y_CSV_INDEX - 1)
+#define IMU_DCU_GYR_X_CSV_SEPARATOR 									(IMU_DCU_GYR_X_CSV_INDEX - 1)
+#define IMU_DCU_GYR_Z_CSV_SEPARATOR 									(IMU_DCU_GYR_Z_CSV_INDEX - 1)
+#define IMU_DCU_HEADING_CSV_SEPARATOR 								(IMU_DCU_HEADING_CSV_INDEX - 1)
+#define IMU_DCU_ACC_Z_CSV_SEPARATOR 									(IMU_DCU_ACC_Z_CSV_INDEX - 1)
+#define IMU_DCU_GYR_Y_CSV_SEPARATOR 									(IMU_DCU_GYR_Y_CSV_INDEX - 1)
+#define DAU_FR_TEMP_CSV_SEPARATOR 										(DAU_FR_TEMP_CSV_INDEX - 1)
+#define DAU_FR_CURRENT_CSV_SEPARATOR 									(DAU_FR_CURRENT_CSV_INDEX - 1)
+#define DAU_FL_TEMP_CSV_SEPARATOR 										(DAU_FL_TEMP_CSV_INDEX - 1)
+#define DAU_FL_CURRENT_CSV_SEPARATOR 									(DAU_FL_CURRENT_CSV_INDEX - 1)
+#define DAU_REAR_TEMP_CSV_SEPARATOR 									(DAU_REAR_TEMP_CSV_INDEX - 1)
+#define DAU_REAR_CURRENT_CSV_SEPARATOR 								(DAU_REAR_CURRENT_CSV_INDEX - 1)
+#define SW_TEMP_CSV_SEPARATOR 												(SW_TEMP_CSV_INDEX - 1)
+#define SW_CURRENT_CSV_SEPARATOR 											(SW_CURRENT_CSV_INDEX - 1)
+#define GCU_TEMP_CSV_SEPARATOR 												(GCU_TEMP_CSV_INDEX - 1)
+#define GCU_CURR_CSV_SEPARATOR 												(GCU_CURR_CSV_INDEX - 1)
+#define H2O_PUMP_CURRENT_CSV_SEPARATOR 								(H2O_PUMP_CURRENT_CSV_INDEX - 1)
+#define FUEL_PUMP_CURRENT_CSV_SEPARATOR 							(FUEL_PUMP_CURRENT_CSV_INDEX - 1)
+#define GEARMOTOR_CURRENT_CSV_SEPARATOR 							(GEARMOTOR_CURRENT_CSV_INDEX - 1)
+#define CLUTCH_CURRENT_CSV_SEPARATOR 									(CLUTCH_CURRENT_CSV_INDEX - 1)
+#define FAN_SX_CURRENT_CSV_SEPARATOR 									(FAN_SX_CURRENT_CSV_INDEX - 1)
+#define FAN_DX_CURRENT_CSV_SEPARATOR 									(FAN_DX_CURRENT_CSV_INDEX - 1)
+#define DCU_TEMP_CSV_SEPARATOR 												(DCU_TEMP_CSV_INDEX - 1)
+#define DCU_CURRENT_CSV_SEPARATOR 										(DCU_CURRENT_CSV_INDEX - 1)
+#define XBEE_CURRENT_CSV_SEPARATOR 										(XBEE_CURRENT_CSV_INDEX - 1)
+#define DUC_3V3_CURRENT_CSV_SEPARATOR 								(DUC_3V3_CURRENT_CSV_INDEX - 1)
+#define DCU_12V_VOLTAGE_CSV_SEPARATOR 								(DCU_12V_VOLTAGE_CSV_INDEX - 1)
+#define DCU_5V_VOLTAGE_CSV_SEPARATOR 									(DCU_5V_VOLTAGE_CSV_INDEX - 1)
+#define DCU_3V3_VOLTAGE_CSV_SEPARATOR 								(DCU_3V3_VOLTAGE_CSV_INDEX - 1)
+#define END_CSV_SEPARATOR															(END_CSV_INDEX - 1)
 
 extern inline void canDataParser(CAN_RxPacketTypeDef *unpackedData);
+extern void dataPacketReset(void);
 extern void packetCounterReset(void);
 
 #endif

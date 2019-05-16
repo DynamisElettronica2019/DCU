@@ -56,7 +56,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+uint8_t acquisitionIsOn = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -123,6 +123,7 @@ int main(void)
 	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET); 		/* Yellow LED off as default */
 	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET); 					/* Red LED off as default */
 	canStart();																																	/* CAN filter config and start */
+	dataPacketReset();																													/* Reset the data saving buffer */
 	packetCounterReset();																												/* Reset the CAN packets recevide counter */
 	HAL_TIM_Base_Start_IT(&htim5); 																							/* Start timer 5 in interrupt mode */
 	HAL_TIM_Base_Start_IT(&htim6); 																							/* Start timer 6 in interrupt mode */
@@ -241,13 +242,19 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	
 	/* Timer 5 period elapsed callback: 1 Hz */
 	if (htim->Instance == TIM5) {
-		HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
+		 
+		/* Send acquisition state to SW */
+		if(acquisitionIsOn) {
+			CAN_acquisitionOnSend();
+			acquisitionIsOn = 0;
+		} else {
+			CAN_acquisitionOffSend();
+			acquisitionIsOn = 1;
+		}
 	}
 	
 	/* Timer 6 period elapsed callback: 10 Hz */
 	if (htim->Instance == TIM6) {
-		HAL_GPIO_TogglePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin);
-		canSendDebug();
 	}
 	
 	/* Timer 7 period elapsed callback: 100 Hz */
