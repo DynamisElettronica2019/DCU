@@ -1,5 +1,7 @@
 --cpu Cortex-M7.fp.dp
 "dcu_dp11\data_conversion.o"
+"dcu_dp11\data.o"
+"dcu_dp11\string_utility.o"
 "dcu_dp11\main.o"
 "dcu_dp11\gpio.o"
 "dcu_dp11\adc.o"
@@ -22,8 +24,6 @@
 "dcu_dp11\stm32f7xx_it.o"
 "dcu_dp11\stm32f7xx_hal_msp.o"
 "dcu_dp11\stm32f7xx_hal_timebase_tim.o"
-"dcu_dp11\data.o"
-"dcu_dp11\string_utility.o"
 "dcu_dp11\startup_stm32f767xx.o"
 "dcu_dp11\croutine.o"
 "dcu_dp11\event_groups.o"

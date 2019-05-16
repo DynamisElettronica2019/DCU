@@ -26,7 +26,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */     
-
+#include "can.h"
+#include "data.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,6 +50,10 @@
 
 /* USER CODE END Variables */
 osThreadId aliveHandle;
+osThreadId canFifo0UnpackHandle;
+osThreadId canFifo1UnpackHandle;
+osMessageQId canFifo0QueueHandle;
+osMessageQId canFifo1QueueHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -56,6 +61,8 @@ osThreadId aliveHandle;
 /* USER CODE END FunctionPrototypes */
 
 void aliveTask(void const * argument);
+void canFifo0UnpackTask(void const * argument);
+void canFifo1UnpackTask(void const * argument);
 
 extern void MX_FATFS_Init(void);
 extern void MX_USB_HOST_Init(void);
@@ -84,6 +91,15 @@ void MX_FREERTOS_Init(void) {
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
 
+  /* Create the queue(s) */
+  /* definition and creation of canFifo0Queue */
+  osMessageQDef(canFifo0Queue, 32, CAN_RxPacketTypeDef);
+  canFifo0QueueHandle = osMessageCreate(osMessageQ(canFifo0Queue), NULL);
+
+  /* definition and creation of canFifo1Queue */
+  osMessageQDef(canFifo1Queue, 32, CAN_RxPacketTypeDef);
+  canFifo1QueueHandle = osMessageCreate(osMessageQ(canFifo1Queue), NULL);
+
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
@@ -92,6 +108,14 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of alive */
   osThreadDef(alive, aliveTask, osPriorityLow, 0, 128);
   aliveHandle = osThreadCreate(osThread(alive), NULL);
+
+  /* definition and creation of canFifo0Unpack */
+  osThreadDef(canFifo0Unpack, canFifo0UnpackTask, osPriorityHigh, 0, 512);
+  canFifo0UnpackHandle = osThreadCreate(osThread(canFifo0Unpack), NULL);
+
+  /* definition and creation of canFifo1Unpack */
+  osThreadDef(canFifo1Unpack, canFifo1UnpackTask, osPriorityHigh, 0, 512);
+  canFifo1UnpackHandle = osThreadCreate(osThread(canFifo1Unpack), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -117,10 +141,52 @@ void aliveTask(void const * argument)
   /* USER CODE BEGIN aliveTask */
   /* Infinite loop */
   for(;;) {
-    HAL_GPIO_TogglePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin);
-		vTaskDelay(500 / portTICK_PERIOD_MS);
+    HAL_GPIO_TogglePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin);
+		vTaskDelay(250 / portTICK_PERIOD_MS);
   }
   /* USER CODE END aliveTask */
+}
+
+/* USER CODE BEGIN Header_canFifo0UnpackTask */
+/**
+* @brief Function implementing the canFifo0Unpack thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_canFifo0UnpackTask */
+void canFifo0UnpackTask(void const * argument)
+{
+  /* USER CODE BEGIN canFifo0UnpackTask */
+	CAN_RxPacketTypeDef unpackedData;
+	
+  /* Infinite loop */
+  for(;;) {		
+		if(xQueueReceive(canFifo0QueueHandle, &unpackedData, portMAX_DELAY) == pdTRUE) {		
+			canDataParser(&unpackedData);
+		}
+  }
+  /* USER CODE END canFifo0UnpackTask */
+}
+
+/* USER CODE BEGIN Header_canFifo1UnpackTask */
+/**
+* @brief Function implementing the canFifo1Unpack thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_canFifo1UnpackTask */
+void canFifo1UnpackTask(void const * argument)
+{
+  /* USER CODE BEGIN canFifo1UnpackTask */
+	CAN_RxPacketTypeDef unpackedData;
+	
+  /* Infinite loop */
+  for(;;) {
+		if(xQueueReceive(canFifo1QueueHandle, &unpackedData, portMAX_DELAY) == pdTRUE) {		
+			canDataParser(&unpackedData);
+		}
+  }
+  /* USER CODE END canFifo1UnpackTask */
 }
 
 /* Private application code --------------------------------------------------*/
