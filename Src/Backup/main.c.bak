@@ -56,7 +56,14 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint8_t acquisitionIsOn = 0;
+uint8_t SW_AcquisitionIsOnDebug = 0;
+uint8_t startAcquisitionCommand = ACQUISITION_IDLE_REQUEST;
+BaseType_t alive_xHigherPriorityTaskWoken = pdFALSE;
+BaseType_t startAcquisition_CtrlxHigherPriorityTaskWoken = pdFALSE;
+BaseType_t USB_xHigherPriorityTaskWoken = pdFALSE;
+extern osThreadId aliveHandle;
+extern osSemaphoreId saveUsbSemaphoreHandle;
+extern osMessageQId startAcquisitionEventHandle;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -125,9 +132,13 @@ int main(void)
 	canStart();																																	/* CAN filter config and start */
 	dataPacketReset();																													/* Reset the data saving buffer */
 	packetCounterReset();																												/* Reset the CAN packets recevide counter */
+	usbInitStart();																															/* USB peripheral config and start */
+	MX_FATFS_Init();																														/* FatFS init */
+	HAL_Delay(500);																															/* Delay for Vbus stabilization */
 	HAL_TIM_Base_Start_IT(&htim5); 																							/* Start timer 5 in interrupt mode */
 	HAL_TIM_Base_Start_IT(&htim6); 																							/* Start timer 6 in interrupt mode */
 	HAL_TIM_Base_Start_IT(&htim7); 																							/* Start timer 7 in interrupt mode */
+	HAL_UART_Receive_IT(&huart1, &startAcquisitionCommand, 1);
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
@@ -220,6 +231,14 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	/* Start acquisition state machine test, only for debug purposes */
+	/* NOTE: Events are coded using chars NOT numbers! */
+	xQueueSendFromISR(startAcquisitionEventHandle, &startAcquisitionCommand, &startAcquisition_CtrlxHigherPriorityTaskWoken);
+	HAL_UART_Receive_IT(&huart1, &startAcquisitionCommand, 1);
+}
+
 /* USER CODE END 4 */
 
 /**
@@ -244,23 +263,28 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if (htim->Instance == TIM5) {
 		 
 		/* Send acquisition state to SW */
-		if(acquisitionIsOn) {
+		if(SW_AcquisitionIsOnDebug) {
 			CAN_acquisitionOnSend();
-			acquisitionIsOn = 0;
+			SW_AcquisitionIsOnDebug = 0;
 		} else {
 			CAN_acquisitionOffSend();
-			acquisitionIsOn = 1;
+			SW_AcquisitionIsOnDebug = 1;
 		}
 	}
-	
+
 	/* Timer 6 period elapsed callback: 10 Hz */
-	if (htim->Instance == TIM6) {
+	if(htim->Instance == TIM6) {
 	}
 	
 	/* Timer 7 period elapsed callback: 100 Hz */
-	if (htim->Instance == TIM7) {
+	if(htim->Instance == TIM7) {
+		
+		/* USB saving task */
+		if(saveUsbSemaphoreHandle != NULL) {
+			xSemaphoreGiveFromISR(saveUsbSemaphoreHandle, &USB_xHigherPriorityTaskWoken);
+			portYIELD_FROM_ISR(USB_xHigherPriorityTaskWoken);
+		}
 	}
-
   /* USER CODE END Callback 1 */
 }
 
@@ -272,14 +296,14 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET); 			/* Switch-off green LED */
-	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET); 		/* Switch-off yellow LED */
-	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET); 					/* Switch-off ed LED off */
+	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
 	
-	/* Red LED toogle to report erorrs */
-	while(1) {
+	/* Red LED toogle to report error */
+  while(1) {
 		HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
-		HAL_Delay(250);
+		HAL_Delay(100);
 	}
   /* USER CODE END Error_Handler_Debug */
 }
@@ -297,14 +321,14 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
      tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET); 			/* Switch-off green LED */
-	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET); 		/* Switch-off yellow LED */
-	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET); 					/* Switch-off ed LED off */
+	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
 	
-	/* Red LED toogle to report erorrs */
-	while(1) {
+	/* Red LED toogle to report error */
+  while(1) {
 		HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
-		HAL_Delay(250);
+		HAL_Delay(100);
 	}
   /* USER CODE END 6 */
 }

@@ -32,7 +32,15 @@
 #include "stm32f7xx_hal.h"
 
 /* USER CODE BEGIN INCLUDE */
+#define VBUS_ENABLE 	(uint8_t)0
+#define VBUS_DISABLE 	(uint8_t)0
 
+typedef enum {
+  DISCONNECTION_EVENT = 1,
+	CONNECTED_EVENT
+} usbApplicationTypedef;
+
+extern void usbInitStart(void);
 /* USER CODE END INCLUDE */
 
 /** @addtogroup USBH_OTG_DRIVER
