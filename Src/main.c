@@ -273,7 +273,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	
 	/* 100 Hz timer callback */
 	if (htim->Instance == TIM7) {
-		if(timer8HzCounter >= 20) {
+		if(timer8HzCounter >= 12) {
 			dataSendTimCallback();
 			timer8HzCounter = 1;
 		}
