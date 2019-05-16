@@ -58,3 +58,4 @@ dcu_dp11\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 dcu_dp11\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
 dcu_dp11\freertos.o: ../Inc/usart.h
 dcu_dp11\freertos.o: ../Inc/data.h
+dcu_dp11\freertos.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h

@@ -28,6 +28,7 @@
 /* USER CODE BEGIN Includes */     
 #include "usart.h"
 #include "data.h"
+#include "string.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -257,7 +258,11 @@ void ReceiveTelemFunc(void const * argument)
 	uint8_t errorLetter = CMD_READ_ERR_ID; 																									/* Define which char is the identifier of the error */
 	uint8_t commandAckMsg [COMMAND_ACK_MSG_LEN] = ACK_MSG;
 	uint8_t usartLockFlag;
+	uint8_t tempBuffer[50];
 	_Bool setRtcComing = 0;
+	
+	HAL_UART_Receive(&huart1, tempBuffer, 50, 50);
+	HAL_UART_Receive_DMA(&huart1, telemetryReceivedBuffer, BUFFER_COMMAND_LEN);
   
 	/* Infinite loop */
   for(;;) {
@@ -273,6 +278,7 @@ void ReceiveTelemFunc(void const * argument)
 			}
 			else { 																																							/* If message does not end correctly */
 				xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0);			 					/* Add error to queue */
+				HAL_UART_Receive_DMA(&huart1, telemetryReceivedBuffer, BUFFER_COMMAND_LEN); 			/* Re enable receiving */
 			}
 		}
 		
@@ -337,9 +343,11 @@ void ReceiveTelemFunc(void const * argument)
 				}
 			}
 			
-			else { 																																							/* If message does not start correctly */
+			else {																																					/* If message does not start correctly */
+				HAL_UART_Receive(&huart1, tempBuffer, 50, 50);
 				HAL_UART_Receive_DMA(&huart1, telemetryReceivedBuffer, BUFFER_COMMAND_LEN); 			/* Re enable receiving */
-				xQueueSend(ErrorQueueHandle, ( void * ) &errorLetter, ( TickType_t ) 0 ); 				/* Add error to queue */
+				HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
+				xQueueSend(ErrorQueueHandle, ( void * ) &errorLetter, ( TickType_t ) 0 ); 				/* Add error to queue */				
 			}
 		}
   }
