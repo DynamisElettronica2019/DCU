@@ -121,6 +121,9 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 	rtcPeripheralInit();																												/* RTC peripheral init only */
+	resetRtcTime();																															/* RTC time values reset */
+	resetRtcDate();																															/* RTC date values reset */
+	resetActualTimestamp();																											/* Reset timestamp structure */
 	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET);			/* Green LED off as default */
 	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET);		/* Yellow LED off as default */
 	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);					/* Red LED off as default */

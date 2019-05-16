@@ -85,8 +85,7 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
-  /* USER CODE END RTOS_SEMAPHORES */
-
+	xSemaphoreTake(updateRtcValueSemaphoreHandle, portMAX_DELAY); 				/* Start with the task locked */
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
@@ -150,7 +149,7 @@ void updateTimestampFromRtcTask(void const * argument)
 	
 	/* Infinite loop */
   for(;;) {
-    xSemaphoreTake(updateTimestampFromRtcHandle, portMAX_DELAY); 				/* Unlock when timer callback is called */
+    xSemaphoreTake(updateRtcValueSemaphoreHandle, portMAX_DELAY); 				/* Unlock when timer callback is called */
 		
 		/* You must call GetData after GetTime to unlock the data */
 		setTimestampTimeFormRtc(); 																					/* Set time values in the timestamp struct, from RTC */

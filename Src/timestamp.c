@@ -1,6 +1,6 @@
 #include "timestamp.h"
 
-static actualTimestamp_t actualTimestamp;
+actualTimestamp_t actualTimestamp;
 
 
 extern void resetActualTimestamp(void)
