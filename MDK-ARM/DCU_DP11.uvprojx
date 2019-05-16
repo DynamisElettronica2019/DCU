@@ -500,6 +500,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\data.c</FilePath>
             </File>
+            <File>
+              <FileName>string_utility.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\string_utility.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -624,6 +629,16 @@
               <FileName>data.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Inc\data.h</FilePath>
+            </File>
+            <File>
+              <FileName>id_can.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Inc\id_can.h</FilePath>
+            </File>
+            <File>
+              <FileName>string_utility.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Inc\string_utility.h</FilePath>
             </File>
           </Files>
         </Group>

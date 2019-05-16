@@ -161,7 +161,7 @@ void canFifo0UnpackTask(void const * argument)
 	
   /* Infinite loop */
   for(;;) {		
-		if(xQueueReceive(canFifo0QueueHandle, &unpackedData, portMAX_DELAY)) {		
+		if(xQueueReceive(canFifo0QueueHandle, &unpackedData, portMAX_DELAY) == pdTRUE) {		
 			canDataParser(&unpackedData);
 		}
   }
@@ -182,7 +182,7 @@ void canFifo1UnpackTask(void const * argument)
 	
   /* Infinite loop */
   for(;;) {
-		if(xQueueReceive(canFifo1QueueHandle, &unpackedData, portMAX_DELAY)) {		
+		if(xQueueReceive(canFifo1QueueHandle, &unpackedData, portMAX_DELAY) == pdTRUE) {		
 			canDataParser(&unpackedData);
 		}
   }
