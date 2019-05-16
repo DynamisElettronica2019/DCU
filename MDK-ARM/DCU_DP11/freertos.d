@@ -83,4 +83,5 @@ dcu_dp11\freertos.o: ../Middlewares/Third_Party/FatFs/src/ff_gen_drv.h
 dcu_dp11\freertos.o: ../Middlewares/Third_Party/FatFs/src/diskio.h
 dcu_dp11\freertos.o: ../Inc/sd_diskio.h
 dcu_dp11\freertos.o: ../Inc/usbh_diskio.h
+dcu_dp11\freertos.o: ../Inc/usart.h
 dcu_dp11\freertos.o: ../Inc/data.h

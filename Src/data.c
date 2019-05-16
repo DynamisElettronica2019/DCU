@@ -2,7 +2,10 @@
 #include "fatfs.h"
 #include "id_can.h"
 #include "string_utility.h"
+#include <stdint.h>
 
+uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
+uint8_t setRtcReceivedBuffer [BUFFER_RTC_SET_LEN];
 uint8_t blockBuffer [BUFFER_BLOCK_LEN];
 uint8_t dcuStateBuffer [BUFFER_STATE_LEN] = "[S;0;0;0;0;0;0;0;0]";
 uint32_t CAN_ReceivedPacketsCounter [NUMBER_OF_RECEIVED_PACKETS];

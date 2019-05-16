@@ -2,6 +2,7 @@
 "dcu_dp11\data.o"
 "dcu_dp11\data_conversion.o"
 "dcu_dp11\string_utility.o"
+"dcu_dp11\telemetry.o"
 "dcu_dp11\main.o"
 "dcu_dp11\gpio.o"
 "dcu_dp11\adc.o"

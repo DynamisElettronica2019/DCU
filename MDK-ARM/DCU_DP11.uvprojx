@@ -134,11 +134,11 @@
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
-            <DriverSelection>4107</DriverSelection>
+            <DriverSelection>4100</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>STLink\ST-LINKIII-KEIL_SWO.dll</Flash2>
-          <Flash3></Flash3>
+          <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -336,7 +336,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F767xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc; ../Drivers/STM32F7xx_HAL_Driver/Inc; ../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy; ../Middlewares/Third_Party/FatFs/src; ../Middlewares/Third_Party/FreeRTOS/Source/include; ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS; ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM7/r0p1; ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc; ../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc; ../Drivers/CMSIS/Device/ST/STM32F7xx/Include; ../Drivers/CMSIS/Include</IncludePath>
+              <IncludePath>../Inc;  ../Drivers/STM32F7xx_HAL_Driver/Inc;  ../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy;  ../Middlewares/Third_Party/FatFs/src;  ../Middlewares/Third_Party/FreeRTOS/Source/include;  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;  ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM7/r0p1;  ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc;  ../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc;  ../Drivers/CMSIS/Device/ST/STM32F7xx/Include;  ../Drivers/CMSIS/Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -394,6 +394,11 @@
               <FileName>string_utility.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\string_utility.c</FilePath>
+            </File>
+            <File>
+              <FileName>telemetry.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\telemetry.c</FilePath>
             </File>
             <File>
               <FileName>main.c</FileName>
@@ -609,6 +614,11 @@
               <FileName>string_utility.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Inc\string_utility.h</FilePath>
+            </File>
+            <File>
+              <FileName>telemetry.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Inc\telemetry.h</FilePath>
             </File>
             <File>
               <FileName>tim.h</FileName>

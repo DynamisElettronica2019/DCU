@@ -36,6 +36,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "data.h"
+#include "telemetry.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -58,12 +59,14 @@
 /* USER CODE BEGIN PV */
 uint8_t SW_AcquisitionIsOnDebug = 0;
 uint8_t startAcquisitionCommand = ACQUISITION_IDLE_REQUEST;
+uint8_t timer8HzCounter = 1;
 BaseType_t alive_xHigherPriorityTaskWoken = pdFALSE;
 BaseType_t startAcquisition_CtrlxHigherPriorityTaskWoken = pdFALSE;
 BaseType_t USB_xHigherPriorityTaskWoken = pdFALSE;
 extern osThreadId aliveHandle;
 extern osSemaphoreId saveUsbSemaphoreHandle;
 extern osMessageQId startAcquisitionEventHandle;
+extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -138,7 +141,6 @@ int main(void)
 	HAL_TIM_Base_Start_IT(&htim5); 																							/* Start timer 5 in interrupt mode */
 	HAL_TIM_Base_Start_IT(&htim6); 																							/* Start timer 6 in interrupt mode */
 	HAL_TIM_Base_Start_IT(&htim7); 																							/* Start timer 7 in interrupt mode */
-	HAL_UART_Receive_IT(&huart1, &startAcquisitionCommand, 1);
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
@@ -151,8 +153,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
+  while (1) {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -231,12 +232,14 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
-	/* Start acquisition state machine test, only for debug purposes */
-	/* NOTE: Events are coded using chars NOT numbers! */
-	xQueueSendFromISR(startAcquisitionEventHandle, &startAcquisitionCommand, &startAcquisition_CtrlxHigherPriorityTaskWoken);
-	HAL_UART_Receive_IT(&huart1, &startAcquisitionCommand, 1);
+	if(huart->Instance==USART1) {
+		usart1TxCallback();
+	}
+	if(huart->Instance==USART2) {
+		/* Put here the GPS code */
+	}
 }
 
 /* USER CODE END 4 */
@@ -258,10 +261,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-	
+
 	/* Timer 5 period elapsed callback: 1 Hz */
 	if (htim->Instance == TIM5) {
 		 
+    /* Telemetry DCU state packet send at 1 Hz */
+    stateSendTimCallback();
+
 		/* Send acquisition state to SW */
 		if(SW_AcquisitionIsOnDebug) {
 			CAN_acquisitionOnSend();
@@ -284,6 +290,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			xSemaphoreGiveFromISR(saveUsbSemaphoreHandle, &USB_xHigherPriorityTaskWoken);
 			portYIELD_FROM_ISR(USB_xHigherPriorityTaskWoken);
 		}
+
+    /* Send telemetry data */
+    if(timer8HzCounter >= 12) {
+      dataSendTimCallback();
+      timer8HzCounter = 1;
+    }
+    else {
+      timer8HzCounter++;
+    }
 	}
   /* USER CODE END Callback 1 */
 }
