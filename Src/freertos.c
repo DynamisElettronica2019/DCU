@@ -213,12 +213,15 @@ void SendStatesFunc(void const * argument)
   /* USER CODE BEGIN SendStatesFunc */
 	uint8_t normalTxModeFlag = NORMAL_MODE_TX_FLAG;  																			/* Setting flag identifier to put later into the queue */
   uint8_t usartLockFlag;
+	uint8_t strToSend[BUFFER_STATE_LEN/2+5];
+	uint16_t strToSenLen;
 	/* Infinite loop */
   for(;;) {
-    xSemaphoreTake(sendStateSemaphoreHandle, portMAX_DELAY); 														/* Unlock when timer callback is called */																			
-		xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);						/* Lock if DMA is in use */
+    xSemaphoreTake(sendStateSemaphoreHandle, portMAX_DELAY); 														/* Unlock when timer callback is called */
+		strToSenLen = encodeString(dcuStateBuffer, strToSend, BUFFER_STATE_LEN); 						/* Get the encoded string */		
+		xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);								/* Lock if DMA is in use */
 		xQueueSend(Usart1TxModeQueueHandle, (void *)&normalTxModeFlag, (TickType_t)0); 			/* Add flag to queue */
-		HAL_UART_Transmit_DMA(&huart1, dcuStateBuffer, BUFFER_STATE_LEN); 									/* Transmit state message */
+		HAL_UART_Transmit_DMA(&huart1, strToSend, strToSenLen); 														/* Transmit state message */
   }
   /* USER CODE END SendStatesFunc */
 }
