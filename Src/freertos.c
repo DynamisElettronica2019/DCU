@@ -353,7 +353,6 @@ void ReceiveTelemFunc(void const * argument)
 			else {																																					/* If message does not start correctly */
 				HAL_UART_Receive(&huart1, tempBuffer, 50, 50);
 				HAL_UART_Receive_DMA(&huart1, telemetryReceivedBuffer, BUFFER_COMMAND_LEN); 			/* Re enable receiving */
-				HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
 				xQueueSend(ErrorQueueHandle, ( void * ) &errorLetter, ( TickType_t ) 0 ); 				/* Add error to queue */				
 			}
 		}
