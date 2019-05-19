@@ -57,3 +57,4 @@ dcu_dp11\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 dcu_dp11\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 dcu_dp11\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
 dcu_dp11\freertos.o: ../Inc/GPS.h
+dcu_dp11\freertos.o: ../Inc/usart.h

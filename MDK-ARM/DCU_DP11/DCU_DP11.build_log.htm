@@ -22,26 +22,21 @@ Dialog DLL:      TCM.DLL V1.32.0.0
  
 <h2>Project:</h2>
 C:\Users\SimoGein\Desktop\git\DCU\MDK-ARM\DCU_DP11.uvprojx
-Project File Date:  05/15/2019
+Project File Date:  05/19/2019
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'DCU_DP11'
 compiling GPS.c...
-..\Src\GPS.c(342): warning:  #177-D: variable "NumberOfMessage"  was declared but never referenced
+..\Src\GPS.c(313): warning:  #177-D: variable "NumberOfMessage"  was declared but never referenced
   	uint8_t NumberOfMessage = buffer[i];
-..\Src\GPS.c: 1 warning, 0 errors
-compiling freertos.c...
-compiling main.c...
-../Inc/GPS.h(70): warning:  #47-D: incompatible redefinition of macro "FALSE"  (declared at line 49 of "../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_def.h")
-  #define FALSE 													((uint8_t)1)
-../Inc/GPS.h(71): warning:  #47-D: incompatible redefinition of macro "TRUE"  (declared at line 53 of "../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_def.h")
-  #define TRUE														((uint8_t)0)
-../Src/main.c: 2 warnings, 0 errors
+..\Src\GPS.c(552): warning:  #940-D: missing return statement at end of non-void function "GPS_str_to_int" 
+  }
+..\Src\GPS.c: 2 warnings, 0 errors
 linking...
-Program Size: Code=48904 RO-data=824 RW-data=220 ZI-data=30196  
+Program Size: Code=45920 RO-data=760 RW-data=208 ZI-data=30288  
 FromELF: creating hex file...
-"DCU_DP11\DCU_DP11.axf" - 0 Error(s), 3 Warning(s).
+"DCU_DP11\DCU_DP11.axf" - 0 Error(s), 2 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -64,7 +59,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.0.2
-Build Time Elapsed:  00:00:14
+Build Time Elapsed:  00:00:10
 </pre>
 </body>
 </html>

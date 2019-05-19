@@ -28,6 +28,7 @@
 /* USER CODE BEGIN Includes */     
 
 #include "GPS.h"
+#include "usart.h"
 
 /* USER CODE END Includes */
 
@@ -49,8 +50,9 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 
-BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-extern uint8_t GPSRawBuffer[GPS_MIN_LENGTH];
+extern BaseType_t xGPSHigherPriorityTaskWoken;
+extern uint8_t GPSRawBuffer[GPS_MAX_LENGTH];
+extern uint8_t GPSFirstChar;
 
 /* USER CODE END Variables */
 osThreadId aliveHandle;
@@ -96,7 +98,8 @@ void MX_FREERTOS_Init(void) {
   GPSSetSemHandle = osSemaphoreCreate(osSemaphore(GPSSetSem), 1);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
-  /* add semaphores, ... */
+  xSemaphoreTake(GPSUnboxSemHandle, 0);
+	xSemaphoreTake(GPSSetSemHandle, 0);
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -160,12 +163,12 @@ void aliveTask(void const * argument)
 void GPSunboxingFunc(void const * argument)
 {
   /* USER CODE BEGIN GPSunboxingFunc */
+	HAL_UART_Receive_DMA(&huart2,&GPSFirstChar, 1);    		//comincio a ricevere un carattere alla volta, fino a quando mi arriva il primo $.
   /* Infinite loop */
   for(;;)
   {
-		xSemaphoreTake(GPSUnboxSemHandle, portMAX_DELAY);		//se non è stato dato semaforo, la task va in blocked state
-																												//se arrivo qui, significa che ho già letto il primo carattere '$', e ho fatto la lettura di GPS_MIN_LENGTH
-		GPS_parse_data(GPSRawBuffer);												//faccio lo spacchettamento dei dati
+		xSemaphoreTake(GPSUnboxSemHandle, portMAX_DELAY);		//quando ho finito di riempire il buffer, sblocco la task
+		GPS_parse_data(GPSRawBuffer);												//e faccio le conversioni
     osDelay(1);
   }
   /* USER CODE END GPSunboxingFunc */

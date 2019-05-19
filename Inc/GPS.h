@@ -70,6 +70,9 @@
 #define FALSE 													((uint8_t)1)
 #define TRUE														((uint8_t)0)
 
+#define FIX_VALID												((uint8_t)0)
+#define FIX_NOT_VALID										((uint8_t)1)
+
 
 typedef struct UTC_time
 {
@@ -217,9 +220,15 @@ typedef struct NMEA_output_types
 
 
 //user functions
+
+void GPS_Rx_Cplt(void);
 void GPS_parse_data(uint8_t * buffer);
-void GPS_complete_packet(uint8_t * buffer);
 uint8_t GPS_get_messageID(uint8_t * buffer);
+void GPS_init(void);
+void GPS_get_time(uint8_t *hour, uint8_t *minut, uint8_t *second);
+void GPS_get_date(uint8_t *day, uint8_t *month, uint8_t *year);
+uint8_t GPS_is_fix_valid(void);
+
 NMEA_GGA_type_t GPS_GGA_conversion(uint8_t * buffer);
 NMEA_GLL_type_t GPS_GLL_conversion(uint8_t * buffer);
 NMEA_GSA_type_t GPS_GSA_conversion(uint8_t * buffer); 
@@ -228,8 +237,8 @@ NMEA_RMC_type_t GPS_RMC_conversion(uint8_t * buffer);
 NMEA_VTG_type_t GPS_VTG_conversion(uint8_t * buffer);
 
 uint16_t GPS_str_to_int(uint8_t centinaia, uint8_t decine, uint8_t unita);
-double    GPS_str_to_float(uint8_t * decimi, uint8_t * centesimi);
-
+double    GPS_str_to_float(uint8_t decimi, uint8_t centesimi);
+void GPS_clear_buffer(uint8_t *buffer, uint8_t length);
 
 
 #endif

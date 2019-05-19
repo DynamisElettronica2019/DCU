@@ -27,6 +27,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */     
 
+#include "GPS.h"
+#include "usart.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,8 +50,22 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 
+BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+extern uint8_t GPSRawBuffer[GPS_MIN_LENGTH];
+
+extern uint8_t GPSFirstChar;
+extern uint8_t GPSMessaggeBegin;
+extern uint8_t GPSRawBuffer[GPS_MIN_LENGTH];
+extern uint8_t GPSComplitingPacket;
+extern uint8_t GPSTerminationChar;
+extern uint8_t GPSSingleCharCplt;
+
 /* USER CODE END Variables */
 osThreadId aliveHandle;
+osThreadId GPSUnboxingTaskHandle;
+osThreadId GPSSettingTaskHandle;
+osSemaphoreId GPSUnboxSemHandle;
+osSemaphoreId GPSSetSemHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -56,6 +73,8 @@ osThreadId aliveHandle;
 /* USER CODE END FunctionPrototypes */
 
 void aliveTask(void const * argument);
+void GPSunboxingFunc(void const * argument);
+void GPSSettingFunc(void const * argument);
 
 extern void MX_FATFS_Init(void);
 extern void MX_USB_HOST_Init(void);
@@ -75,8 +94,18 @@ void MX_FREERTOS_Init(void) {
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
+  /* Create the semaphores(s) */
+  /* definition and creation of GPSUnboxSem */
+  osSemaphoreDef(GPSUnboxSem);
+  GPSUnboxSemHandle = osSemaphoreCreate(osSemaphore(GPSUnboxSem), 1);
+
+  /* definition and creation of GPSSetSem */
+  osSemaphoreDef(GPSSetSem);
+  GPSSetSemHandle = osSemaphoreCreate(osSemaphore(GPSSetSem), 1);
+
   /* USER CODE BEGIN RTOS_SEMAPHORES */
-  /* add semaphores, ... */
+  xSemaphoreTake(GPSUnboxSemHandle, 0);
+	xSemaphoreTake(GPSSetSemHandle, 0);
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -91,6 +120,14 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of alive */
   osThreadDef(alive, aliveTask, osPriorityLow, 0, 128);
   aliveHandle = osThreadCreate(osThread(alive), NULL);
+
+  /* definition and creation of GPSUnboxingTask */
+  osThreadDef(GPSUnboxingTask, GPSunboxingFunc, osPriorityIdle, 0, 128);
+  GPSUnboxingTaskHandle = osThreadCreate(osThread(GPSUnboxingTask), NULL);
+
+  /* definition and creation of GPSSettingTask */
+  osThreadDef(GPSSettingTask, GPSSettingFunc, osPriorityIdle, 0, 128);
+  GPSSettingTaskHandle = osThreadCreate(osThread(GPSSettingTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -120,6 +157,54 @@ void aliveTask(void const * argument)
     osDelay(1);
   }
   /* USER CODE END aliveTask */
+}
+
+/* USER CODE BEGIN Header_GPSunboxingFunc */
+/**
+* @brief Function implementing the GPSUnboxingTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_GPSunboxingFunc */
+void GPSunboxingFunc(void const * argument)
+{
+  /* USER CODE BEGIN GPSunboxingFunc */
+	HAL_UART_Receive_DMA(&huart2, &GPSFirstChar, 1);		//comincio a ricevere un carattere alla volta, fino a quando mi arriva il primo $.
+  /* Infinite loop */
+  for(;;)
+  {
+		xSemaphoreTake(GPSUnboxSemHandle, portMAX_DELAY);		//se non è stato dato semaforo, la task va in blocked state
+																												//se arrivo qui, significa che ho già letto il primo carattere '$', e ho fatto la lettura di GPS_MIN_LENGTH
+		HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);
+		GPS_parse_data(GPSRawBuffer);												//faccio lo spacchettamento dei dati
+		
+		
+		HAL_UART_Receive_DMA(&huart2, &GPSFirstChar, 1);		//ricomincio con un nuovo pacchetto
+    osDelay(1);
+  }
+  /* USER CODE END GPSunboxingFunc */
+}
+
+/* USER CODE BEGIN Header_GPSSettingFunc */
+/**
+* @brief Function implementing the GPSSettingTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_GPSSettingFunc */
+void GPSSettingFunc(void const * argument)
+{
+  /* USER CODE BEGIN GPSSettingFunc */
+  /* Infinite loop */
+  for(;;)
+  {
+		xSemaphoreTake(GPSSetSemHandle, portMAX_DELAY);	//se non è stato dato semaforo, la task va in blocked state
+		
+		/*switch che implementa il setting del GPS*/
+		
+    osDelay(1);
+  }
+  /* USER CODE END GPSSettingFunc */
 }
 
 /* Private application code --------------------------------------------------*/

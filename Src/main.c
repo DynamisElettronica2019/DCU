@@ -59,17 +59,6 @@
 
 /* USER CODE BEGIN PV */
 
-extern osSemaphoreId GPSUnboxSemHandle;
-extern osSemaphoreId GPSSetSemHandle;
-extern BaseType_t xHigherPriorityTaskWoken;
-
-extern uint8_t GPSFirstChar;
-extern uint8_t GPSMessaggeBegin;
-extern uint8_t GPSRawBuffer[GPS_MIN_LENGTH];
-extern uint8_t GPSComplitingPacket;
-extern uint8_t GPSTerminationChar;
-extern uint8_t GPSSingleCharCplt;
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -136,7 +125,6 @@ int main(void)
 	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
 	
-	HAL_UART_Receive_DMA(&huart2, &GPSFirstChar, 1);		//comincio a ricevere un carattere alla volta, fino a quando mi arriva il primo $. !probabilmente MXFREERtosInit va chiamata prima di questa funzione
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
@@ -232,35 +220,6 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) // questa funzione si puo cambiare con una fatta da me e inserita nella callback di interrupt della dma
-{
-	if(huart->Instance == USART2){		//gestisce i messagi che arrivano dal gps
-		
-		if((GPSFirstChar == '$') && (GPSMessaggeBegin == 0)){				//se effettivamente mi è arrivato l'inizio di un messaggio e non ho già iniziato a leggere il messaggio dopo il $
-			GPSMessaggeBegin = 1;
-			GPSFirstChar = 0;
-			HAL_UART_Receive_DMA(&huart2, GPSRawBuffer, GPS_MIN_LENGTH);
-		}
-		else if(GPSMessaggeBegin == 1){															//se ho letto il numero minimo di caratteri, allora chiamo la task di conversione
-			GPSMessaggeBegin = 0;
-			xSemaphoreGiveFromISR(GPSUnboxSemHandle, &xHigherPriorityTaskWoken );		//do semaforo alla task di conversione
-			portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-		}
-		else if (GPSComplitingPacket == 1){												//se sto terminando il pacchetto del GPS
-			GPSSingleCharCplt = 1;																	// segnalo che ho letto il singolo carattere
-		}
-		else
-			HAL_UART_Receive_DMA(&huart2, &GPSFirstChar, 1);	//continuo ad aspettare il primo carattere
-	}
-
-	if(huart->Instance == USART3){		//gestisce i messaggi da terminale, ovvero i cambiamenti di setting. per il sw dcu questa parte andrà inserita da un'altra parte e tolta la usart3
-		
-		xSemaphoreGiveFromISR(GPSSetSemHandle, &xHigherPriorityTaskWoken);			//do semaforo alla taskche gestisce il setting del gps
-		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-	}
-		
-}
 
 /* USER CODE END 4 */
 
