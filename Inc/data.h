@@ -2,7 +2,7 @@
 #define __data_H
 
 #define BUFFER_BLOCK_LEN            	(uint16_t)512
-#define BUFFER_STATE_LEN            	(uint16_t)19
+#define BUFFER_STATE_LEN            	(uint16_t)17
 #define BUFFER_COMMAND_LEN          	(uint8_t)4
 #define BUFFER_RTC_SET_LEN          	(uint8_t)20
 #define ERROR_MSG_LEN               	(uint8_t)4

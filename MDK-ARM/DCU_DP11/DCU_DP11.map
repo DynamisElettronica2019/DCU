@@ -3308,10 +3308,10 @@ Image Symbol Table
     .conststring                             0x0020b8b4   Section       79  freertos.o(.conststring)
     .conststring                             0x0020b904   Section       12  usbh_core.o(.conststring)
     .conststring                             0x0020b910   Section        4  usbh_msc.o(.conststring)
-    .data                                    0x20000000   Section       19  data.o(.data)
-    .data                                    0x20000013   Section      512  data.o(.data)
-    .data                                    0x20000213   Section        4  data.o(.data)
-    .data                                    0x20000217   Section        1  main.o(.data)
+    .data                                    0x20000000   Section       17  data.o(.data)
+    .data                                    0x20000011   Section      512  data.o(.data)
+    .data                                    0x20000211   Section        4  data.o(.data)
+    .data                                    0x20000215   Section        1  main.o(.data)
     .data                                    0x20000218   Section        8  sd_diskio.o(.data)
     Stat                                     0x20000218   Data           1  sd_diskio.o(.data)
     SDQueueID                                0x2000021c   Data           4  sd_diskio.o(.data)
@@ -3880,10 +3880,10 @@ Image Symbol Table
     APBPrescTable                            0x0020b8ac   Data           8  system_stm32f7xx.o(.constdata)
     Region$$Table$$Base                      0x0020b914   Number         0  anon$$obj.o(Region$$Table)
     Region$$Table$$Limit                     0x0020b934   Number         0  anon$$obj.o(Region$$Table)
-    dcuStateBuffer                           0x20000000   Data          19  data.o(.data)
-    blockBuffer                              0x20000013   Data         512  data.o(.data)
-    telemetryReceivedBuffer                  0x20000213   Data           4  data.o(.data)
-    timer8HzCounter                          0x20000217   Data           1  main.o(.data)
+    dcuStateBuffer                           0x20000000   Data          17  data.o(.data)
+    blockBuffer                              0x20000011   Data         512  data.o(.data)
+    telemetryReceivedBuffer                  0x20000211   Data           4  data.o(.data)
+    timer8HzCounter                          0x20000215   Data           1  main.o(.data)
     retSD                                    0x20000220   Data           1  fatfs.o(.data)
     retUSBH                                  0x20000221   Data           1  fatfs.o(.data)
     SDPath                                   0x20000222   Data           4  fatfs.o(.data)
@@ -4421,10 +4421,11 @@ Memory Map of the image
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x20000000   COMPRESSED   0x00000013   Data   RW            2    .data               data.o
-    0x20000013   COMPRESSED   0x00000200   Data   RW            3    .data               data.o
-    0x20000213   COMPRESSED   0x00000004   Data   RW            4    .data               data.o
-    0x20000217   COMPRESSED   0x00000001   Data   RW          126    .data               main.o
+    0x20000000   COMPRESSED   0x00000011   Data   RW            2    .data               data.o
+    0x20000011   COMPRESSED   0x00000200   Data   RW            3    .data               data.o
+    0x20000211   COMPRESSED   0x00000004   Data   RW            4    .data               data.o
+    0x20000215   COMPRESSED   0x00000001   Data   RW          126    .data               main.o
+    0x20000216   COMPRESSED   0x00000002   PAD
     0x20000218   COMPRESSED   0x00000008   Data   RW          681    .data               sd_diskio.o
     0x20000220   COMPRESSED   0x0000000a   Data   RW          778    .data               fatfs.o
     0x2000022a   COMPRESSED   0x00000002   PAD
@@ -4471,7 +4472,7 @@ Image component sizes
        194         26          0          0          0       5425   bsp_driver_sd.o
        252         22          0          0         40       1681   can.o
        384          8          0          0          0      21847   cmsis_os.o
-         0          0          0        535         20       5266   data.o
+         0          0          0        533         20       5266   data.o
        124          4          0          0          0        790   dma.o
          0          0          0          0          0       9540   event_groups.o
         44         18          0         10          0       1166   fatfs.o
@@ -4532,7 +4533,7 @@ Image component sizes
     ----------------------------------------------------------------------
      45934       1804        884        760      30008    1454259   Object Totals
          0          0         32          0          0          0   (incl. Generated)
-        72          0          1          5          0          0   (incl. Padding)
+        72          0          1          7          0          0   (incl. Padding)
 
     ----------------------------------------------------------------------
 
