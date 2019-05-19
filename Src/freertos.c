@@ -29,6 +29,7 @@
 #include "usart.h"
 #include "data.h"
 #include "string.h"
+#include "telemetry.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -234,13 +235,16 @@ void SendDataFunc(void const * argument)
   /* USER CODE BEGIN SendDataFunc */
 	uint8_t usartLockFlag;
 	uint8_t secondTxModeFlag = SECOND_HALF_TX_FLAG; 																			/* Setting flag identifier to put later into the queue */
+	uint8_t strToSend[BUFFER_BLOCK_LEN/2+10];
+	uint16_t strToSenLen;
   
 	/* Infinite loop */
   for(;;) {
     xSemaphoreTake(sendDataSemaphoreHandle, portMAX_DELAY); 														/* Unlock when timer callback is called */
+		strToSenLen = encodeString(blockBuffer, strToSend, BUFFER_BLOCK_LEN); 							/* Get the encoded string */
 		xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);								/* Lock if DMA is in use */
 		xQueueSend(Usart1TxModeQueueHandle, (void *)&secondTxModeFlag, (TickType_t)0); 			/* Add flag to queue */
-		HAL_UART_Transmit_DMA(&huart1, blockBuffer, HALF_DATA_INDEX); 											/* Transmit first half of data message */
+		HAL_UART_Transmit_DMA(&huart1, strToSend, strToSenLen); 														/* Transmit first half of data message */
   }
   /* USER CODE END SendDataFunc */
 }

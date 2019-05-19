@@ -59,3 +59,4 @@ dcu_dp11\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_gr
 dcu_dp11\freertos.o: ../Inc/usart.h
 dcu_dp11\freertos.o: ../Inc/data.h
 dcu_dp11\freertos.o: D:\Programmi secondari\Keil\ARM\ARMCC\Bin\..\include\string.h
+dcu_dp11\freertos.o: ../Inc/telemetry.h
