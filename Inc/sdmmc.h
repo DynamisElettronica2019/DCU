@@ -27,7 +27,7 @@
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "fatfs.h"
 /* USER CODE END Includes */
 
 extern SD_HandleTypeDef hsd1;
@@ -39,7 +39,11 @@ extern SD_HandleTypeDef hsd1;
 void MX_SDMMC1_SD_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+uint8_t SD_Init(void);
+uint8_t SD_openFile(uint8_t* fileName, FIL* MyFile);
+uint8_t SD_refreshFile(uint8_t* fileName, FIL* MyFile);
+uint8_t SD_writeString(uint8_t *writeBuffer, uint32_t bufferLen, FIL* MyFile);
+void SD_onError(FRESULT code);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
