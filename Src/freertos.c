@@ -244,7 +244,7 @@ void SendDataFunc(void const * argument)
 	/* Infinite loop */
   for(;;) {
     xSemaphoreTake(sendDataSemaphoreHandle, portMAX_DELAY); 														/* Unlock when timer callback is called */
-		strToSenLen = encodeString(blockBuffer, strToSend, BUFFER_BLOCK_LEN); 							/* Get the encoded string */
+		strToSenLen = encodeString(blockBuffer, strToSend, HALF_DATA_INDEX); 							/* Get the encoded string */
 		xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);								/* Lock if DMA is in use */
 		xQueueSend(Usart1TxModeQueueHandle, (void *)&secondTxModeFlag, (TickType_t)0); 			/* Add flag to queue */
 		HAL_UART_Transmit_DMA(&huart1, strToSend, strToSenLen); 														/* Transmit first half of data message */
@@ -397,12 +397,15 @@ void SendFollowingDataFunc(void const * argument)
 {
   /* USER CODE BEGIN SendFollowingDataFunc */
 	uint8_t normalTxModeFlag = NORMAL_MODE_TX_FLAG; 																				/* Setting flag identifier to put later into the queue */
-  
+  uint8_t strToSend[BUFFER_BLOCK_LEN/2+10];
+	uint16_t strToSenLen;
+	
 	/* Infinite loop */
   for(;;) {
     xSemaphoreTake(sendFollowingDataSemaphoreHandle, portMAX_DELAY); 											/* Unlock when first part tx is completed, unlocked from tx complete callback */
 		xQueueSend(Usart1TxModeQueueHandle, (void *)&normalTxModeFlag, (TickType_t)0); 				/* Add flag to queue */
-		HAL_UART_Transmit_DMA(&huart1, blockBuffer + HALF_DATA_INDEX, HALF_DATA_INDEX); 			/* Transmit second half of data message */
+		strToSenLen = encodeString(blockBuffer + HALF_DATA_INDEX, strToSend, HALF_DATA_INDEX); 		/* Get the encoded string */
+		HAL_UART_Transmit_DMA(&huart1, strToSend, strToSenLen); 														/* Transmit first half of data message */
   }
   /* USER CODE END SendFollowingDataFunc */
 }
