@@ -84,6 +84,7 @@ osThreadId usbManagerHandle;
 osThreadId startAcquisitionStateMachineHandle;
 osThreadId canFifo0UnpackHandle;
 osThreadId canFifo1UnpackHandle;
+osThreadId sendDebugDataHandle;
 osMessageQId digitalAuxQueueHandle;
 osMessageQId ErrorQueueHandle;
 osMessageQId Usart1TxModeQueueHandle;
@@ -92,6 +93,7 @@ osMessageQId usbEventQueueHandle;
 osMessageQId startAcquisitionEventHandle;
 osMessageQId canFifo0QueueHandle;
 osMessageQId canFifo1QueueHandle;
+osMessageQId CAN_SendDataQueueHandle;
 osSemaphoreId adc1SemaphoreHandle;
 osSemaphoreId adc2SemaphoreHandle;
 osSemaphoreId autogearSemaphoreHandle;
@@ -101,6 +103,8 @@ osSemaphoreId sendStateSemaphoreHandle;
 osSemaphoreId receiveCommandSemaphoreHandle;
 osSemaphoreId sendFollowingDataSemaphoreHandle;
 osSemaphoreId saveUsbSemaphoreHandle;
+osSemaphoreId CAN_SendDebugDataHandle;
+osSemaphoreId CAN_SendDataSemaphoreCounterHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -123,6 +127,7 @@ void usbManagerTask(void const * argument);
 void startAcquisitionStateMachineTask(void const * argument);
 void canFifo0UnpackTask(void const * argument);
 void canFifo1UnpackTask(void const * argument);
+void sendDebugDataTask(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -177,6 +182,14 @@ void MX_FREERTOS_Init(void) {
   osSemaphoreDef(saveUsbSemaphore);
   saveUsbSemaphoreHandle = osSemaphoreCreate(osSemaphore(saveUsbSemaphore), 1);
 
+  /* definition and creation of CAN_SendDebugData */
+  osSemaphoreDef(CAN_SendDebugData);
+  CAN_SendDebugDataHandle = osSemaphoreCreate(osSemaphore(CAN_SendDebugData), 1);
+
+  /* definition and creation of CAN_SendDataSemaphoreCounter */
+  osSemaphoreDef(CAN_SendDataSemaphoreCounter);
+  CAN_SendDataSemaphoreCounterHandle = osSemaphoreCreate(osSemaphore(CAN_SendDataSemaphoreCounter), 3);
+
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
 	xSemaphoreTake(saveUsbSemaphoreHandle, portMAX_DELAY);								/* Start with the task locked */
@@ -188,6 +201,7 @@ void MX_FREERTOS_Init(void) {
 	xSemaphoreTake(adc2SemaphoreHandle, portMAX_DELAY); 									/* Start with the task locked */
 	xSemaphoreTake(autogearSemaphoreHandle, portMAX_DELAY); 							/* Start with the task locked */
 	xSemaphoreTake(USB_OvercurrentSemaphoreHandle, portMAX_DELAY); 				/* Start with the task locked */
+	xSemaphoreTake(CAN_SendDebugDataHandle, portMAX_DELAY); 							/* Start with the task locked */
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -226,6 +240,10 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of canFifo1Queue */
   osMessageQDef(canFifo1Queue, 32, CAN_RxPacketTypeDef);
   canFifo1QueueHandle = osMessageCreate(osMessageQ(canFifo1Queue), NULL);
+
+  /* definition and creation of CAN_SendDataQueue */
+  osMessageQDef(CAN_SendDataQueue, 32, CAN_TxHeaderTypeDef);
+  CAN_SendDataQueueHandle = osMessageCreate(osMessageQ(CAN_SendDataQueue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -297,6 +315,10 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of canFifo1Unpack */
   osThreadDef(canFifo1Unpack, canFifo1UnpackTask, osPriorityHigh, 0, 512);
   canFifo1UnpackHandle = osThreadCreate(osThread(canFifo1Unpack), NULL);
+
+  /* definition and creation of sendDebugData */
+  osThreadDef(sendDebugData, sendDebugDataTask, osPriorityLow, 0, 128);
+  sendDebugDataHandle = osThreadCreate(osThread(sendDebugData), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -692,39 +714,13 @@ void saveUsbTask(void const * argument)
 /* USER CODE END Header_usbManagerTask */
 void usbManagerTask(void const * argument)
 {
-  /* USER CODE BEGIN usbManageTask */
-	osEvent usbEvent;
-	
+  /* USER CODE BEGIN usbManagerTask */
   /* Infinite loop */
-  for(;;) {
-		usbEvent = osMessageGet(usbEventQueueHandle, osWaitForever);
-		
-		if(usbEvent.status == osEventMessage) {
-			switch(usbEvent.value.v) {
-				case DISCONNECTION_EVENT:
-					f_mount(NULL, (TCHAR const *)"", 1);
-					FATFS_UnLinkDriver(USBHPath);
-					resetUsbReadyState();					/* Update of the status packet */
-					resetUsbPresentState();				/* Update of the status packet */
-					/* Put here the code to manage errors */
-					break;
-
-				case CONNECTED_EVENT:
-					if(FATFS_LinkDriver(&USBH_Driver, USBHPath) == 0) {
-						f_mount(&USBHFatFS, (TCHAR const *)USBHPath, 1);
-						setUsbReadyState();					/* Update of the status packet */
-						setUsbReadyState();					/* Update of the status packet */
-					}
-					
-					/* Put here the code to manage errors */
-					break;
-	    
-				default:
-					break;
-			}
-		}
-	}
-  /* USER CODE END usbManageTask */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END usbManagerTask */
 }
 
 /* USER CODE BEGIN Header_startAcquisitionStateMachineTask */
@@ -736,7 +732,7 @@ void usbManagerTask(void const * argument)
 /* USER CODE END Header_startAcquisitionStateMachineTask */
 void startAcquisitionStateMachineTask(void const * argument)
 {
-	/* USER CODE BEGIN startAcquisitionStateMachineTask */
+  /* USER CODE BEGIN startAcquisitionStateMachineTask */
 	uint8_t startAcquisitionEvent = ACQUISITION_IDLE_REQUEST;
 
 	/* Infinite loop */
@@ -749,7 +745,7 @@ void startAcquisitionStateMachineTask(void const * argument)
 			startAcquisitionEvent = ACQUISITION_IDLE_REQUEST;
 		}
 	}
-	/* USER CODE END startAcquisitionStateMachineTask */
+  /* USER CODE END startAcquisitionStateMachineTask */
 }
 
 /* USER CODE BEGIN Header_canFifo0UnpackTask */
@@ -792,6 +788,27 @@ void canFifo1UnpackTask(void const * argument)
 		}
   }
   /* USER CODE END canFifo1UnpackTask */
+}
+
+/* USER CODE BEGIN Header_sendDebugDataTask */
+/**
+* @brief Function implementing the sendDebugData thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_sendDebugDataTask */
+void sendDebugDataTask(void const * argument)
+{
+  /* USER CODE BEGIN sendDebugDataTask */
+  /* Infinite loop */
+  for(;;) {
+		xSemaphoreTake(, portMAX_DELAY);		/* Unlock when timer callback is called */
+		CAN_SendMessage();
+		
+		DCU_DEBUG_1_ID
+		DCU_DEBUG_2_ID
+  }
+  /* USER CODE END sendDebugDataTask */
 }
 
 /* Private application code --------------------------------------------------*/

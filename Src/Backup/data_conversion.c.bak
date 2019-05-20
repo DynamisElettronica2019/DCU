@@ -64,7 +64,7 @@ extern inline float dcuTempSenseConversion(uint32_t rawData) {
 }
 
 extern inline float vbatConversion(uint32_t rawData) {
-	return ((float)rawData * ADC_LSB * 4);
+	return ((float)rawData * ADC_LSB * 4.0f);
 }
 
 extern inline float analogAux1Conversion(uint32_t rawData) {

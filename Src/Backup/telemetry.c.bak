@@ -40,7 +40,7 @@ extern inline void usart1TxCallback(void)
 		/* If the flag is unrecognised, raise eventually an error and return to normal mode */
 		default:
 			/* Eventual error throwing code to be inserted here */
-			if(Usart1LockQueueHandle != NULL) { 																														/* Check on system start if semaphore is already created */
+			if(Usart1LockQueueHandle != NULL) { 																										/* Check on system start if semaphore is already created */
 				xQueueSendFromISR(Usart1LockQueueHandle, &usart1LockFlag, &xHigherPriorityTaskWoken);	/* Send wake up signal to task when DMA is clear */
 				portYIELD_FROM_ISR(xHigherPriorityTaskWoken); 																				/* Do context-switch if needed */
 			}

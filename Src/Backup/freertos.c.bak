@@ -65,6 +65,8 @@ extern uint32_t adc2BufferRaw [ADC2_RAW_DATA_LEN];
 extern float adcBufferConvertedDebug [ADC_CONVERTED_DEBUG_DATA_LEN];
 extern float adcBufferConvertedAux [ADC_CONVERTED_AUX_DATA_LEN];
 extern USBH_HandleTypeDef hUsbHostFS;
+
+uint8_t state;
 /* USER CODE END Variables */
 osThreadId aliveHandle;
 osThreadId adc1ConversionHandle;
@@ -82,6 +84,7 @@ osThreadId usbManagerHandle;
 osThreadId startAcquisitionStateMachineHandle;
 osThreadId canFifo0UnpackHandle;
 osThreadId canFifo1UnpackHandle;
+osThreadId sendDebugDataHandle;
 osMessageQId digitalAuxQueueHandle;
 osMessageQId ErrorQueueHandle;
 osMessageQId Usart1TxModeQueueHandle;
@@ -99,6 +102,7 @@ osSemaphoreId sendStateSemaphoreHandle;
 osSemaphoreId receiveCommandSemaphoreHandle;
 osSemaphoreId sendFollowingDataSemaphoreHandle;
 osSemaphoreId saveUsbSemaphoreHandle;
+osSemaphoreId CAN_SendDebugDataHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -121,6 +125,7 @@ void usbManagerTask(void const * argument);
 void startAcquisitionStateMachineTask(void const * argument);
 void canFifo0UnpackTask(void const * argument);
 void canFifo1UnpackTask(void const * argument);
+void sendDebugDataTask(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -175,6 +180,10 @@ void MX_FREERTOS_Init(void) {
   osSemaphoreDef(saveUsbSemaphore);
   saveUsbSemaphoreHandle = osSemaphoreCreate(osSemaphore(saveUsbSemaphore), 1);
 
+  /* definition and creation of CAN_SendDebugData */
+  osSemaphoreDef(CAN_SendDebugData);
+  CAN_SendDebugDataHandle = osSemaphoreCreate(osSemaphore(CAN_SendDebugData), 1);
+
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
 	xSemaphoreTake(saveUsbSemaphoreHandle, portMAX_DELAY);								/* Start with the task locked */
@@ -186,6 +195,7 @@ void MX_FREERTOS_Init(void) {
 	xSemaphoreTake(adc2SemaphoreHandle, portMAX_DELAY); 									/* Start with the task locked */
 	xSemaphoreTake(autogearSemaphoreHandle, portMAX_DELAY); 							/* Start with the task locked */
 	xSemaphoreTake(USB_OvercurrentSemaphoreHandle, portMAX_DELAY); 				/* Start with the task locked */
+	xSemaphoreTake(CAN_SendDebugDataHandle, portMAX_DELAY); 							/* Start with the task locked */
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -227,6 +237,8 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+	uint8_t usart1LockFlag = UART1_CLEAR_FLAG;
+	xQueueSend(Usart1LockQueueHandle, &usart1LockFlag, 0);
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
@@ -294,6 +306,10 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(canFifo1Unpack, canFifo1UnpackTask, osPriorityHigh, 0, 512);
   canFifo1UnpackHandle = osThreadCreate(osThread(canFifo1Unpack), NULL);
 
+  /* definition and creation of sendDebugData */
+  osThreadDef(sendDebugData, sendDebugDataTask, osPriorityLow, 0, 128);
+  sendDebugDataHandle = osThreadCreate(osThread(sendDebugData), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -309,6 +325,7 @@ void MX_FREERTOS_Init(void) {
 /* USER CODE END Header_aliveTask */
 void aliveTask(void const * argument)
 {
+
   /* USER CODE BEGIN aliveTask */
   /* Infinite loop */
   for(;;) {
@@ -546,7 +563,7 @@ void ReceiveTelemFunc(void const * argument)
 							case START_ACQ_ID:
 								/* Put here the code necessary for starting acquisition */
 								temp = '6';
-								xQueueSendFromISR(startAcquisitionEventHandle, &temp, &startAcquisition_xHigherPriorityTaskWoken);
+								xQueueSend(startAcquisitionEventHandle, (void *)&temp, (TickType_t)0); 			/* Add flag to queue */
 							
 								xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);			/* Lock if DMA is in use */
 								commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = START_ACQ_ID; 								/* Set the correct identifier */
@@ -556,7 +573,7 @@ void ReceiveTelemFunc(void const * argument)
 							case STOP_ACQ_ID:
 								/* Put here the code necessary for stopping acquisition */
 								temp = 'A';
-								xQueueSendFromISR(startAcquisitionEventHandle, &temp, &startAcquisition_xHigherPriorityTaskWoken);
+								xQueueSend(startAcquisitionEventHandle, &temp, 0);
 							
 								xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);			/* Lock if DMA is in use */
 								commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = STOP_ACQ_ID; 									/* Set the correct identifier */
@@ -598,7 +615,7 @@ void ReceiveTelemFunc(void const * argument)
 				}
 			}
 			
-			else {																																					/* If message does not start correctly */
+			else {																																							/* If message does not start correctly */
 				HAL_UART_Receive(&huart1, tempBuffer, 50, 50);
 				HAL_UART_Receive_DMA(&huart1, telemetryReceivedBuffer, BUFFER_COMMAND_LEN); 			/* Re enable receiving */
 				xQueueSend(ErrorQueueHandle, ( void * ) &errorLetter, ( TickType_t ) 0 ); 				/* Add error to queue */				
@@ -731,20 +748,20 @@ void usbManagerTask(void const * argument)
 /* USER CODE END Header_startAcquisitionStateMachineTask */
 void startAcquisitionStateMachineTask(void const * argument)
 {
-	/* USER CODE BEGIN startAcquisitionStateMachineTask */
+  /* USER CODE BEGIN startAcquisitionStateMachineTask */
 	uint8_t startAcquisitionEvent = ACQUISITION_IDLE_REQUEST;
 
 	/* Infinite loop */
 	for(;;) {
-		startAcquisitionStateMachine(startAcquisitionEvent);
-		
 		/* Start acquisition state machine, called at 100 Hz */
 		/* NOTE: Events are coded using chars NOT numbers! */
-		if(xQueueReceive(startAcquisitionEventHandle, &startAcquisitionEvent, 10 / portTICK_PERIOD_MS) != pdTRUE) {
+		startAcquisitionStateMachine(startAcquisitionEvent);
+	
+		if(xQueueReceive(startAcquisitionEventHandle, &startAcquisitionEvent, 100 / portTICK_PERIOD_MS) != pdTRUE) {
 			startAcquisitionEvent = ACQUISITION_IDLE_REQUEST;
 		}
 	}
-	/* USER CODE END startAcquisitionStateMachineTask */
+  /* USER CODE END startAcquisitionStateMachineTask */
 }
 
 /* USER CODE BEGIN Header_canFifo0UnpackTask */
@@ -787,6 +804,27 @@ void canFifo1UnpackTask(void const * argument)
 		}
   }
   /* USER CODE END canFifo1UnpackTask */
+}
+
+/* USER CODE BEGIN Header_sendDebugDataTask */
+/**
+* @brief Function implementing the sendDebugData thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_sendDebugDataTask */
+void sendDebugDataTask(void const * argument)
+{
+  /* USER CODE BEGIN sendDebugDataTask */
+  /* Infinite loop */
+  for(;;) {
+		xSemaphoreTake(, portMAX_DELAY);		/* Unlock when timer callback is called */
+		CAN_SendMessage();
+		
+		DCU_DEBUG_1_ID
+		DCU_DEBUG_2_ID
+  }
+  /* USER CODE END sendDebugDataTask */
 }
 
 /* Private application code --------------------------------------------------*/

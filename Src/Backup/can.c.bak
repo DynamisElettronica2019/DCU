@@ -136,37 +136,17 @@ extern void canStart(void)
 	return;
 }
 
-extern inline void CAN_acquisitionOnSend(void)
+extern inline void CAN_SendMessage(uint32_t id, uint8_t *message, uint8_t bytesNumber)
 {
 	uint32_t packetMailbox;
 	CAN_TxHeaderTypeDef packetHeader;
-	uint8_t dataPacket[8];
 	
-	packetHeader.StdId = DCU_ACQUISITION_SW_ID;
+	packetHeader.StdId = id;
 	packetHeader.RTR = CAN_RTR_DATA;
 	packetHeader.IDE = CAN_ID_STD;
-	packetHeader.DLC = 2;
+	packetHeader.DLC = bytesNumber;
 	packetHeader.TransmitGlobalTime = DISABLE;
-	dataPacket[0] = 0;
-	dataPacket[1] = 1;
-	HAL_CAN_AddTxMessage(&hcan1, &packetHeader, dataPacket, &packetMailbox);
-	return;
-}
-
-extern inline void CAN_acquisitionOffSend(void)
-{
-	uint32_t packetMailbox;
-	CAN_TxHeaderTypeDef packetHeader;
-	uint8_t dataPacket[8];
-	
-	packetHeader.StdId = DCU_ACQUISITION_SW_ID;
-	packetHeader.RTR = CAN_RTR_DATA;
-	packetHeader.IDE = CAN_ID_STD;
-	packetHeader.DLC = 2;
-	packetHeader.TransmitGlobalTime = DISABLE;
-	dataPacket[0] = 0;
-	dataPacket[1] = 0;
-	HAL_CAN_AddTxMessage(&hcan1, &packetHeader, dataPacket, &packetMailbox);
+	HAL_CAN_AddTxMessage(&hcan1, &packetHeader, message, &packetMailbox);
 	return;
 }
 

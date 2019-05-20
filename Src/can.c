@@ -27,9 +27,14 @@
 CAN_FilterTypeDef canFilterConfigHeader;
 CAN_RxPacketTypeDef currentFifo0ReceivedPacket;
 CAN_RxPacketTypeDef currentFifo1ReceivedPacket;
-BaseType_t canCtrlxHigherPriorityTaskWoken = pdFALSE;
+BaseType_t CAN_Rx0xHigherPriorityTaskWoken = pdFALSE;
+BaseType_t CAN_Rx1xHigherPriorityTaskWoken = pdFALSE;
+BaseType_t CAN_Tx0xHigherPriorityTaskWoken = pdFALSE;
+BaseType_t CAN_Tx1xHigherPriorityTaskWoken = pdFALSE;
+BaseType_t CAN_Tx2xHigherPriorityTaskWoken = pdFALSE;
 extern osMessageQId canFifo0QueueHandle;
 extern osMessageQId canFifo1QueueHandle;
+extern osSemaphoreId CAN_SendDataSemaphoreCounterHandle;
 /* USER CODE END 0 */
 
 CAN_HandleTypeDef hcan1;
@@ -136,54 +141,32 @@ extern void canStart(void)
 	return;
 }
 
-extern inline void CAN_acquisitionOnSend(void)
+extern inline void CAN_SendMessage(uint32_t id, uint8_t *message, uint8_t bytesNumber)
 {
 	uint32_t packetMailbox;
 	CAN_TxHeaderTypeDef packetHeader;
-	uint8_t dataPacket[8];
 	
-	packetHeader.StdId = DCU_ACQUISITION_SW_ID;
+	packetHeader.StdId = id;
 	packetHeader.RTR = CAN_RTR_DATA;
 	packetHeader.IDE = CAN_ID_STD;
-	packetHeader.DLC = 2;
+	packetHeader.DLC = bytesNumber;
 	packetHeader.TransmitGlobalTime = DISABLE;
-	dataPacket[0] = 0;
-	dataPacket[1] = 1;
-	HAL_CAN_AddTxMessage(&hcan1, &packetHeader, dataPacket, &packetMailbox);
-	return;
-}
-
-extern inline void CAN_acquisitionOffSend(void)
-{
-	uint32_t packetMailbox;
-	CAN_TxHeaderTypeDef packetHeader;
-	uint8_t dataPacket[8];
-	
-	packetHeader.StdId = DCU_ACQUISITION_SW_ID;
-	packetHeader.RTR = CAN_RTR_DATA;
-	packetHeader.IDE = CAN_ID_STD;
-	packetHeader.DLC = 2;
-	packetHeader.TransmitGlobalTime = DISABLE;
-	dataPacket[0] = 0;
-	dataPacket[1] = 0;
-	HAL_CAN_AddTxMessage(&hcan1, &packetHeader, dataPacket, &packetMailbox);
+	HAL_CAN_AddTxMessage(&hcan1, &packetHeader, message, &packetMailbox);
 	return;
 }
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-	canCtrlxHigherPriorityTaskWoken = pdFALSE;
 	HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &(currentFifo0ReceivedPacket.CAN_RxPacket_Header), currentFifo0ReceivedPacket.CAN_RxPacket_Data);
-	xQueueSendFromISR(canFifo0QueueHandle, &currentFifo0ReceivedPacket, &canCtrlxHigherPriorityTaskWoken);
+	xQueueSendFromISR(canFifo0QueueHandle, &currentFifo0ReceivedPacket, &CAN_Rx0xHigherPriorityTaskWoken);
 	/* There's no need of calling taskYIELD beacuse RTOS is configured to use PREEMPTION, so the scheduler will always have the higher priority */
 }
 
 
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-	canCtrlxHigherPriorityTaskWoken = pdFALSE;
 	HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO1, &(currentFifo1ReceivedPacket.CAN_RxPacket_Header), currentFifo1ReceivedPacket.CAN_RxPacket_Data); 
-	xQueueSendFromISR(canFifo1QueueHandle, &currentFifo1ReceivedPacket, &canCtrlxHigherPriorityTaskWoken);
+	xQueueSendFromISR(canFifo1QueueHandle, &currentFifo1ReceivedPacket, &CAN_Rx1xHigherPriorityTaskWoken);
 	/* There's no need of calling taskYIELD beacuse RTOS is configured to use PREEMPTION, so the scheduler will always have the higher priority */
 }
 
@@ -220,19 +203,22 @@ static void canFilterConfig(void)
 
 void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *hcan)
 {
-	/* Put here the transmission complete managing code */
+	xSemaphoreGiveFromISR(CAN_SendDataSemaphoreCounterHandle, &CAN_Tx0xHigherPriorityTaskWoken);
+	portYIELD_FROM_ISR(CAN_Tx0xHigherPriorityTaskWoken);
 	return;
 }
 
 void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef *hcan)
 {
-	/* Put here the transmission complete managing code */
+	xSemaphoreGiveFromISR(CAN_SendDataSemaphoreCounterHandle, &CAN_Tx1xHigherPriorityTaskWoken);
+	portYIELD_FROM_ISR(CAN_Tx1xHigherPriorityTaskWoken);
 	return;
 }
 
 void HAL_CAN_TxMailbox2CompleteCallback(CAN_HandleTypeDef *hcan)
 {
-	/* Put here the transmission complete managing code */
+	xSemaphoreGiveFromISR(CAN_SendDataSemaphoreCounterHandle, &CAN_Tx21xHigherPriorityTaskWoken);
+	portYIELD_FROM_ISR(CAN_Tx2xHigherPriorityTaskWoken);
 	return;
 }
 
