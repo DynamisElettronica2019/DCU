@@ -57,7 +57,6 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint8_t SW_AcquisitionIsOnDebug = 0;
 uint8_t startAcquisitionCommand = ACQUISITION_IDLE_REQUEST;
 uint8_t timer8HzCounter = 1;
 BaseType_t GPIO_AutogearHigherPriorityTaskWoken = pdFALSE;
@@ -306,15 +305,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	
 	/* Timer 5 period elapsed callback: 1 Hz */
 	if (htim->Instance == TIM5) {
-		
-		/* ONLY FOR DEBUG: Send acquisition state to SW */
-		if(SW_AcquisitionIsOnDebug) {
-			CAN_acquisitionOnSend();
-			SW_AcquisitionIsOnDebug = 0;
-		} else {
-			CAN_acquisitionOffSend();
-			SW_AcquisitionIsOnDebug = 1;
-		}
 
 		/* Telemetry DCU state packet send at 1 Hz */
     stateSendTimCallback();
@@ -354,12 +344,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		}
 
     /* Send telemetry data */
-    /*if(timer8HzCounter >= 12) {
+    if(timer8HzCounter >= 12) {
       dataSendTimCallback();
       timer8HzCounter = 1;
     } else {
       timer8HzCounter++;
-    }*/
+    }
 	}
   /* USER CODE END Callback 1 */
 }
