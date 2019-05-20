@@ -58,7 +58,6 @@
 
 /* USER CODE BEGIN PV */
 extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
-uint8_t timer8HzCounter = 1;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -268,17 +267,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	/* 10 Hz timer callback */
 	if (htim->Instance == TIM6) {
 		/* Data packet send at 10 Hz */
+		dataSendTimCallback();
   }
 	
 	/* 100 Hz timer callback */
 	if (htim->Instance == TIM7) {
-		if(timer8HzCounter >= 12) {
-			dataSendTimCallback();
-			timer8HzCounter = 1;
-		}
-		else {
-			timer8HzCounter++;
-		}
+		/* Data packet send at 100 Hz */
   }
   /* USER CODE END Callback 1 */
 }

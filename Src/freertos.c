@@ -247,7 +247,7 @@ void SendDataFunc(void const * argument)
 		strToSenLen = encodeString(blockBuffer, strToSend, HALF_DATA_INDEX); 							/* Get the encoded string */
 		xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);								/* Lock if DMA is in use */
 		xQueueSend(Usart1TxModeQueueHandle, (void *)&secondTxModeFlag, (TickType_t)0); 			/* Add flag to queue */
-		HAL_UART_Transmit_DMA(&huart1, strToSend, strToSenLen); 														/* Transmit first half of data message */
+		HAL_UART_Transmit_DMA(&huart1, strToSend, strToSenLen - 1); 														/* Transmit first half of data message */
   }
   /* USER CODE END SendDataFunc */
 }
@@ -405,7 +405,7 @@ void SendFollowingDataFunc(void const * argument)
     xSemaphoreTake(sendFollowingDataSemaphoreHandle, portMAX_DELAY); 											/* Unlock when first part tx is completed, unlocked from tx complete callback */
 		xQueueSend(Usart1TxModeQueueHandle, (void *)&normalTxModeFlag, (TickType_t)0); 				/* Add flag to queue */
 		strToSenLen = encodeString(blockBuffer + HALF_DATA_INDEX, strToSend, HALF_DATA_INDEX); 		/* Get the encoded string */
-		HAL_UART_Transmit_DMA(&huart1, strToSend, strToSenLen); 														/* Transmit first half of data message */
+		HAL_UART_Transmit_DMA(&huart1, strToSend + 1, strToSenLen); 														/* Transmit first half of data message */
   }
   /* USER CODE END SendFollowingDataFunc */
 }
