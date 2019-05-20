@@ -76,8 +76,8 @@
 #define DIRECTION_EAST 									((char)'E')
 #define DIRECTION_WEST 									((char)'W')
 
-#define FALSE 													((uint8_t)1)
-#define TRUE														((uint8_t)0)
+//#define FALSE 													((uint8_t)1)
+//#define TRUE														((uint8_t)0)
 
 #define FIX_VALID												((uint8_t)0)
 #define FIX_NOT_VALID										((uint8_t)1)

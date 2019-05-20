@@ -10,7 +10,7 @@ uint8_t GPSMessageID;							//globale solo per comodità di debug per adesso
 uint8_t GPSFirstChar;
 uint8_t GPSParsingChar = '$';
 uint8_t i = 0;
-uint8_t GPSRawBuffer[GPS_MAX_LENGTH];
+uint8_t GPSRawBuffer [GPS_MAX_LENGTH];
 
 extern osSemaphoreId GPSUnboxSemHandle;
 extern osSemaphoreId GPSSetSemHandle;
@@ -48,15 +48,15 @@ void GPS_parse_data(uint8_t * GPSRawBuffer){
 			break;
 		
 		case MESSAGE_TYPE_GLL :
-			//NMEA_output.NMEA_GLL_type = GPS_GLL_conversion(GPSRawBuffer); 
+			NMEA_output.NMEA_GLL_type = GPS_GLL_conversion(GPSRawBuffer); 
 			break;
 		
 		case MESSAGE_TYPE_GSA :
-			//NMEA_output.NMEA_GSA_type = GPS_GSA_conversion(GPSRawBuffer); 
+			NMEA_output.NMEA_GSA_type = GPS_GSA_conversion(GPSRawBuffer); 
 			break;
 		
 		case MESSAGE_TYPE_GSV :
-			//NMEA_output.NMEA_GSV_type = GPS_GSV_conversion(GPSRawBuffer); 
+			NMEA_output.NMEA_GSV_type = GPS_GSV_conversion(GPSRawBuffer); 
 			break;
 		
 		case MESSAGE_TYPE_RMC :
