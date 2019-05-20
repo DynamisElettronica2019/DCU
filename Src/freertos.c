@@ -30,7 +30,10 @@
 #include "usb_host.h"
 #include "fatfs.h"
 #include "usart.h"
+#include "gpio.h"
+#include "adc.h"
 #include "data.h"
+#include "data_conversion.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -53,13 +56,24 @@
 UINT bytesWritten;
 BaseType_t startAcquisition_xHigherPriorityTaskWoken = pdFALSE;
 extern uint8_t acquisitionOn;
-extern USBH_HandleTypeDef hUsbHostFS;
 extern uint8_t blockBuffer[BUFFER_BLOCK_LEN];
 extern uint8_t dcuStateBuffer[BUFFER_STATE_LEN];
 extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
 extern uint8_t setRtcReceivedBuffer [BUFFER_RTC_SET_LEN];
+extern uint32_t adc1BufferRaw [ADC1_RAW_DATA_LEN];					
+extern uint32_t adc2BufferRaw [ADC2_RAW_DATA_LEN];
+extern float adcBufferConvertedDebug [ADC_CONVERTED_DEBUG_DATA_LEN];
+extern float adcBufferConvertedAux [ADC_CONVERTED_AUX_DATA_LEN];
+extern USBH_HandleTypeDef hUsbHostFS;
+
+uint8_t state;
 /* USER CODE END Variables */
 osThreadId aliveHandle;
+osThreadId adc1ConversionHandle;
+osThreadId adc2ConversionHandle;
+osThreadId digitalAuxManagerHandle;
+osThreadId autogearManagerHandle;
+osThreadId USB_OvercurrentManagerHandle;
 osThreadId SendStatesHandle;
 osThreadId SendDataHandle;
 osThreadId ReceiveTelemHandle;
@@ -70,6 +84,7 @@ osThreadId usbManagerHandle;
 osThreadId startAcquisitionStateMachineHandle;
 osThreadId canFifo0UnpackHandle;
 osThreadId canFifo1UnpackHandle;
+osMessageQId digitalAuxQueueHandle;
 osMessageQId ErrorQueueHandle;
 osMessageQId Usart1TxModeQueueHandle;
 osMessageQId Usart1LockQueueHandle;
@@ -77,6 +92,10 @@ osMessageQId usbEventQueueHandle;
 osMessageQId startAcquisitionEventHandle;
 osMessageQId canFifo0QueueHandle;
 osMessageQId canFifo1QueueHandle;
+osSemaphoreId adc1SemaphoreHandle;
+osSemaphoreId adc2SemaphoreHandle;
+osSemaphoreId autogearSemaphoreHandle;
+osSemaphoreId USB_OvercurrentSemaphoreHandle;
 osSemaphoreId sendDataSemaphoreHandle;
 osSemaphoreId sendStateSemaphoreHandle;
 osSemaphoreId receiveCommandSemaphoreHandle;
@@ -89,6 +108,11 @@ osSemaphoreId saveUsbSemaphoreHandle;
 /* USER CODE END FunctionPrototypes */
 
 void aliveTask(void const * argument);
+void adc1ConversionTask(void const * argument);
+void adc2ConversionTask(void const * argument);
+void digitalAuxManagerTask(void const * argument);
+void autogearManagerTask(void const * argument);
+void USB_OvercurrentManagerTask(void const * argument);
 void SendStatesFunc(void const * argument);
 void SendDataFunc(void const * argument);
 void ReceiveTelemFunc(void const * argument);
@@ -117,6 +141,22 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_MUTEX */
 
   /* Create the semaphores(s) */
+  /* definition and creation of adc1Semaphore */
+  osSemaphoreDef(adc1Semaphore);
+  adc1SemaphoreHandle = osSemaphoreCreate(osSemaphore(adc1Semaphore), 1);
+
+  /* definition and creation of adc2Semaphore */
+  osSemaphoreDef(adc2Semaphore);
+  adc2SemaphoreHandle = osSemaphoreCreate(osSemaphore(adc2Semaphore), 1);
+
+  /* definition and creation of autogearSemaphore */
+  osSemaphoreDef(autogearSemaphore);
+  autogearSemaphoreHandle = osSemaphoreCreate(osSemaphore(autogearSemaphore), 1);
+
+  /* definition and creation of USB_OvercurrentSemaphore */
+  osSemaphoreDef(USB_OvercurrentSemaphore);
+  USB_OvercurrentSemaphoreHandle = osSemaphoreCreate(osSemaphore(USB_OvercurrentSemaphore), 1);
+
   /* definition and creation of sendDataSemaphore */
   osSemaphoreDef(sendDataSemaphore);
   sendDataSemaphoreHandle = osSemaphoreCreate(osSemaphore(sendDataSemaphore), 1);
@@ -144,6 +184,10 @@ void MX_FREERTOS_Init(void) {
 	xSemaphoreTake(sendDataSemaphoreHandle, portMAX_DELAY); 							/* Start with the task locked */
 	xSemaphoreTake(receiveCommandSemaphoreHandle, portMAX_DELAY); 				/* Start with the task locked */
 	xSemaphoreTake(sendFollowingDataSemaphoreHandle, portMAX_DELAY); 			/* Start with the task locked */
+	xSemaphoreTake(adc1SemaphoreHandle, portMAX_DELAY);										/* Start with the task locked */
+	xSemaphoreTake(adc2SemaphoreHandle, portMAX_DELAY); 									/* Start with the task locked */
+	xSemaphoreTake(autogearSemaphoreHandle, portMAX_DELAY); 							/* Start with the task locked */
+	xSemaphoreTake(USB_OvercurrentSemaphoreHandle, portMAX_DELAY); 				/* Start with the task locked */
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -151,6 +195,10 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_TIMERS */
 
   /* Create the queue(s) */
+  /* definition and creation of digitalAuxQueue */
+  osMessageQDef(digitalAuxQueue, 8, uint8_t);
+  digitalAuxQueueHandle = osMessageCreate(osMessageQ(digitalAuxQueue), NULL);
+
   /* definition and creation of ErrorQueue */
   osMessageQDef(ErrorQueue, 8, uint8_t);
   ErrorQueueHandle = osMessageCreate(osMessageQ(ErrorQueue), NULL);
@@ -190,6 +238,26 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(alive, aliveTask, osPriorityLow, 0, 128);
   aliveHandle = osThreadCreate(osThread(alive), NULL);
 
+  /* definition and creation of adc1Conversion */
+  osThreadDef(adc1Conversion, adc1ConversionTask, osPriorityLow, 0, 128);
+  adc1ConversionHandle = osThreadCreate(osThread(adc1Conversion), NULL);
+
+  /* definition and creation of adc2Conversion */
+  osThreadDef(adc2Conversion, adc2ConversionTask, osPriorityLow, 0, 128);
+  adc2ConversionHandle = osThreadCreate(osThread(adc2Conversion), NULL);
+
+  /* definition and creation of digitalAuxManager */
+  osThreadDef(digitalAuxManager, digitalAuxManagerTask, osPriorityLow, 0, 128);
+  digitalAuxManagerHandle = osThreadCreate(osThread(digitalAuxManager), NULL);
+
+  /* definition and creation of autogearManager */
+  osThreadDef(autogearManager, autogearManagerTask, osPriorityBelowNormal, 0, 128);
+  autogearManagerHandle = osThreadCreate(osThread(autogearManager), NULL);
+
+  /* definition and creation of USB_OvercurrentManager */
+  osThreadDef(USB_OvercurrentManager, USB_OvercurrentManagerTask, osPriorityBelowNormal, 0, 128);
+  USB_OvercurrentManagerHandle = osThreadCreate(osThread(USB_OvercurrentManager), NULL);
+
   /* definition and creation of SendStates */
   osThreadDef(SendStates, SendStatesFunc, osPriorityNormal, 0, 128);
   SendStatesHandle = osThreadCreate(osThread(SendStates), NULL);
@@ -211,11 +279,11 @@ void MX_FREERTOS_Init(void) {
   SendFollowingDataHandle = osThreadCreate(osThread(SendFollowingData), NULL);
 
   /* definition and creation of saveUsb */
-  osThreadDef(saveUsb, saveUsbTask, osPriorityHigh, 0, 512);
+  osThreadDef(saveUsb, saveUsbTask, osPriorityAboveNormal, 0, 512);
   saveUsbHandle = osThreadCreate(osThread(saveUsb), NULL);
 
   /* definition and creation of usbManager */
-  osThreadDef(usbManager, usbManagerTask, osPriorityNormal, 0, 512);
+  osThreadDef(usbManager, usbManagerTask, osPriorityBelowNormal, 0, 512);
   usbManagerHandle = osThreadCreate(osThread(usbManager), NULL);
 
   /* definition and creation of startAcquisitionStateMachine */
@@ -253,6 +321,136 @@ void aliveTask(void const * argument)
 		osDelay(250);
   }
   /* USER CODE END aliveTask */
+}
+
+/* USER CODE BEGIN Header_adc1ConversionTask */
+/**
+* @brief Function implementing the adc1Conversion thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_adc1ConversionTask */
+void adc1ConversionTask(void const * argument)
+{
+  /* USER CODE BEGIN adc1ConversionTask */
+  /* Infinite loop */
+  for(;;) {
+		xSemaphoreTake(adc1SemaphoreHandle, portMAX_DELAY); 		/* Unlock when DMA callback is called */
+		HAL_ADC_Stop_DMA(&hadc1);																/* Stop ADC1 conversion and wait for timer to restrt it */
+		adcBufferConvertedDebug[DCU_TEMP_SENSE_POSITION] = dcuTempSenseConversion(adc1BufferRaw[DCU_TEMP_SENSE_POSITION]);
+		adcBufferConvertedDebug[MAIN_CURRENT_SENSE_POSITION] = mainCurrentSenseConversion(adc1BufferRaw[MAIN_CURRENT_SENSE_POSITION]);
+		adcBufferConvertedDebug[DCU_CURRENT_SENSE_POSITION] = dcuCurrentSenseConversion(adc1BufferRaw[DCU_CURRENT_SENSE_POSITION]);
+		adcBufferConvertedDebug[_5V_DCU_POSITION] = _5vSenseConversion(adc1BufferRaw[_5V_DCU_POSITION]);
+		adcBufferConvertedDebug[_12V_POST_DIODES_SENSE_POSITION] = _12vSenseConversion(adc1BufferRaw[_12V_POST_DIODES_SENSE_POSITION]);
+		adcBufferConvertedDebug[_3V3_MCU_POSITION] = _3v3SenseConversion(adc1BufferRaw[_3V3_MCU_POSITION]);
+		adcBufferConvertedDebug[XBEE_CURRENT_SENSE_POSITION] = xbeeCurrentSenseConversion(adc1BufferRaw[XBEE_CURRENT_SENSE_POSITION]);
+		adcBufferConvertedDebug[VBAT_CHANNEL_POSITION] = vbatConversion(adc1BufferRaw[VBAT_CHANNEL_POSITION]);
+		/* TO BE IMPLEMENTED */
+		/* Put here the CSV buffer conversion functions */
+  }
+  /* USER CODE END adc1ConversionTask */
+}
+
+/* USER CODE BEGIN Header_adc2ConversionTask */
+/**
+* @brief Function implementing the adc2Conversion thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_adc2ConversionTask */
+void adc2ConversionTask(void const * argument)
+{
+  /* USER CODE BEGIN adc2ConversionTask */
+  /* Infinite loop */
+  for(;;) {
+		xSemaphoreTake(adc2SemaphoreHandle, portMAX_DELAY); 		/* Unlock when DMA callback is called */
+		HAL_ADC_Stop_DMA(&hadc2);																/* Stop ADC2 conversion and wait for timer to restrt it */
+    adcBufferConvertedAux[ANALOG_AUX_1_POSITION] = analogAux1Conversion(adc2BufferRaw[ANALOG_AUX_1_RAW_POSITION]);
+		adcBufferConvertedAux[ANALOG_AUX_2_POSITION] = analogAux2Conversion(adc2BufferRaw[ANALOG_AUX_2_RAW_POSITION]);
+		adcBufferConvertedAux[ANALOG_AUX_3_POSITION] = analogAux3Conversion(adc2BufferRaw[ANALOG_AUX_3_RAW_POSITION]);
+		/* TO BE IMPLEMENTED */
+		/* Put here the CSV buffer conversion functions */
+  }
+  /* USER CODE END adc2ConversionTask */
+}
+
+/* USER CODE BEGIN Header_digitalAuxManagerTask */
+/**
+* @brief Function implementing the digitalAuxManager thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_digitalAuxManagerTask */
+void digitalAuxManagerTask(void const * argument)
+{
+  /* USER CODE BEGIN digitalAuxManagerTask */
+	uint8_t digitalAuxEvent = 0;
+	
+  /* Infinite loop */
+  for(;;) {
+		
+		/* Wait for an event and get the identifier from the queue */
+		if(xQueueReceive(digitalAuxQueueHandle, &digitalAuxEvent, portMAX_DELAY) == pdTRUE) {
+			switch(digitalAuxEvent) {
+				case DIGITAL_EVENT_AUX_1:
+					/* Put here the code to handling digital aux 1 event */
+					break;
+				
+				case DIGITAL_EVENT_AUX_2:
+					/* Put here the code to handling digital aux 1 event */
+					break;
+				
+				case DIGITAL_EVENT_AUX_3:
+					/* Put here the code to handling digital aux 1 event */
+					break;
+			}
+		}
+  }
+  /* USER CODE END digitalAuxManagerTask */
+}
+
+/* USER CODE BEGIN Header_autogearManagerTask */
+/**
+* @brief Function implementing the autogearManager thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_autogearManagerTask */
+void autogearManagerTask(void const * argument)
+{
+  /* USER CODE BEGIN autogearManagerTask */
+  /* Infinite loop */
+  for(;;) {
+    xSemaphoreTake(autogearSemaphoreHandle, portMAX_DELAY); 			/* Unlock when interrupt callback is called */
+		osDelay(15);																									/* Wait for fail trigger detection */
+		
+		if(HAL_GPIO_ReadPin(AUTOGEAR_SWTICH_MCU_GPIO_Port, AUTOGEAR_SWTICH_MCU_Pin) == GPIO_PIN_RESET) {
+			/* Put here the code to handling autogear event */
+		}
+  }
+  /* USER CODE END autogearManagerTask */
+}
+
+/* USER CODE BEGIN Header_USB_OvercurrentManagerTask */
+/**
+* @brief Function implementing the USB_OvercurrentManager thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_USB_OvercurrentManagerTask */
+void USB_OvercurrentManagerTask(void const * argument)
+{
+  /* USER CODE BEGIN USB_OvercurrentManagerTask */
+  /* Infinite loop */
+  for(;;) {
+		xSemaphoreTake(autogearSemaphoreHandle, portMAX_DELAY); 		/* Unlock when interrupt callback is called */
+		osDelay(1);																									/* Wait for fail trigger detection */
+		
+		if(HAL_GPIO_ReadPin(USB_OVERCURRENT_GPIO_Port, USB_OVERCURRENT_Pin) == GPIO_PIN_RESET) {
+			/* Put here the code to handling autogear event */
+		}
+  }
+  /* USER CODE END USB_OvercurrentManagerTask */
 }
 
 /* USER CODE BEGIN Header_SendStatesFunc */
@@ -313,9 +511,9 @@ void ReceiveTelemFunc(void const * argument)
 	uint8_t errorLetter = CMD_READ_ERR_ID; 																									/* Define which char is the identifier of the error */
 	uint8_t commandAckMsg [COMMAND_ACK_MSG_LEN] = ACK_MSG;
 	uint8_t usartLockFlag;
-	uint8_t temp;
 	uint8_t tempBuffer[50];
 	_Bool setRtcComing = 0;
+	uint8_t temp;
 	
 	HAL_UART_Receive(&huart1, tempBuffer, 50, 50);
 	HAL_UART_Receive_DMA(&huart1, telemetryReceivedBuffer, BUFFER_COMMAND_LEN);
@@ -334,6 +532,7 @@ void ReceiveTelemFunc(void const * argument)
 			}
 			else { 																																							/* If message does not end correctly */
 				xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0);			 					/* Add error to queue */
+				HAL_UART_Receive_DMA(&huart1, telemetryReceivedBuffer, BUFFER_COMMAND_LEN); 			/* Re enable receiving */
 			}
 		}
 		
@@ -350,10 +549,10 @@ void ReceiveTelemFunc(void const * argument)
 							break;
 			
 							case START_ACQ_ID:
-								/* Put here the code necessary for stopping acquisition */
-								/* Only for debug! */
+								/* Put here the code necessary for starting acquisition */
 								temp = '6';
-								xQueueSendFromISR(startAcquisitionEventHandle, &temp, &startAcquisition_xHigherPriorityTaskWoken);
+								xQueueSend(startAcquisitionEventHandle, (void *)&temp, (TickType_t)0); 			/* Add flag to queue */
+							
 								xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);			/* Lock if DMA is in use */
 								commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = START_ACQ_ID; 								/* Set the correct identifier */
 								HAL_UART_Transmit_DMA(&huart1, commandAckMsg, COMMAND_ACK_MSG_LEN); 			/* Transmit ack message */
@@ -361,9 +560,8 @@ void ReceiveTelemFunc(void const * argument)
 
 							case STOP_ACQ_ID:
 								/* Put here the code necessary for stopping acquisition */
-								/* Only for debug! */
 								temp = 'A';
-								xQueueSendFromISR(startAcquisitionEventHandle, &temp, &startAcquisition_xHigherPriorityTaskWoken);
+								xQueueSend(startAcquisitionEventHandle, &temp, 0);
 							
 								xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);			/* Lock if DMA is in use */
 								commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = STOP_ACQ_ID; 									/* Set the correct identifier */
@@ -405,10 +603,10 @@ void ReceiveTelemFunc(void const * argument)
 				}
 			}
 			
-			else {																																							/* If message does not start correctly */
-				HAL_UART_Receive(&huart1, tempBuffer, 50, 50);																		
+			else {																																					/* If message does not start correctly */
+				HAL_UART_Receive(&huart1, tempBuffer, 50, 50);
 				HAL_UART_Receive_DMA(&huart1, telemetryReceivedBuffer, BUFFER_COMMAND_LEN); 			/* Re enable receiving */
-				xQueueSend(ErrorQueueHandle, ( void * ) &errorLetter, ( TickType_t ) 0 ); 				/* Add error to queue */
+				xQueueSend(ErrorQueueHandle, ( void * ) &errorLetter, ( TickType_t ) 0 ); 				/* Add error to queue */				
 			}
 		}
   }
@@ -538,20 +736,20 @@ void usbManagerTask(void const * argument)
 /* USER CODE END Header_startAcquisitionStateMachineTask */
 void startAcquisitionStateMachineTask(void const * argument)
 {
-  /* USER CODE BEGIN startAcquisitionStateMachineTask */
+	/* USER CODE BEGIN startAcquisitionStateMachineTask */
 	uint8_t startAcquisitionEvent = ACQUISITION_IDLE_REQUEST;
 
-  /* Infinite loop */
-  for(;;) {
-		startAcquisitionStateMachine(startAcquisitionEvent);
-		
+	/* Infinite loop */
+	for(;;) {
 		/* Start acquisition state machine, called at 100 Hz */
 		/* NOTE: Events are coded using chars NOT numbers! */
-		if(xQueueReceive(startAcquisitionEventHandle, &startAcquisitionEvent, 10 / portTICK_PERIOD_MS) != pdTRUE) {
+		startAcquisitionStateMachine(startAcquisitionEvent);
+	
+		if(xQueueReceive(startAcquisitionEventHandle, &startAcquisitionEvent, 100 / portTICK_PERIOD_MS) != pdTRUE) {
 			startAcquisitionEvent = ACQUISITION_IDLE_REQUEST;
 		}
-  }
-  /* USER CODE END startAcquisitionStateMachineTask */
+	}
+	/* USER CODE END startAcquisitionStateMachineTask */
 }
 
 /* USER CODE BEGIN Header_canFifo0UnpackTask */
