@@ -18,9 +18,11 @@
 #define NMEA_SET_BAUDRATE_19200 				"$PMTK251,19200*22\r\n" 				// Set NMEA port baudrate to 19200.
 #define NMEA_SET_BAUDRATE_38400 				"$PMTK251,38400*27\r\n" 				// Set NMEA port baudrate to 38400.
 #define NMEA_SET_BAUDRATE_57600 				"$PMTK251,57600*2C\r\n" 				// Set NMEA port baudrate to 57600.
+#define NMEA_SET_BAUDRATE_57600_LENGTH	(uint8_t) 19
 #define NMEA_SET_BAUDRATE_115200 				"$PMTK251,115200*1F\r\n" 				// Set NMEA port baudrate to 115200.
 #define NMEA_SET_5_HZ_NAVIGATION 				"$PMTK300,200,0,0,0,0*2F\r\n"		// Command for setting the Fix Rate to 5 Hz. Use baudrate equal to 38400. Reply: "$PMTK001,300,3*33".
 #define NMEA_SET_10_HZ_NAVIGATION 			"$PMTK300,100,0,0,0,0*2C\r\n" 	// Command for setting the Fix Rate to 10 Hz. Use baudrate equal to 115200. Reply: "$PMTK001,300,3*33".
+#define NMEA_SET_10_HZ_NAVIGATION_LENGTH (uint8_t) 25
 #define NMEA_API_SET_DGPS_MODE_DISABLE 	"$PMTK301,0*2C\r\n" 						// Disable DGPS correction data source mode. Reply: "$PMTK001,301,3*32".
 #define NMEA_API_SET_DGPS_MODE_RTCM 		"$PMTK301,1*2D\r\n" 						// RTCM DGPS correction data source mode. Reply: "$PMTK001,301,3*32".
 #define NMEA_API_SET_DGPS_MODE_WAAS 		"$PMTK301,2*2E\r\n" 						// WAAS DGPS correction data source mode. Reply: "$PMTK001,301,3*32".
@@ -38,6 +40,13 @@
 #define NMEA_API_GET_USER_OPTION 				"$PMTK490*3F\r\n" 							// Returns the current user setting from the flash memory.
 #define NMEA_QUERY_FIRMWARE_INFO 				"$PMTK605*31\r\n" 							// Returns the firmware release information. Reply: "$PMTK705,AXN_1.30,9156,Fastrax IT500,*6C".
 #define NMEA_QUERY_EPO_STATUS 					"$PMTK607,0*2F\r\n" 						// Returns the status of EPO file loaded into flash memory.
+
+
+#define NMEA_SET_GGA_RMC_VTG						"$PMTK314,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1*2C\r\n"
+#define NMEA_SET_GGA_RMC_VTG_LENGTH			(uint8_t)51
+
+
+
 
 // Message type defines.
 #define MESSAGE_TYPE_GGA								((uint8_t)1)
@@ -220,8 +229,9 @@ typedef struct NMEA_output_types
 
 
 //user functions
+
+void GPS_Rx_Cplt(void);
 void GPS_parse_data(uint8_t * buffer);
-void GPS_complete_packet(uint8_t * buffer);
 uint8_t GPS_get_messageID(uint8_t * buffer);
 void GPS_init(void);
 void GPS_get_time(uint8_t *hour, uint8_t *minut, uint8_t *second);
@@ -236,8 +246,9 @@ NMEA_RMC_type_t GPS_RMC_conversion(uint8_t * buffer);
 NMEA_VTG_type_t GPS_VTG_conversion(uint8_t * buffer);
 
 uint16_t GPS_str_to_int(uint8_t centinaia, uint8_t decine, uint8_t unita);
-double    GPS_str_to_float(uint8_t * decimi, uint8_t * centesimi);
+double    GPS_str_to_float(uint8_t decimi, uint8_t centesimi);
 void GPS_clear_buffer(uint8_t *buffer, uint8_t length);
+void GPS_USART2_UART_Init(void);
 
 
 #endif

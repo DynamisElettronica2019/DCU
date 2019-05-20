@@ -5,51 +5,35 @@
 //user variables
 
 NMEA_output_types_t NMEA_output;	//dove salvo i risultati della conversione
-uint8_t GPSMessageID;
+uint8_t GPSMessageID;							//globale solo per comodità di debug per adesso
 
-extern uint8_t rx;
+uint8_t GPSFirstChar;
+uint8_t GPSParsingChar = '$';
+uint8_t i = 0;
+uint8_t GPSRawBuffer[GPS_MAX_LENGTH];
 
-/*variabili che mi servono per controllare se avviene qualche errore nella conversione*/
-uint8_t GGAConversionError = FALSE;
-uint8_t GLLConversionError = FALSE;
-uint8_t GSAConversionError = FALSE;
-uint8_t GSVConversionError = FALSE;
-uint8_t VTGConversionError = FALSE;
-uint8_t RMCConversionError = FALSE;
+extern osSemaphoreId GPSUnboxSemHandle;
+extern osSemaphoreId GPSSetSemHandle;
+BaseType_t xGPSHigherPriorityTaskWoken;
 
 
-void GPS_Rx_Cplt(){
-		if (rx == '$'){
+void GPS_Rx_Cplt(void){
+		if (GPSFirstChar == '$'){								//se ho trovato il carattere iniziale della stringa
 			
-			/*if ((i == 4) && (rx2 == 'L')){
-				i = 0;
-				rx = 0;		// se mi è arrivato un gll lo scarto e ricomincio a cercare la prossima $
-			}
-			else if ((i == 4)&&( rx2 == 'S')){
-				i = 0;
-				rx = 0;		// stessa cosa con i gss
-			}
-			else if((i == 5) && (rx2 == 'V')){
-				i = 0;
-				rx = 0;		// stessa cosa con i gsv
-			}*/
-			
-			buffer[i] = rx2;
+			GPSRawBuffer[i] = GPSParsingChar;			//lo salvo
 			i++;
 			
-			//HAL_UART_Transmit(&huart3, &rx2, 1, 100);
-			HAL_UART_Receive_DMA(&huart2,&rx2, 1);
+			HAL_UART_Receive_DMA(&huart2,&GPSParsingChar, 1);		//e comincio a leggere i caratteri successivi
 	}
-	 if (rx2 == '\n'){
-			buffer[i] = '\n';
-			//HAL_UART_Transmit(&huart3, buffer, i, 1000);
+	 if (GPSParsingChar == '\n'){								//se sono arrivato alla fine del messaggio
+			GPSRawBuffer[i] = '\n';									//salvo l'ultimo carattere
 			i = 0;
-			rx2 = '$';
-			xSemaphoreGiveFromISR(myBinarySem01Handle,&xHigherPriorityTaskWoken );
-			portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+			GPSParsingChar = '$';										//riinizializzo le variabili che mi servono
+			xSemaphoreGiveFromISR(GPSUnboxSemHandle,&xGPSHigherPriorityTaskWoken );			//chiamo la task di spacchettamento
+			portYIELD_FROM_ISR(xGPSHigherPriorityTaskWoken);
 	}
-	 if ((rx != '$') && (rx2 != '\n')){
-		 HAL_UART_Receive_DMA(&huart2,&rx, 1);
+	 if ((GPSFirstChar != '$') && (GPSParsingChar != '\n')){			//se non ho ancora trovato il carattere iniziale continuo a cercarlo
+		 HAL_UART_Receive_DMA(&huart2,&GPSFirstChar, 1);
 	 }
 		
 }
@@ -90,9 +74,7 @@ void GPS_parse_data(uint8_t * GPSRawBuffer){
 		default :						//non dovrei mai arrivare qui in ogni caso
 			break;
 	}
-	//GPS_clear_buffer(GPSRawBuffer, GPS_MAX_LENGTH);					//forse usando un buffer globale con dma lineare riscio che alcuni dati mi si vengano a sovrapporre
-	//HAL_UART_DMAResume(&huart2);
-	HAL_UART_Receive_DMA(&huart2,&rx, 1);
+	HAL_UART_Receive_DMA(&huart2,&GPSFirstChar, 1);			//finita la conversionie, ricomincio a cercare il carattere iniziale
 }
 uint8_t GPS_get_messageID(uint8_t * buffer){										//questa funzione funziona solo se in buffer i caratteri identificatori del messaggio sono contenuti nei primo 5 elementi
 
@@ -563,8 +545,8 @@ double GPS_str_to_float(uint8_t decimi, uint8_t  centesimi){
 }
 
 
-void GPS_get_time(uint8_t *hour, uint8_t *minut, uint8_t *second){
-	if (GPS_is_fix_valid() == FIX_VALID){		//se i dati che ho a disposizione non hanno problemi, riempo le variabili passate con dati coerenti
+void GPS_get_time(uint8_t *hour, uint8_t *minut, uint8_t *second){  /*da testare*/
+	if (GPS_is_fix_valid() == FIX_VALID){									//se i dati che ho a disposizione non hanno problemi, riempo le variabili passate con dati coerenti
 		*hour = NMEA_output.NMEA_GGA_type.UTC_time.hours;
 		*minut = NMEA_output.NMEA_GGA_type.UTC_time.minutes;
 		*second = NMEA_output.NMEA_GGA_type.UTC_time.seconds;
@@ -581,7 +563,7 @@ uint8_t GPS_is_fix_valid(void){		//ritorna FIX_VALID  se i dati presenti nella v
 		if(NMEA_output.NMEA_RMC_type.RMC_status == 'A')
 			return FIX_VALID;
 	}
-	return FIX_NOT_VALID;
+	return FIX_NOT_VALID;		/*da testare*/
 }
 
 
@@ -594,18 +576,16 @@ void GPS_get_date(uint8_t *day, uint8_t *month, uint8_t *year){		//se i dati son
 	else{														//altrimenti gli riempo con dati non coerenti
 		*day = 255;
 		*month = 255;
-		*year = 255;
+		*year = 255;		/*da testare*/
 	}
 }
 
 
-void GPS_init(void){
-	/*tira giu il baud rate della uart*/
-	/*testa la comunicazione con il gps*/
-	/*digli di andare a un baud rate piu alto*/
-	/*riconfigura la huart con il baud rate piu alto*/
-	/*aumenta il fix rate a 10hz*/
-	/*verifica se si possono disattivare alcune sentence con output*/
+void GPS_init(void){		/*questi tipi di messaggio sono sbagliati*/
+	HAL_UART_Transmit(&huart2,(uint8_t *)NMEA_SET_GGA_RMC_VTG, NMEA_SET_GGA_RMC_VTG_LENGTH, 100);		//mandami solo RMC, GGA, VTG
+	HAL_UART_Transmit(&huart2, (uint8_t *)NMEA_SET_BAUDRATE_57600, NMEA_SET_BAUDRATE_57600_LENGTH, 100); //setta la comunicazione del gps a 57600
+	GPS_USART2_UART_Init();																																				//setta la uart2 a 57600
+	HAL_UART_Transmit(&huart2, (uint8_t *)NMEA_SET_10_HZ_NAVIGATION , NMEA_SET_10_HZ_NAVIGATION_LENGTH, 100); //aumenta il fix rate a 10Hz
 }
 
 void GPS_clear_buffer(uint8_t *buffer, uint8_t length){
@@ -616,6 +596,27 @@ void GPS_clear_buffer(uint8_t *buffer, uint8_t length){
 		i++;
 	}
 
+}
+
+void GPS_USART2_UART_Init(void){			//reinizializza la uart2 a 57600
+	
+	huart2.Instance = USART2;
+  huart2.Init.BaudRate = 57600;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart2.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart2.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_RXOVERRUNDISABLE_INIT|UART_ADVFEATURE_DMADISABLEONERROR_INIT;
+  huart2.AdvancedInit.OverrunDisable = UART_ADVFEATURE_OVERRUN_DISABLE;
+  huart2.AdvancedInit.DMADisableonRxError = UART_ADVFEATURE_DMA_DISABLEONRXERROR;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+	
 }
 
 
