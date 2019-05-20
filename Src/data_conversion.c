@@ -71,7 +71,7 @@ extern inline float analogAux1Conversion(uint32_t rawData) {
 	float data;
 	
 	data = (float)rawData * ADC_LSB;
-	data = data / ANALOG_AUX_1_GAIN;
+	data = data * ANALOG_AUX_1_VOLTAGE_GAIN;
 	return data;
 }
 
@@ -79,7 +79,7 @@ extern inline float analogAux2Conversion(uint32_t rawData) {
 	float data;
 	
 	data = (float)rawData * ADC_LSB;
-	data = data / ANALOG_AUX_2_GAIN;
+	data = data * ANALOG_AUX_2_VOLTAGE_GAIN;
 	return data;
 }
 
@@ -87,6 +87,6 @@ extern inline float analogAux3Conversion(uint32_t rawData) {
 	float data;
 	
 	data = (float)rawData * ADC_LSB;
-	data = data / ANALOG_AUX_2_GAIN;
+	data = data * ANALOG_AUX_3_VOLTAGE_GAIN;
 	return data;
 }

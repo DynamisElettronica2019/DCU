@@ -13,9 +13,14 @@
 #define _5V_DCU_GAIN												0.3237f
 #define _3V3_MCU_GAIN												0.5313f
 #define VBAT_GAIN														4.0f
-#define ANALOG_AUX_1_GAIN										0.641f	
-#define ANALOG_AUX_2_GAIN										0.641f
-#define ANALOG_AUX_3_GAIN										0.641f
+
+#define ANALOG_AUX_1_VOLTAGE_GAIN						1.56f	
+#define ANALOG_AUX_2_VOLTAGE_GAIN						1.56f
+#define ANALOG_AUX_3_VOLTAGE_GAIN						1.56f
+
+//#define ANALOG_AUX_1_VOLTAGE_GAIN						1.7905f	
+//#define ANALOG_AUX_2_VOLTAGE_GAIN						1.7876f
+//#define ANALOG_AUX_3_VOLTAGE_GAIN						1.7963f
 
 extern inline uint16_t mainCurrentSenseConversion(uint32_t rawData);
 extern inline uint16_t dcuCurrentSenseConversion(uint32_t rawData);

@@ -58,10 +58,12 @@ osThreadId adc1ConversionHandle;
 osThreadId adc2ConversionHandle;
 osThreadId digitalAuxManagerHandle;
 osThreadId autogearManagerHandle;
+osThreadId USB_OvercurrentManagerHandle;
 osMessageQId digitalAuxQueueHandle;
 osSemaphoreId adc1SemaphoreHandle;
 osSemaphoreId adc2SemaphoreHandle;
 osSemaphoreId autogearSemaphoreHandle;
+osSemaphoreId USB_OvercurrentSemaphoreHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -73,6 +75,7 @@ void adc1ConversionTask(void const * argument);
 void adc2ConversionTask(void const * argument);
 void digitalAuxManagerTask(void const * argument);
 void autogearManagerTask(void const * argument);
+void USB_OvercurrentManagerTask(void const * argument);
 
 extern void MX_FATFS_Init(void);
 extern void MX_USB_HOST_Init(void);
@@ -105,11 +108,16 @@ void MX_FREERTOS_Init(void) {
   osSemaphoreDef(autogearSemaphore);
   autogearSemaphoreHandle = osSemaphoreCreate(osSemaphore(autogearSemaphore), 1);
 
+  /* definition and creation of USB_OvercurrentSemaphore */
+  osSemaphoreDef(USB_OvercurrentSemaphore);
+  USB_OvercurrentSemaphoreHandle = osSemaphoreCreate(osSemaphore(USB_OvercurrentSemaphore), 1);
+
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
-	xSemaphoreTake(adc1SemaphoreHandle, portMAX_DELAY);					/* Start with the task locked */
-	xSemaphoreTake(adc2SemaphoreHandle, portMAX_DELAY); 				/* Start with the task locked */
-	xSemaphoreTake(autogearSemaphoreHandle, portMAX_DELAY); 		/* Start with the task locked */
+	xSemaphoreTake(adc1SemaphoreHandle, portMAX_DELAY);									/* Start with the task locked */
+	xSemaphoreTake(adc2SemaphoreHandle, portMAX_DELAY); 								/* Start with the task locked */
+	xSemaphoreTake(autogearSemaphoreHandle, portMAX_DELAY); 						/* Start with the task locked */
+	xSemaphoreTake(USB_OvercurrentSemaphoreHandle, portMAX_DELAY); 			/* Start with the task locked */
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -145,6 +153,10 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of autogearManager */
   osThreadDef(autogearManager, autogearManagerTask, osPriorityNormal, 0, 128);
   autogearManagerHandle = osThreadCreate(osThread(autogearManager), NULL);
+
+  /* definition and creation of USB_OvercurrentManager */
+  osThreadDef(USB_OvercurrentManager, USB_OvercurrentManagerTask, osPriorityNormal, 0, 128);
+  USB_OvercurrentManagerHandle = osThreadCreate(osThread(USB_OvercurrentManager), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -216,11 +228,11 @@ void adc2ConversionTask(void const * argument)
   /* USER CODE BEGIN adc2ConversionTask */
   /* Infinite loop */
   for(;;) {
-		xSemaphoreTake(adc2SemaphoreHandle, portMAX_DELAY); 	/* Unlock when DMA callback is called */
-		HAL_ADC_Stop_DMA(&hadc2);															/* Stop ADC2 conversion and wait for timer to restrt it */
-    adcBufferConvertedAux[ANALOG_AUX_1_POSITION] = analogAux1Conversion(adc2BufferRaw[ANALOG_AUX_1_POSITION]);
-		adcBufferConvertedAux[ANALOG_AUX_2_POSITION] = analogAux2Conversion(adc2BufferRaw[ANALOG_AUX_2_POSITION]);
-		adcBufferConvertedAux[ANALOG_AUX_3_POSITION] = analogAux3Conversion(adc2BufferRaw[ANALOG_AUX_3_POSITION]);
+		xSemaphoreTake(adc2SemaphoreHandle, portMAX_DELAY); 		/* Unlock when DMA callback is called */
+		HAL_ADC_Stop_DMA(&hadc2);																/* Stop ADC2 conversion and wait for timer to restrt it */
+    adcBufferConvertedAux[ANALOG_AUX_1_POSITION] = analogAux1Conversion(adc2BufferRaw[ANALOG_AUX_1_RAW_POSITION]);
+		adcBufferConvertedAux[ANALOG_AUX_2_POSITION] = analogAux2Conversion(adc2BufferRaw[ANALOG_AUX_2_RAW_POSITION]);
+		adcBufferConvertedAux[ANALOG_AUX_3_POSITION] = analogAux3Conversion(adc2BufferRaw[ANALOG_AUX_3_RAW_POSITION]);
 		/* TO BE IMPLEMENTED */
 		/* Put here the CSV buffer conversion functions */
   }
@@ -241,20 +253,22 @@ void digitalAuxManagerTask(void const * argument)
 	
   /* Infinite loop */
   for(;;) {
-    xQueueReceive(digitalAuxQueueHandle, &digitalAuxEvent, portMAX_DELAY);		/* Wait for an event and get the identifier from the queue */
 		
-		switch(digitalAuxEvent) {
-			case DIGITAL_EVENT_AUX_1:
-				/* Put here the code to handling digital aux 1 event */				
-				break;
-			
-			case DIGITAL_EVENT_AUX_2:
-				/* Put here the code to handling digital aux 1 event */
-				break;
-			
-			case DIGITAL_EVENT_AUX_3:
-				/* Put here the code to handling digital aux 1 event */
-				break;
+		/* Wait for an event and get the identifier from the queue */
+		if(xQueueReceive(digitalAuxQueueHandle, &digitalAuxEvent, portMAX_DELAY) == pdTRUE) {
+			switch(digitalAuxEvent) {
+				case DIGITAL_EVENT_AUX_1:
+					/* Put here the code to handling digital aux 1 event */
+					break;
+				
+				case DIGITAL_EVENT_AUX_2:
+					/* Put here the code to handling digital aux 1 event */
+					break;
+				
+				case DIGITAL_EVENT_AUX_3:
+					/* Put here the code to handling digital aux 1 event */
+					break;
+			}
 		}
   }
   /* USER CODE END digitalAuxManagerTask */
@@ -272,13 +286,36 @@ void autogearManagerTask(void const * argument)
   /* USER CODE BEGIN autogearManagerTask */
   /* Infinite loop */
   for(;;) {
-    xSemaphoreTake(autogearSemaphoreHandle, portMAX_DELAY); 		/* Unlock when interrupt callback is called */
+    xSemaphoreTake(autogearSemaphoreHandle, portMAX_DELAY); 			/* Unlock when interrupt callback is called */
+		osDelay(15);																									/* Wait for fail trigger detection */
 		
 		if(HAL_GPIO_ReadPin(AUTOGEAR_SWTICH_MCU_GPIO_Port, AUTOGEAR_SWTICH_MCU_Pin) == GPIO_PIN_RESET) {
 			/* Put here the code to handling autogear event */
 		}
   }
   /* USER CODE END autogearManagerTask */
+}
+
+/* USER CODE BEGIN Header_USB_OvercurrentManagerTask */
+/**
+* @brief Function implementing the USB_OvercurrentManager thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_USB_OvercurrentManagerTask */
+void USB_OvercurrentManagerTask(void const * argument)
+{
+  /* USER CODE BEGIN USB_OvercurrentManagerTask */
+  /* Infinite loop */
+  for(;;) {
+		xSemaphoreTake(autogearSemaphoreHandle, portMAX_DELAY); 		/* Unlock when interrupt callback is called */
+		osDelay(1);																									/* Wait for fail trigger detection */
+		
+		if(HAL_GPIO_ReadPin(USB_OVERCURRENT_GPIO_Port, USB_OVERCURRENT_Pin) == GPIO_PIN_RESET) {
+			/* Put here the code to handling autogear event */
+		}
+  }
+  /* USER CODE END USB_OvercurrentManagerTask */
 }
 
 /* Private application code --------------------------------------------------*/

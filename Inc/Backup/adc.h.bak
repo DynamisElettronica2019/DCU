@@ -48,9 +48,12 @@ extern ADC_HandleTypeDef hadc2;
 #define _3V3_MCU_POSITION										(uint8_t)5
 #define XBEE_CURRENT_SENSE_POSITION					(uint8_t)6
 #define VBAT_CHANNEL_POSITION								(uint8_t)7
-#define ANALOG_AUX_3_POSITION								(uint8_t)0
+#define ANALOG_AUX_1_POSITION								(uint8_t)0
 #define ANALOG_AUX_2_POSITION								(uint8_t)1
-#define ANALOG_AUX_1_POSITION								(uint8_t)2
+#define ANALOG_AUX_3_POSITION								(uint8_t)2
+#define ANALOG_AUX_1_RAW_POSITION						(uint8_t)2
+#define ANALOG_AUX_2_RAW_POSITION						(uint8_t)1
+#define ANALOG_AUX_3_RAW_POSITION						(uint8_t)0
 /* USER CODE END Private defines */
 
 void MX_ADC1_Init(void);

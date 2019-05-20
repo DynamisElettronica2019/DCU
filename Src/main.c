@@ -56,10 +56,16 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+BaseType_t GPIO_AutogearHigherPriorityTaskWoken = pdFALSE;
+BaseType_t GPIO_OvercurrentHigherPriorityTaskWoken = pdFALSE;
+BaseType_t GPIO1_CtrlxHigherPriorityTaskWoken = pdFALSE;
+BaseType_t GPIO2_CtrlxHigherPriorityTaskWoken = pdFALSE;
+BaseType_t GPIO3_CtrlxHigherPriorityTaskWoken = pdFALSE;
 extern uint32_t adc1BufferRaw [ADC1_RAW_DATA_LEN];					
 extern uint32_t adc2BufferRaw [ADC2_RAW_DATA_LEN];
 extern osMessageQId digitalAuxQueueHandle;
 extern osSemaphoreId autogearSemaphoreHandle;
+extern osSemaphoreId USB_OvercurrentSemaphoreHandle;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -222,13 +228,20 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+	/* USB overcurrent ISR */
+	if(HAL_GPIO_ReadPin(USB_OVERCURRENT_GPIO_Port, USB_OVERCURRENT_Pin) == GPIO_PIN_RESET) {
+		if(USB_OvercurrentSemaphoreHandle != NULL) {																													/* Check on system start if semaphore is already created */
+			xSemaphoreGiveFromISR(USB_OvercurrentSemaphoreHandle, &GPIO_OvercurrentHigherPriorityTaskWoken); 		/* Give semaphore to task when interrupt is called */
+			portYIELD_FROM_ISR(GPIO_OvercurrentHigherPriorityTaskWoken);																				/* Do context-switch if needed */
+		}
+	}
 	
 	/* Autogear switch ISR */
-	if(GPIO_Pin == AUTOGEAR_SWTICH_MCU_Pin) {
-		if(autogearSemaphoreHandle != NULL) {																						/* Check on system start if semaphore is already created */
-			xSemaphoreGiveFromISR(autogearSemaphoreHandle, &xHigherPriorityTaskWoken); 		/* Give semaphore to task when interrupt is called */
-			portYIELD_FROM_ISR(xHigherPriorityTaskWoken);																	/* Do context-switch if needed */
+	if(HAL_GPIO_ReadPin(AUTOGEAR_SWTICH_MCU_GPIO_Port, AUTOGEAR_SWTICH_MCU_Pin) == GPIO_PIN_RESET) {
+		if(autogearSemaphoreHandle != NULL) {																																	/* Check on system start if semaphore is already created */
+			xSemaphoreGiveFromISR(autogearSemaphoreHandle, &GPIO_AutogearHigherPriorityTaskWoken); 							/* Give semaphore to task when interrupt is called */
+			portYIELD_FROM_ISR(GPIO_AutogearHigherPriorityTaskWoken);																						/* Do context-switch if needed */
 		}
 	}
 }
@@ -263,15 +276,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	
 		/* Digital aux management: 1 Hz sampling time */
 		if(HAL_GPIO_ReadPin(DIGITAL_AUX_1_GPIO_Port, DIGITAL_AUX_1_Pin) == GPIO_PIN_SET) {
-			xQueueSend(digitalAuxQueueHandle, (void *)&digitalAuxEvent, (TickType_t)0); 	/* Add digital aux event to queue */
+			digitalAuxEvent = DIGITAL_EVENT_AUX_1;
+			xQueueSendFromISR(digitalAuxQueueHandle, &digitalAuxEvent, &GPIO1_CtrlxHigherPriorityTaskWoken);		/* Add digital aux event to queue */
 		}
 		
 		if(HAL_GPIO_ReadPin(DIGITAL_AUX_2_GPIO_Port, DIGITAL_AUX_2_Pin) == GPIO_PIN_SET) {
-			xQueueSend(digitalAuxQueueHandle, (void *)&digitalAuxEvent, (TickType_t)0); 	/* Add digital aux event to queue */
+			digitalAuxEvent = DIGITAL_EVENT_AUX_2;
+			xQueueSendFromISR(digitalAuxQueueHandle, &digitalAuxEvent, &GPIO1_CtrlxHigherPriorityTaskWoken);		/* Add digital aux event to queue */
 		}
 		
 		if(HAL_GPIO_ReadPin(DIGITAL_AUX_3_GPIO_Port, DIGITAL_AUX_3_Pin) == GPIO_PIN_SET) {
-			xQueueSend(digitalAuxQueueHandle, (void *)&digitalAuxEvent, (TickType_t)0); 	/* Add digital aux event to queue */
+			digitalAuxEvent = DIGITAL_EVENT_AUX_3;
+			xQueueSendFromISR(digitalAuxQueueHandle, &digitalAuxEvent, &GPIO1_CtrlxHigherPriorityTaskWoken);		/* Add digital aux event to queue */
 		}
 	}
 	
