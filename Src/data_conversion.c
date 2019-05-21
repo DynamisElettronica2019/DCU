@@ -66,7 +66,7 @@ extern inline float FUEL_LEVEL_DataConversion(uint16_t input)
 	return temp1;
 }
 
-extern inline uint16_t mainCurrentSenseConversion(uint32_t rawData) {
+extern inline uint16_t DCU_MainCurrentSenseConversion(uint32_t rawData) {
 	float data;
 	
 	data = (float)rawData * ADC_LSB;
@@ -75,7 +75,7 @@ extern inline uint16_t mainCurrentSenseConversion(uint32_t rawData) {
 	return (uint16_t)data;
 }
 
-extern inline uint16_t dcuCurrentSenseConversion(uint32_t rawData) {
+extern inline uint16_t DCU_CurrentSenseConversion(uint32_t rawData) {
 	float data;
 	
 	data = (float)rawData * ADC_LSB;
@@ -84,7 +84,7 @@ extern inline uint16_t dcuCurrentSenseConversion(uint32_t rawData) {
 	return (uint16_t)data;
 }
 
-extern inline uint16_t xbeeCurrentSenseConversion(uint32_t rawData) {
+extern inline uint16_t DCU_XbeeCurrentSenseConversion(uint32_t rawData) {
 	float data;
 	
 	data = (float)rawData * ADC_LSB;
@@ -93,7 +93,7 @@ extern inline uint16_t xbeeCurrentSenseConversion(uint32_t rawData) {
 	return (uint16_t)data;
 }
 
-extern inline float _3v3SenseConversion(uint32_t rawData) {
+extern inline float DCU_3v3SenseConversion(uint32_t rawData) {
 	float data;
 	
 	data = (float)rawData * ADC_LSB;
@@ -101,7 +101,7 @@ extern inline float _3v3SenseConversion(uint32_t rawData) {
 	return data;
 }
 
-extern inline float _5vSenseConversion(uint32_t rawData) {
+extern inline float DCU_5vSenseConversion(uint32_t rawData) {
 	float data;
 	
 	data = (float)rawData * ADC_LSB;
@@ -109,7 +109,7 @@ extern inline float _5vSenseConversion(uint32_t rawData) {
 	return data;
 }
 
-extern inline float _12vSenseConversion(uint32_t rawData) {
+extern inline float DCU_12vSenseConversion(uint32_t rawData) {
 	float data;
 	
 	data = (float)rawData * ADC_LSB;
@@ -117,7 +117,7 @@ extern inline float _12vSenseConversion(uint32_t rawData) {
 	return data;
 }
 
-extern inline float dcuTempSenseConversion(uint32_t rawData) {
+extern inline float DCU_TempSenseConversion(uint32_t rawData) {
 	float data;
 	
 	data = (float)rawData * ADC_LSB * 1000.0f;
@@ -127,7 +127,7 @@ extern inline float dcuTempSenseConversion(uint32_t rawData) {
 	return data;
 }
 
-extern inline float vbatConversion(uint32_t rawData) {
+extern inline float DCU_VbatConversion(uint32_t rawData) {
 	return ((float)rawData * ADC_LSB * 4.0f);
 }
 

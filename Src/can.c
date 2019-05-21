@@ -262,14 +262,19 @@ static void CAN_FilterConfig(void)
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
 	HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &(CAN_CurrentFifo0ReceivedPacket.packetHeader), CAN_CurrentFifo0ReceivedPacket.packetData);
-	xQueueSendFromISR(canFifo0QueueHandle, &CAN_CurrentFifo0ReceivedPacket, &CAN_Rx0xHigherPriorityTaskWoken);
+	
+	if(DATA_GetAcquisitionState() == STATE_ON) {
+		xQueueSendFromISR(canFifo0QueueHandle, &CAN_CurrentFifo0ReceivedPacket, &CAN_Rx0xHigherPriorityTaskWoken);
+	}
 }
-
 
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
 	HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO1, &(CAN_CurrentFifo1ReceivedPacket.packetHeader), CAN_CurrentFifo1ReceivedPacket.packetData); 
-	xQueueSendFromISR(canFifo1QueueHandle, &CAN_CurrentFifo1ReceivedPacket, &CAN_Rx1xHigherPriorityTaskWoken);
+	
+	if(DATA_GetAcquisitionState() == STATE_ON) {
+		xQueueSendFromISR(canFifo1QueueHandle, &CAN_CurrentFifo1ReceivedPacket, &CAN_Rx1xHigherPriorityTaskWoken);
+	}
 }
 
 void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *hcan)

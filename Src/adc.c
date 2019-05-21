@@ -22,7 +22,9 @@
 
 /* USER CODE BEGIN 0 */
 #include "cmsis_os.h"
+#include "data.h"
 #include "data_conversion.h"
+#include "string_utility.h"
 
 BaseType_t ADC1_xHigherPriorityTaskWoken = pdFALSE;
 BaseType_t ADC2_xHigherPriorityTaskWoken = pdFALSE;
@@ -30,6 +32,7 @@ uint32_t ADC1_BufferRaw [ADC1_RAW_DATA_LEN];
 uint32_t ADC2_BufferRaw [ADC2_RAW_DATA_LEN];
 float ADC_BufferConvertedDebug [ADC_CONVERTED_DEBUG_DATA_LEN];
 float ADC_BufferConvertedAux [ADC_CONVERTED_AUX_DATA_LEN];
+extern uint8_t DATA_BlockBuffer [BUFFER_BLOCK_LEN];
 extern osSemaphoreId adc1SemaphoreHandle;
 extern osSemaphoreId adc2SemaphoreHandle;
 /* USER CODE END 0 */
@@ -381,21 +384,29 @@ extern inline void ADC_SamplingFunction(void)
 {
 	HAL_ADC_Start_DMA(&hadc1,ADC1_BufferRaw, ADC1_NUMBER_OF_CHANNELS);			/* Start ADC 1 in DMA mode */
 	HAL_ADC_Start_DMA(&hadc2,ADC2_BufferRaw, ADC2_NUMBER_OF_CHANNELS); 			/* Start ADC 2 in DMA mode */
-	return;
 }
 
 extern inline void ADC_ReadDataDebug(void)
 {
 	HAL_ADC_Stop_DMA(&hadc1);			/* Stop ADC1 conversion and wait for timer to restrt it */
-	ADC_BufferConvertedDebug[DCU_TEMP_SENSE_POSITION] = dcuTempSenseConversion(ADC1_BufferRaw[DCU_TEMP_SENSE_POSITION]);
-	ADC_BufferConvertedDebug[MAIN_CURRENT_SENSE_POSITION] = mainCurrentSenseConversion(ADC1_BufferRaw[MAIN_CURRENT_SENSE_POSITION]);
-	ADC_BufferConvertedDebug[DCU_CURRENT_SENSE_POSITION] = dcuCurrentSenseConversion(ADC1_BufferRaw[DCU_CURRENT_SENSE_POSITION]);
-	ADC_BufferConvertedDebug[_5V_DCU_POSITION] = _5vSenseConversion(ADC1_BufferRaw[_5V_DCU_POSITION]);
-	ADC_BufferConvertedDebug[_12V_POST_DIODES_SENSE_POSITION] = _12vSenseConversion(ADC1_BufferRaw[_12V_POST_DIODES_SENSE_POSITION]);
-	ADC_BufferConvertedDebug[_3V3_MCU_POSITION] = _3v3SenseConversion(ADC1_BufferRaw[_3V3_MCU_POSITION]);
-	ADC_BufferConvertedDebug[XBEE_CURRENT_SENSE_POSITION] = xbeeCurrentSenseConversion(ADC1_BufferRaw[XBEE_CURRENT_SENSE_POSITION]);
-	ADC_BufferConvertedDebug[VBAT_CHANNEL_POSITION] = vbatConversion(ADC1_BufferRaw[VBAT_CHANNEL_POSITION]);
-	return;
+	ADC_BufferConvertedDebug[DCU_TEMP_SENSE_POSITION] = DCU_TempSenseConversion(ADC1_BufferRaw[DCU_TEMP_SENSE_POSITION]);
+	ADC_BufferConvertedDebug[MAIN_CURRENT_SENSE_POSITION] = DCU_MainCurrentSenseConversion(ADC1_BufferRaw[MAIN_CURRENT_SENSE_POSITION]);
+	ADC_BufferConvertedDebug[DCU_CURRENT_SENSE_POSITION] = DCU_CurrentSenseConversion(ADC1_BufferRaw[DCU_CURRENT_SENSE_POSITION]);
+	ADC_BufferConvertedDebug[_5V_DCU_POSITION] = DCU_5vSenseConversion(ADC1_BufferRaw[_5V_DCU_POSITION]);
+	ADC_BufferConvertedDebug[_12V_POST_DIODES_SENSE_POSITION] = DCU_12vSenseConversion(ADC1_BufferRaw[_12V_POST_DIODES_SENSE_POSITION]);
+	ADC_BufferConvertedDebug[_3V3_MCU_POSITION] = DCU_3v3SenseConversion(ADC1_BufferRaw[_3V3_MCU_POSITION]);
+	ADC_BufferConvertedDebug[XBEE_CURRENT_SENSE_POSITION] = DCU_XbeeCurrentSenseConversion(ADC1_BufferRaw[XBEE_CURRENT_SENSE_POSITION]);
+	ADC_BufferConvertedDebug[VBAT_CHANNEL_POSITION] = DCU_VbatConversion(ADC1_BufferRaw[VBAT_CHANNEL_POSITION]);
+	
+	if(DATA_GetAcquisitionState() == STATE_ON) {
+		intToStringUnsigned(ADC_BufferConvertedDebug[DCU_TEMP_SENSE_POSITION], &DATA_BlockBuffer[5], 2);
+		intToStringUnsigned(ADC_BufferConvertedDebug[MAIN_CURRENT_SENSE_POSITION], &DATA_BlockBuffer[5], 4);
+		intToStringUnsigned(ADC_BufferConvertedDebug[DCU_CURRENT_SENSE_POSITION], &DATA_BlockBuffer[5], 3);
+		decimalToStringUnsigned(ADC_BufferConvertedDebug[_5V_DCU_POSITION], &DATA_BlockBuffer[5], 1, 2);
+		decimalToStringUnsigned(ADC_BufferConvertedDebug[_12V_POST_DIODES_SENSE_POSITION], &DATA_BlockBuffer[5], 2, 2);
+		decimalToStringUnsigned(ADC_BufferConvertedDebug[_3V3_MCU_POSITION], &DATA_BlockBuffer[5], 1, 2);
+		intToStringUnsigned(ADC_BufferConvertedDebug[XBEE_CURRENT_SENSE_POSITION], &DATA_BlockBuffer[5], 3);
+	}
 }
 
 extern inline void ADC_ReadDataAux(void)
@@ -404,7 +415,6 @@ extern inline void ADC_ReadDataAux(void)
 	ADC_BufferConvertedAux[ANALOG_AUX_1_POSITION] = analogAux1Conversion(ADC2_BufferRaw[ANALOG_AUX_1_RAW_POSITION]);
 	ADC_BufferConvertedAux[ANALOG_AUX_2_POSITION] = analogAux2Conversion(ADC2_BufferRaw[ANALOG_AUX_2_RAW_POSITION]);
 	ADC_BufferConvertedAux[ANALOG_AUX_3_POSITION] = analogAux3Conversion(ADC2_BufferRaw[ANALOG_AUX_3_RAW_POSITION]);
-	return;
 }
 
 extern void ADC_BuffersInit(void) {
@@ -417,8 +427,6 @@ extern void ADC_BuffersInit(void) {
 		ADC2_BufferRaw [i] = 0;
 		ADC_BufferConvertedAux [i] = 0.0;
 	}
-	
-	return;
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
@@ -437,8 +445,6 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
 			portYIELD_FROM_ISR(ADC2_xHigherPriorityTaskWoken);															/* Do context-switch if needed */
 		}
 	}
-	
-	return;
 }
 
 /* USER CODE END 1 */

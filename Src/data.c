@@ -4,10 +4,10 @@
 #include "data_conversion.h"
 #include "string_utility.h"
 
-uint16_t data1;
-uint16_t data2;
-uint16_t data3;
-uint16_t data4;
+uint16_t data1 = 0;
+uint16_t data2 = 0;
+uint16_t data3 = 0;
+uint16_t data4 = 0;
 float fData1 = 0.0f;
 float fData2 = 0.0f;
 float fData3 = 0.0f;
@@ -21,10 +21,10 @@ extern uint32_t CAN_ReceivedPacketsCounter [NUMBER_OF_ACQUIRED_CHANNELS];
 extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 {	
 	/* Get the four 16 bit data from the 8 bit CAN messages */
-	data1 = (unpackedData->packetData[0] << 8) | unpackedData->packetData[1]; 			/* First data in the packet */
-	data2 = (unpackedData->packetData[2] << 8) | unpackedData->packetData[3]; 			/* Second data in the packet */
-	data3 = (unpackedData->packetData[4] << 8) | unpackedData->packetData[5]; 			/* Third data in the packet */
-	data4 = (unpackedData->packetData[6] << 8) | unpackedData->packetData[7]; 			/* Fourth data in the packet */
+	data1 = (unpackedData->packetData[0] << 8) | unpackedData->packetData[1]; 		/* First data in the packet */
+	data2 = (unpackedData->packetData[2] << 8) | unpackedData->packetData[3]; 		/* Second data in the packet */
+	data3 = (unpackedData->packetData[4] << 8) | unpackedData->packetData[5]; 		/* Third data in the packet */
+	data4 = (unpackedData->packetData[6] << 8) | unpackedData->packetData[7]; 		/* Fourth data in the packet */
 	
 	/* Manage the conversions of all the data types */
 	switch(unpackedData->packetHeader.StdId) {

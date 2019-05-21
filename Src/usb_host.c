@@ -95,7 +95,7 @@ extern inline void USB_SavingTask(void)
 	
 	if(DATA_GetAcquisitionState() == STATE_ON) {
 		timestamp = getDataTimestamp();
-		uint32ToString(timestamp, &DATA_BlockBuffer[0], 7);
+		uint32ToString(timestamp, &DATA_BlockBuffer[TIMESTAMP_CSV_INDEX], 7);
 		f_write(&USBHFile, DATA_BlockBuffer, BUFFER_BLOCK_LEN, (void *)&bytesWritten);
 		/* Put here the code to manage errors */
 	}
