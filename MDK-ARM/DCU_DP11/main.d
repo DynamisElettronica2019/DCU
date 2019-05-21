@@ -94,3 +94,4 @@ dcu_dp11\main.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.
 dcu_dp11\main.o: ../Inc/gpio.h
 dcu_dp11\main.o: ../Inc/data.h
 dcu_dp11\main.o: ../Inc/telemetry.h
+dcu_dp11\main.o: ../Inc/timestamp.h

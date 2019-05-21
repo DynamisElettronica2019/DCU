@@ -37,6 +37,7 @@
 /* USER CODE BEGIN Includes */
 #include "data.h"
 #include "telemetry.h"
+#include "timestamp.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -284,6 +285,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	/* Timer 7: 100 Hz */
 	if(htim->Instance == TIM7) {		
 		USB_SavingRequest();						/* USB data saving */
+		incrementDataTimestamp();				/* Incremente data timestamp private variable by 10 ms */
 	}
   /* USER CODE END Callback 1 */
 }

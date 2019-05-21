@@ -510,6 +510,11 @@
               <FileType>1</FileType>
               <FilePath>../Src/stm32f7xx_hal_timebase_tim.c</FilePath>
             </File>
+            <File>
+              <FileName>timestamp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\timestamp.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -654,6 +659,11 @@
               <FileName>file_headers.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Inc\file_headers.h</FilePath>
+            </File>
+            <File>
+              <FileName>timestamp.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Inc\timestamp.h</FilePath>
             </File>
           </Files>
         </Group>

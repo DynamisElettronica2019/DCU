@@ -85,4 +85,6 @@ dcu_dp11\usb_host.o: ../Inc/sd_diskio.h
 dcu_dp11\usb_host.o: ../Inc/usbh_diskio.h
 dcu_dp11\usb_host.o: ../Inc/data.h
 dcu_dp11\usb_host.o: ../Inc/can.h
+dcu_dp11\usb_host.o: ../Inc/timestamp.h
+dcu_dp11\usb_host.o: ../Inc/string_utility.h
 dcu_dp11\usb_host.o: ../Inc/file_headers.h

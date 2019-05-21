@@ -29,6 +29,8 @@
 #include "usbh_platform.h"
 #include "fatfs.h"
 #include "data.h"
+#include "timestamp.h"
+#include "string_utility.h"
 #include "file_headers.h"
 /* USER CODE END Includes */
 
@@ -89,7 +91,11 @@ extern inline void USB_SavingRequest(void)
 
 extern inline void USB_SavingTask(void)
 {
+	uint32_t timestamp;
+	
 	if(DATA_GetAcquisitionState() == STATE_ON) {
+		timestamp = getDataTimestamp();
+		uint32ToString(timestamp, &DATA_BlockBuffer[0], 7);
 		f_write(&USBHFile, DATA_BlockBuffer, BUFFER_BLOCK_LEN, (void *)&bytesWritten);
 		/* Put here the code to manage errors */
 	}
@@ -105,6 +111,7 @@ extern inline void USB_OpenFile(void)
 			USB_WriteLen(fileHeader);
 			USB_WriteLen(channelNameHeader);
 			HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
+			resetDataTimestamp();							/* Reset data timestamp private variable */
 			DATA_SetAcquisitionState();				/* Update of the status packet */
 			/* Put here the code to manage errors */
 		}
