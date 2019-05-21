@@ -1,4 +1,5 @@
 dcu_dp11\telemetry.o: ..\Src\telemetry.c
+dcu_dp11\telemetry.o: ../Inc/telemetry.h
 dcu_dp11\telemetry.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
 dcu_dp11\telemetry.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
 dcu_dp11\telemetry.o: C:\Keil_v5\ARM\ARM_Compiler_5.06u6\Bin\..\include\stddef.h
@@ -15,9 +16,7 @@ dcu_dp11\telemetry.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.
 dcu_dp11\telemetry.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 dcu_dp11\telemetry.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 dcu_dp11\telemetry.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
-dcu_dp11\telemetry.o: ../Inc/telemetry.h
-dcu_dp11\telemetry.o: ../Inc/data.h
-dcu_dp11\telemetry.o: ../Inc/can.h
+dcu_dp11\telemetry.o: ../Inc/usart.h
 dcu_dp11\telemetry.o: ../Inc/main.h
 dcu_dp11\telemetry.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal.h
 dcu_dp11\telemetry.o: ../Inc/stm32f7xx_hal_conf.h
@@ -59,3 +58,5 @@ dcu_dp11\telemetry.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart.h
 dcu_dp11\telemetry.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart_ex.h
 dcu_dp11\telemetry.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_hcd.h
 dcu_dp11\telemetry.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_usb.h
+dcu_dp11\telemetry.o: ../Inc/data.h
+dcu_dp11\telemetry.o: ../Inc/can.h

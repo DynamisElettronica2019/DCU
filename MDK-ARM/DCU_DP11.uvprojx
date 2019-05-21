@@ -650,6 +650,11 @@
               <FileType>5</FileType>
               <FilePath>..\Inc\usbh_platform.h</FilePath>
             </File>
+            <File>
+              <FileName>file_headers.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Inc\file_headers.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

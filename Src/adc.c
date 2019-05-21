@@ -22,11 +22,14 @@
 
 /* USER CODE BEGIN 0 */
 #include "cmsis_os.h"
+#include "data_conversion.h"
 
-uint32_t adc1BufferRaw [ADC1_RAW_DATA_LEN];					
-uint32_t adc2BufferRaw [ADC2_RAW_DATA_LEN];
-float adcBufferConvertedDebug [ADC_CONVERTED_DEBUG_DATA_LEN];
-float adcBufferConvertedAux [ADC_CONVERTED_AUX_DATA_LEN];
+BaseType_t ADC1_xHigherPriorityTaskWoken = pdFALSE;
+BaseType_t ADC2_xHigherPriorityTaskWoken = pdFALSE;
+uint32_t ADC1_BufferRaw [ADC1_RAW_DATA_LEN];					
+uint32_t ADC2_BufferRaw [ADC2_RAW_DATA_LEN];
+float ADC_BufferConvertedDebug [ADC_CONVERTED_DEBUG_DATA_LEN];
+float ADC_BufferConvertedAux [ADC_CONVERTED_AUX_DATA_LEN];
 extern osSemaphoreId adc1SemaphoreHandle;
 extern osSemaphoreId adc2SemaphoreHandle;
 /* USER CODE END 0 */
@@ -374,38 +377,65 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 
 /* USER CODE BEGIN 1 */
 
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
-	BaseType_t xHigherPriorityTaskWoken = pdFALSE;																/* Variable goes to true when contxt-switch is needed */
+extern inline void ADC_SamplingFunction(void)
+{
+	HAL_ADC_Start_DMA(&hadc1,ADC1_BufferRaw, ADC1_NUMBER_OF_CHANNELS);			/* Start ADC 1 in DMA mode */
+	HAL_ADC_Start_DMA(&hadc2,ADC2_BufferRaw, ADC2_NUMBER_OF_CHANNELS); 			/* Start ADC 2 in DMA mode */
+	return;
+}
 
-	if(hadc->Instance == ADC1) {
-		if(adc1SemaphoreHandle != NULL) {																						/* Check on system start if semaphore is already created */
-			HAL_ADC_Stop_DMA(hadc);																										/* Stop ADC1 conversion */
-			xSemaphoreGiveFromISR(adc1SemaphoreHandle, &xHigherPriorityTaskWoken); 		/* Give semaphore to task when DMA is clear */
-			xSemaphoreGiveFromISR(adc1SemaphoreHandle, &xHigherPriorityTaskWoken); 		/* Give semaphore to task when DMA is clear */
-			portYIELD_FROM_ISR(xHigherPriorityTaskWoken);															/* Do context-switch if needed */
-		}
+extern inline void ADC_ReadDataDebug(void)
+{
+	HAL_ADC_Stop_DMA(&hadc1);			/* Stop ADC1 conversion and wait for timer to restrt it */
+	ADC_BufferConvertedDebug[DCU_TEMP_SENSE_POSITION] = dcuTempSenseConversion(ADC1_BufferRaw[DCU_TEMP_SENSE_POSITION]);
+	ADC_BufferConvertedDebug[MAIN_CURRENT_SENSE_POSITION] = mainCurrentSenseConversion(ADC1_BufferRaw[MAIN_CURRENT_SENSE_POSITION]);
+	ADC_BufferConvertedDebug[DCU_CURRENT_SENSE_POSITION] = dcuCurrentSenseConversion(ADC1_BufferRaw[DCU_CURRENT_SENSE_POSITION]);
+	ADC_BufferConvertedDebug[_5V_DCU_POSITION] = _5vSenseConversion(ADC1_BufferRaw[_5V_DCU_POSITION]);
+	ADC_BufferConvertedDebug[_12V_POST_DIODES_SENSE_POSITION] = _12vSenseConversion(ADC1_BufferRaw[_12V_POST_DIODES_SENSE_POSITION]);
+	ADC_BufferConvertedDebug[_3V3_MCU_POSITION] = _3v3SenseConversion(ADC1_BufferRaw[_3V3_MCU_POSITION]);
+	ADC_BufferConvertedDebug[XBEE_CURRENT_SENSE_POSITION] = xbeeCurrentSenseConversion(ADC1_BufferRaw[XBEE_CURRENT_SENSE_POSITION]);
+	ADC_BufferConvertedDebug[VBAT_CHANNEL_POSITION] = vbatConversion(ADC1_BufferRaw[VBAT_CHANNEL_POSITION]);
+	return;
+}
+
+extern inline void ADC_ReadDataAux(void)
+{
+	HAL_ADC_Stop_DMA(&hadc2);			/* Stop ADC2 conversion and wait for timer to restrt it */
+	ADC_BufferConvertedAux[ANALOG_AUX_1_POSITION] = analogAux1Conversion(ADC2_BufferRaw[ANALOG_AUX_1_RAW_POSITION]);
+	ADC_BufferConvertedAux[ANALOG_AUX_2_POSITION] = analogAux2Conversion(ADC2_BufferRaw[ANALOG_AUX_2_RAW_POSITION]);
+	ADC_BufferConvertedAux[ANALOG_AUX_3_POSITION] = analogAux3Conversion(ADC2_BufferRaw[ANALOG_AUX_3_RAW_POSITION]);
+	return;
+}
+
+extern void ADC_BuffersInit(void) {
+	for (uint8_t i = 0; i < ADC1_NUMBER_OF_CHANNELS; i++) {
+		ADC2_BufferRaw [i] = 0;
+		ADC_BufferConvertedDebug [i] = 0.0;
 	}
 	
-	if(hadc->Instance == ADC2) {
-		if(adc2SemaphoreHandle != NULL) {																						/* Check on system start if semaphore is already created */
-			HAL_ADC_Stop_DMA(hadc);																										/* Stop ADC2 conversion */
-			xSemaphoreGiveFromISR(adc2SemaphoreHandle, &xHigherPriorityTaskWoken); 		/* Give semaphore to task when DMA is clear */
-			portYIELD_FROM_ISR(xHigherPriorityTaskWoken);															/* Do context-switch if needed */
-		}
+	for (uint8_t i = 0; i < ADC2_NUMBER_OF_CHANNELS; i++) {
+		ADC2_BufferRaw [i] = 0;
+		ADC_BufferConvertedAux [i] = 0.0;
 	}
 	
 	return;
 }
 
-extern void adcBuffersInit(void) {
-	for (uint8_t i = 0; i < ADC1_NUMBER_OF_CHANNELS; i++) {
-		adc1BufferRaw [i] = 0;
-		adcBufferConvertedDebug [i] = 0.0;
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
+	if(hadc->Instance == ADC1) {
+		if(adc1SemaphoreHandle != NULL) {																									/* Check on system start if semaphore is already created */
+			HAL_ADC_Stop_DMA(hadc);																													/* Stop ADC1 conversion */
+			xSemaphoreGiveFromISR(adc1SemaphoreHandle, &ADC1_xHigherPriorityTaskWoken); 		/* Give semaphore to task when DMA is clear */
+			portYIELD_FROM_ISR(ADC1_xHigherPriorityTaskWoken);															/* Do context-switch if needed */
+		}
 	}
 	
-	for (uint8_t i = 0; i < ADC2_NUMBER_OF_CHANNELS; i++) {
-		adc2BufferRaw [i] = 0;
-		adcBufferConvertedAux [i] = 0.0;
+	if(hadc->Instance == ADC2) {
+		if(adc2SemaphoreHandle != NULL) {																									/* Check on system start if semaphore is already created */
+			HAL_ADC_Stop_DMA(hadc);																													/* Stop ADC2 conversion */
+			xSemaphoreGiveFromISR(adc2SemaphoreHandle, &ADC2_xHigherPriorityTaskWoken); 		/* Give semaphore to task when DMA is clear */
+			portYIELD_FROM_ISR(ADC2_xHigherPriorityTaskWoken);															/* Do context-switch if needed */
+		}
 	}
 	
 	return;

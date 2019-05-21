@@ -57,26 +57,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint8_t startAcquisitionCommand = ACQUISITION_IDLE_REQUEST;
-uint8_t timer8HzCounter = 1;
-BaseType_t GPIO_AutogearHigherPriorityTaskWoken = pdFALSE;
-BaseType_t GPIO_OvercurrentHigherPriorityTaskWoken = pdFALSE;
-BaseType_t GPIO1_CtrlxHigherPriorityTaskWoken = pdFALSE;
-BaseType_t GPIO2_CtrlxHigherPriorityTaskWoken = pdFALSE;
-BaseType_t GPIO3_CtrlxHigherPriorityTaskWoken = pdFALSE;
-BaseType_t alive_xHigherPriorityTaskWoken = pdFALSE;
-BaseType_t USB_xHigherPriorityTaskWoken = pdFALSE;
-BaseType_t CAN_xHigherPriorityTaskWoken = pdFALSE;
-extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
-extern uint32_t adc1BufferRaw [ADC1_RAW_DATA_LEN];					
-extern uint32_t adc2BufferRaw [ADC2_RAW_DATA_LEN];
-extern osThreadId aliveHandle;
-extern osSemaphoreId saveUsbSemaphoreHandle;
-extern osMessageQId startAcquisitionEventHandle;
-extern osMessageQId digitalAuxQueueHandle;
-extern osSemaphoreId autogearSemaphoreHandle;
-extern osSemaphoreId USB_OvercurrentSemaphoreHandle;
-extern osSemaphoreId CAN_SendSemaphoreHandle;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -101,7 +82,6 @@ int main(void)
 
   /* USER CODE END 1 */
   
-
   /* Enable I-Cache---------------------------------------------------------*/
   SCB_EnableICache();
 
@@ -139,19 +119,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET); 			/* Green LED off as default */
-	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET); 		/* Yellow LED off as default */
-	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET); 					/* Red LED off as default */
-	dataPacketReset();																													/* Reset the data saving buffer */
-	packetCounterReset();																												/* Reset the CAN packets recevide counter */
-	canStart();																																	/* CAN filter config and start */
-	adcBuffersInit();																														/* ADC buffer initialization */
-	usbInitStart();																															/* USB peripheral config and start */
-	MX_FATFS_Init();																														/* FatFS init */
-	HAL_Delay(500);																															/* Delay for Vbus stabilization */
-	HAL_TIM_Base_Start_IT(&htim5); 																							/* Start timer 5 in interrupt mode */
-	HAL_TIM_Base_Start_IT(&htim6); 																							/* Start timer 6 in interrupt mode */
-	HAL_TIM_Base_Start_IT(&htim7); 																							/* Start timer 7 in interrupt mode */
+	USER_SystemInit();
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
@@ -243,45 +211,42 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+	GPIO_UsbOvercurrentISR(); 				/* USB overcurrent ISR */
+	GPIO_AutogearSwitchISR(); 				/* Autogear switch ISR */
+}
+
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	if(huart->Instance == USART1) {
 		usart1RxCallback();
 	}
-	
-	if(huart->Instance == USART2) {
-		/* Put here the GPS code */
+	else if(huart->Instance == USART2) {
 	}
 }
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
-	if(huart->Instance==USART1) {
+	if(huart->Instance == USART1) {
 		usart1TxCallback();
 	}
-	
-	if(huart->Instance==USART2) {
-		/* Put here the GPS code */
+	else if(huart->Instance == USART2) {
 	}
 }
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-
-	/* USB overcurrent ISR */
-	if(HAL_GPIO_ReadPin(USB_OVERCURRENT_GPIO_Port, USB_OVERCURRENT_Pin) == GPIO_PIN_RESET) {
-		if(USB_OvercurrentSemaphoreHandle != NULL) {																													/* Check on system start if semaphore is already created */
-			xSemaphoreGiveFromISR(USB_OvercurrentSemaphoreHandle, &GPIO_OvercurrentHigherPriorityTaskWoken); 		/* Give semaphore to task when interrupt is called */
-			portYIELD_FROM_ISR(GPIO_OvercurrentHigherPriorityTaskWoken);																				/* Do context-switch if needed */
-		}
-	}
-	
-	/* Autogear switch ISR */
-	if(HAL_GPIO_ReadPin(AUTOGEAR_SWTICH_MCU_GPIO_Port, AUTOGEAR_SWTICH_MCU_Pin) == GPIO_PIN_RESET) {
-		if(autogearSemaphoreHandle != NULL) {																																	/* Check on system start if semaphore is already created */
-			xSemaphoreGiveFromISR(autogearSemaphoreHandle, &GPIO_AutogearHigherPriorityTaskWoken); 							/* Give semaphore to task when interrupt is called */
-			portYIELD_FROM_ISR(GPIO_AutogearHigherPriorityTaskWoken);																						/* Do context-switch if needed */
-		}
-	}
+static inline void USER_SystemInit(void)
+{
+	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET); 				/* Green LED off as default */
+	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET); 			/* Yellow LED off as default */
+	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET); 						/* Red LED off as default */
+	DATA_PacketReset();																														/* Reset the data saving buffer */
+	CAN_PacketCounterReset();																											/* Reset the CAN packets recevide counter */
+	CAN_Start();																																	/* CAN filter config and start */
+	ADC_BuffersInit();																														/* ADC buffer initialization */
+	USB_InitStart();																															/* USB peripheral config and start */
+	MX_FATFS_Init();																															/* FatFS init */
+	HAL_Delay(500);																																/* Delay for Vbus stabilization */
+	return;
 }
 
 /* USER CODE END 4 */
@@ -297,67 +262,28 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
-	uint8_t digitalAuxEvent = 0;
-	
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM1) {
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
 	
-	/* Timer 5 period elapsed callback: 1 Hz */
-	if (htim->Instance == TIM5) {
-
-		/* CAN send at 1 Hz: temperature, currents, voltages and acquisition status */
-		if(CAN_SendSemaphoreHandle != NULL) {
-			xSemaphoreGiveFromISR(CAN_SendSemaphoreHandle, &CAN_xHigherPriorityTaskWoken);
-			portYIELD_FROM_ISR(CAN_xHigherPriorityTaskWoken);
-		}
-		
-		/* Telemetry DCU state packet send at 1 Hz */
-    stateSendTimCallback();
-		
-		/* ADCs management: 1 Hz sampling time */
-		HAL_ADC_Start_DMA(&hadc1,adc1BufferRaw, ADC1_NUMBER_OF_CHANNELS);			/* Start ADC 1 in DMA mode */
-		HAL_ADC_Start_DMA(&hadc2,adc2BufferRaw, ADC2_NUMBER_OF_CHANNELS ); 		/* Start ADC 2 in DMA mode */
-	
-		/* Digital aux management: 1 Hz sampling time */
-		if(HAL_GPIO_ReadPin(DIGITAL_AUX_1_GPIO_Port, DIGITAL_AUX_1_Pin) == GPIO_PIN_SET) {
-			digitalAuxEvent = DIGITAL_EVENT_AUX_1;
-			xQueueSendFromISR(digitalAuxQueueHandle, &digitalAuxEvent, &GPIO1_CtrlxHigherPriorityTaskWoken);		/* Add digital aux event to queue */
-		}
-		
-		if(HAL_GPIO_ReadPin(DIGITAL_AUX_2_GPIO_Port, DIGITAL_AUX_2_Pin) == GPIO_PIN_SET) {
-			digitalAuxEvent = DIGITAL_EVENT_AUX_2;
-			xQueueSendFromISR(digitalAuxQueueHandle, &digitalAuxEvent, &GPIO1_CtrlxHigherPriorityTaskWoken);		/* Add digital aux event to queue */
-		}
-		
-		if(HAL_GPIO_ReadPin(DIGITAL_AUX_3_GPIO_Port, DIGITAL_AUX_3_Pin) == GPIO_PIN_SET) {
-			digitalAuxEvent = DIGITAL_EVENT_AUX_3;
-			xQueueSendFromISR(digitalAuxQueueHandle, &digitalAuxEvent, &GPIO1_CtrlxHigherPriorityTaskWoken);		/* Add digital aux event to queue */
-		}
+	/* Timer 5: 1 Hz */
+	if (htim->Instance == TIM5) {	
+		CAN_SendPackets(); 							/* CAN send: temperature, currents, voltages and acquisition status */
+		stateSendTimCallback(); 				/* Telemetry DCU state packet */
+		ADC_SamplingFunction(); 				/* ADC sampling: debug and aux channels*/
+		GPIO_AuxSamplingFunction(); 		/* GPIO aux sampling */
 	}
 
-	/* Timer 6 period elapsed callback: 10 Hz */
+	/* Timer 6: 10 Hz */
 	if(htim->Instance == TIM6) {
+		dataSendTimCallback();					/* Send telemetry data */
 	}
 
-	/* Timer 7 period elapsed callback: 100 Hz */
-	if(htim->Instance == TIM7) {
-		
-		/* USB saving task */
-		if(saveUsbSemaphoreHandle != NULL) {
-			xSemaphoreGiveFromISR(saveUsbSemaphoreHandle, &USB_xHigherPriorityTaskWoken);
-			portYIELD_FROM_ISR(USB_xHigherPriorityTaskWoken);
-		}
-
-    /* Send telemetry data */
-    if(timer8HzCounter >= 12) {
-      dataSendTimCallback();
-      timer8HzCounter = 1;
-    } else {
-      timer8HzCounter++;
-    }
+	/* Timer 7: 100 Hz */
+	if(htim->Instance == TIM7) {		
+		USB_SavingRequest();						/* USB data saving */
 	}
   /* USER CODE END Callback 1 */
 }
@@ -377,7 +303,7 @@ void Error_Handler(void)
 	/* Red LED toogle to report error */
   while(1) {
 		HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
-		HAL_Delay(100);
+		HAL_Delay(10);
 	}
   /* USER CODE END Error_Handler_Debug */
 }
@@ -402,7 +328,7 @@ void assert_failed(uint8_t *file, uint32_t line)
 	/* Red LED toogle to report erorrs */
 	while(1) {
 		HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
-		HAL_Delay(250);
+		HAL_Delay(100);
 	}
   /* USER CODE END 6 */
 }

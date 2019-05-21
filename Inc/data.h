@@ -6,7 +6,6 @@
 #define CHANNEL_SEPARATION																		(uint8_t)';'
 #define DECIMAL_SEPARATOR 																		(uint8_t)'.'
 #define END_LINE																							(uint8_t)'\n'
-
 #define NUMBER_OF_RECEIVED_PACKETS														(uint8_t)25
 #define NUMBER_OF_ACQUIRED_CHANNELS														(uint8_t)91
 #define BUFFER_STATE_LEN 																			(uint8_t)19
@@ -45,7 +44,7 @@
 #define GCU_DEBUG_1_ID_COUNTER_INDEX 													(uint8_t)23
 #define GCU_DEBUG_2_ID_COUNTER_INDEX 													(uint8_t)24
 
-#define HALL_EFFECT_FR_CSV_INDEX 															(uint16_t)0
+#define HALL_EFFECT_FR_CSV_INDEX 															(uint16_t)1
 #define HALL_EFFECT_FL_CSV_INDEX 															(uint16_t)6
 #define HALL_EFFECT_RR_CSV_INDEX 															(uint16_t)12
 #define HALL_EFFECT_RL_CSV_INDEX 															(uint16_t)18
@@ -146,7 +145,7 @@
 #define END_DATA_CSV_INDEX 																		(uint16_t)588
 #define END_ROW_CSV_INDEX 																		(uint16_t)1023
 
-//#define HALL_EFFECT_FR_CSV_SEPARATOR												(HALL_EFFECT_FR_CSV_INDEX - 1)
+#define HALL_EFFECT_FR_CSV_SEPARATOR													(HALL_EFFECT_FR_CSV_INDEX - 1)
 #define HALL_EFFECT_FL_CSV_SEPARATOR													(HALL_EFFECT_FL_CSV_INDEX - 1)
 #define HALL_EFFECT_RR_CSV_SEPARATOR 													(HALL_EFFECT_RR_CSV_INDEX - 1)
 #define HALL_EFFECT_RL_CSV_SEPARATOR 													(HALL_EFFECT_RL_CSV_INDEX - 1)
@@ -270,9 +269,9 @@
 #define ACQUISITION_OFF_ETH_COMMAND 													(uint8_t)'H'
 #define ACQUISITION_ON_DEBUG_COMMAND 													(uint8_t)'D'
 #define ACQUISITION_OFF_DEBUG_COMMAND 												(uint8_t)'B'
+
 #define STATE_ON 																							(uint8_t)'1'
 #define STATE_OFF																							(uint8_t)'0'
-
 #define STATE_USB_PRESENT_INDEX 															(uint8_t)3
 #define STATE_USB_READY_INDEX 																(uint8_t)5
 #define STATE_uSD_PRESENT_INDEX 															(uint8_t)7
@@ -295,20 +294,16 @@
 #define CMD_READ_ERR_ID          															(uint8_t)'B'
 #define UART1_CLEAR_FLAG																			(uint8_t)'C'
 
-extern inline void canDataParser(CAN_RxPacketTypeDef *unpackedData);
+extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData);
 extern inline void startAcquisitionStateMachine(uint8_t startAcquisitionEvent);
-static inline void USB_OpenFile(void);
-static inline void USB_CloseFile(void);
-extern inline uint8_t getUsbReadyState(void);
-extern inline uint8_t getAcquisitionState(void);
-extern inline void setUsbPresentState(void);
-extern inline void setUsbReadyState(void);
-extern inline void setAcquisitionState(void);
-extern inline void resetUsbPresentState(void);
-extern inline void resetUsbReadyState(void);
-extern inline void resetAcquisitionState(void);
-extern void dataPacketReset(void);
-extern void packetCounterReset(void);
-static inline void USB_WriteLen(uint8_t *buffer);
+extern inline uint8_t DATA_GetUsbReadyState(void);
+extern inline uint8_t DATA_GetAcquisitionState(void);
+extern inline void DATA_SetUsbPresentState(void);
+extern inline void DATA_SetUsbReadyState(void);
+extern inline void DATA_SetAcquisitionState(void);
+extern inline void DATA_ResetUsbPresentState(void);
+extern inline void DATA_ResetUsbReadyState(void);
+extern inline void DATA_ResetAcquisitionState(void);
+extern void DATA_PacketReset(void);
 
 #endif

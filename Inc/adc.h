@@ -60,7 +60,10 @@ void MX_ADC1_Init(void);
 void MX_ADC2_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-extern void adcBuffersInit(void);
+extern inline void ADC_SamplingFunction(void);
+extern inline void ADC_ReadDataDebug(void);
+extern inline void ADC_ReadDataAux(void);
+extern void ADC_BuffersInit(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

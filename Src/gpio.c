@@ -20,14 +20,22 @@
 /* Includes ------------------------------------------------------------------*/
 #include "gpio.h"
 /* USER CODE BEGIN 0 */
-
+#include "cmsis_os.h"
 /* USER CODE END 0 */
 
 /*----------------------------------------------------------------------------*/
 /* Configure GPIO                                                             */
 /*----------------------------------------------------------------------------*/
 /* USER CODE BEGIN 1 */
-
+uint8_t digitalAuxEvent = 0;
+BaseType_t GPIO_AutogearxHigherPriorityTaskWoken = pdFALSE;
+BaseType_t GPIO_OvercurrentxHigherPriorityTaskWoken = pdFALSE;
+BaseType_t GPIO_Aux1xHigherPriorityTaskWoken = pdFALSE;
+BaseType_t GPIO_Aux2xHigherPriorityTaskWoken = pdFALSE;
+BaseType_t GPIO_Aux3xHigherPriorityTaskWoken = pdFALSE;
+extern osSemaphoreId autogearSemaphoreHandle;
+extern osSemaphoreId USB_OvercurrentSemaphoreHandle;
+extern osMessageQId digitalAuxQueueHandle;
 /* USER CODE END 1 */
 
 /** Configure pins as 
@@ -108,6 +116,70 @@ void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 2 */
+
+extern inline void GPIO_UsbOvercurrentISR(void)
+{
+	if(HAL_GPIO_ReadPin(USB_OVERCURRENT_GPIO_Port, USB_OVERCURRENT_Pin) == GPIO_PIN_RESET) {
+		if(USB_OvercurrentSemaphoreHandle != NULL) {																														/* Check on system start if semaphore is already created */
+			xSemaphoreGiveFromISR(USB_OvercurrentSemaphoreHandle, &GPIO_OvercurrentxHigherPriorityTaskWoken); 		/* Give semaphore to task when interrupt is called */
+			portYIELD_FROM_ISR(GPIO_OvercurrentxHigherPriorityTaskWoken);																					/* Do context-switch if needed */
+		}
+	}
+	
+	return;
+}
+
+
+extern inline void GPIO_AutogearSwitchISR(void)
+{
+	if(HAL_GPIO_ReadPin(AUTOGEAR_SWTICH_MCU_GPIO_Port, AUTOGEAR_SWTICH_MCU_Pin) == GPIO_PIN_RESET) {
+		if(autogearSemaphoreHandle != NULL) {																																		/* Check on system start if semaphore is already created */
+			xSemaphoreGiveFromISR(autogearSemaphoreHandle, &GPIO_AutogearxHigherPriorityTaskWoken); 							/* Give semaphore to task when interrupt is called */
+			portYIELD_FROM_ISR(GPIO_AutogearxHigherPriorityTaskWoken);																						/* Do context-switch if needed */
+		}
+	}
+	
+	return;
+}
+
+extern inline void GPIO_AuxSamplingFunction(void)
+{
+	if(HAL_GPIO_ReadPin(DIGITAL_AUX_1_GPIO_Port, DIGITAL_AUX_1_Pin) == GPIO_PIN_SET) {
+		digitalAuxEvent = DIGITAL_EVENT_AUX_1;
+		xQueueSendFromISR(digitalAuxQueueHandle, &digitalAuxEvent, &GPIO_Aux1xHigherPriorityTaskWoken);					/* Add digital aux event to queue */
+	}
+	
+	if(HAL_GPIO_ReadPin(DIGITAL_AUX_2_GPIO_Port, DIGITAL_AUX_2_Pin) == GPIO_PIN_SET) {
+		digitalAuxEvent = DIGITAL_EVENT_AUX_2;
+		xQueueSendFromISR(digitalAuxQueueHandle, &digitalAuxEvent, &GPIO_Aux2xHigherPriorityTaskWoken);					/* Add digital aux event to queue */
+	}
+	
+	if(HAL_GPIO_ReadPin(DIGITAL_AUX_3_GPIO_Port, DIGITAL_AUX_3_Pin) == GPIO_PIN_SET) {
+		digitalAuxEvent = DIGITAL_EVENT_AUX_3;
+		xQueueSendFromISR(digitalAuxQueueHandle, &digitalAuxEvent, &GPIO_Aux3xHigherPriorityTaskWoken);					/* Add digital aux event to queue */
+	}
+	
+	return;
+}
+
+extern inline void GPIO_AuxManageEvent(uint8_t event)
+{
+	switch(digitalAuxEvent) {
+		case DIGITAL_EVENT_AUX_1:
+			/* Put here the code to handling digital aux 1 event */
+			break;
+
+		case DIGITAL_EVENT_AUX_2:
+			/* Put here the code to handling digital aux 1 event */
+			break;
+
+		case DIGITAL_EVENT_AUX_3:
+			/* Put here the code to handling digital aux 1 event */
+			break;
+	}
+
+	return;
+}
 
 /* USER CODE END 2 */
 

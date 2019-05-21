@@ -43,3 +43,17 @@ dcu_dp11\usbh_platform.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart
 dcu_dp11\usbh_platform.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart_ex.h
 dcu_dp11\usbh_platform.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_hcd.h
 dcu_dp11\usbh_platform.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_usb.h
+dcu_dp11\usbh_platform.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
+dcu_dp11\usbh_platform.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+dcu_dp11\usbh_platform.o: ../Inc/FreeRTOSConfig.h
+dcu_dp11\usbh_platform.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+dcu_dp11\usbh_platform.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+dcu_dp11\usbh_platform.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+dcu_dp11\usbh_platform.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM7/r0p1/portmacro.h
+dcu_dp11\usbh_platform.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+dcu_dp11\usbh_platform.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+dcu_dp11\usbh_platform.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
+dcu_dp11\usbh_platform.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h
+dcu_dp11\usbh_platform.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
+dcu_dp11\usbh_platform.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
+dcu_dp11\usbh_platform.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h

@@ -58,3 +58,5 @@ dcu_dp11\can.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 dcu_dp11\can.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 dcu_dp11\can.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
 dcu_dp11\can.o: ../Inc/id_can.h
+dcu_dp11\can.o: ../Inc/adc.h
+dcu_dp11\can.o: ../Inc/data.h

@@ -68,3 +68,4 @@ dcu_dp11\usbh_conf.o: ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_pip
 dcu_dp11\usbh_conf.o: ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_ctlreq.h
 dcu_dp11\usbh_conf.o: ../Inc/usbh_platform.h
 dcu_dp11\usbh_conf.o: ../Inc/usb_host.h
+dcu_dp11\usbh_conf.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
