@@ -239,6 +239,7 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+	/* Start the transmit process */
 	uint8_t usart1LockFlag = UART1_CLEAR_FLAG;
 	xQueueSend(Usart1LockQueueHandle, &usart1LockFlag, 0);
   /* USER CODE END RTOS_QUEUES */
@@ -506,7 +507,7 @@ void ReceiveTelemFunc(void const * argument)
 	/* Infinite loop */
   for(;;) {
     xSemaphoreTake(receiveCommandSemaphoreHandle, portMAX_DELAY); 		/* Unlock when uart rx from telemetry is completed */
-		telemetryReceive();																															/* */
+		TELEMETRY_Receive();																															/* */
   }
   /* USER CODE END ReceiveTelemFunc */
 }

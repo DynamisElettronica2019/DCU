@@ -58,5 +58,3 @@ dcu_dp11\telemetry.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart.h
 dcu_dp11\telemetry.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart_ex.h
 dcu_dp11\telemetry.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_hcd.h
 dcu_dp11\telemetry.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_usb.h
-dcu_dp11\telemetry.o: ../Inc/data.h
-dcu_dp11\telemetry.o: ../Inc/can.h

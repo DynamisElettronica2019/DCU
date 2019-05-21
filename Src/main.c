@@ -220,7 +220,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	if(huart->Instance == USART1) {
-		usart1RxCallback();
+		UART1_RxCallback();
 	}
 	else if(huart->Instance == USART2) {
 	}
@@ -229,7 +229,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
 	if(huart->Instance == USART1) {
-		usart1TxCallback();
+		UART1_TxCallback();
 	}
 	else if(huart->Instance == USART2) {
 	}
@@ -271,21 +271,21 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	
 	/* Timer 5: 1 Hz */
 	if (htim->Instance == TIM5) {	
-		CAN_SendPackets(); 							/* CAN send: temperature, currents, voltages and acquisition status */
-		stateSendTimCallback(); 				/* Telemetry DCU state packet */
-		ADC_SamplingFunction(); 				/* ADC sampling: debug and aux channels*/
-		GPIO_AuxSamplingFunction(); 		/* GPIO aux sampling */
+		CAN_SendPackets(); 										/* CAN send: temperature, currents, voltages and acquisition status */
+		TELEMETRY_StateSendTimCallback(); 		/* Telemetry DCU state packet */
+		ADC_SamplingFunction(); 							/* ADC sampling: debug and aux channels*/
+		GPIO_AuxSamplingFunction(); 					/* GPIO aux sampling */
 	}
 
 	/* Timer 6: 10 Hz */
 	if(htim->Instance == TIM6) {
-		dataSendTimCallback();					/* Send telemetry data */
+		TELEMETRY_DataSendTimCallback();			/* Send telemetry data */
 	}
 
 	/* Timer 7: 100 Hz */
 	if(htim->Instance == TIM7) {		
-		USB_SavingRequest();						/* USB data saving */
-		incrementDataTimestamp();				/* Incremente data timestamp private variable by 10 ms */
+		USB_SavingRequest();									/* USB data saving */
+		incrementDataTimestamp();							/* Incremente data timestamp private variable by 10 ms */
 	}
   /* USER CODE END Callback 1 */
 }
