@@ -38,13 +38,18 @@ typedef struct
 	CAN_RxHeaderTypeDef CAN_RxPacket_Header;
 	uint8_t CAN_RxPacket_Data[8];
 } CAN_RxPacketTypeDef;
+
+typedef struct
+{
+	CAN_TxHeaderTypeDef CAN_RtPacketHeader;
+	uint8_t CAN_RxPacketData[8];
+} CAN_TxPacketTypedef;
 /* USER CODE END Private defines */
 
 void MX_CAN1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 extern void canStart(void);
-extern inline void CAN_SendMessage(uint32_t id, uint8_t *message, uint8_t bytesNumber);
 static void canFilterConfig(void);
 /* USER CODE END Prototypes */
 

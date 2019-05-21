@@ -88,3 +88,4 @@ dcu_dp11\freertos.o: ../Inc/gpio.h
 dcu_dp11\freertos.o: ../Inc/adc.h
 dcu_dp11\freertos.o: ../Inc/data.h
 dcu_dp11\freertos.o: ../Inc/data_conversion.h
+dcu_dp11\freertos.o: ../Inc/id_can.h

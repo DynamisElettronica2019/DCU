@@ -66,6 +66,7 @@ BaseType_t GPIO2_CtrlxHigherPriorityTaskWoken = pdFALSE;
 BaseType_t GPIO3_CtrlxHigherPriorityTaskWoken = pdFALSE;
 BaseType_t alive_xHigherPriorityTaskWoken = pdFALSE;
 BaseType_t USB_xHigherPriorityTaskWoken = pdFALSE;
+BaseType_t CAN_xHigherPriorityTaskWoken = pdFALSE;
 extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
 extern uint32_t adc1BufferRaw [ADC1_RAW_DATA_LEN];					
 extern uint32_t adc2BufferRaw [ADC2_RAW_DATA_LEN];
@@ -75,6 +76,7 @@ extern osMessageQId startAcquisitionEventHandle;
 extern osMessageQId digitalAuxQueueHandle;
 extern osSemaphoreId autogearSemaphoreHandle;
 extern osSemaphoreId USB_OvercurrentSemaphoreHandle;
+extern osSemaphoreId CAN_SendSemaphoreHandle;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -306,6 +308,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	/* Timer 5 period elapsed callback: 1 Hz */
 	if (htim->Instance == TIM5) {
 
+		/* CAN send at 1 Hz: temperature, currents, voltages and acquisition status */
+		if(CAN_SendSemaphoreHandle != NULL) {
+			xSemaphoreGiveFromISR(CAN_SendSemaphoreHandle, &CAN_xHigherPriorityTaskWoken);
+			portYIELD_FROM_ISR(CAN_xHigherPriorityTaskWoken);
+		}
+		
 		/* Telemetry DCU state packet send at 1 Hz */
     stateSendTimCallback();
 		

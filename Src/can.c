@@ -141,20 +141,6 @@ extern void canStart(void)
 	return;
 }
 
-extern inline void CAN_SendMessage(uint32_t id, uint8_t *message, uint8_t bytesNumber)
-{
-	uint32_t packetMailbox;
-	CAN_TxHeaderTypeDef packetHeader;
-	
-	packetHeader.StdId = id;
-	packetHeader.RTR = CAN_RTR_DATA;
-	packetHeader.IDE = CAN_ID_STD;
-	packetHeader.DLC = bytesNumber;
-	packetHeader.TransmitGlobalTime = DISABLE;
-	HAL_CAN_AddTxMessage(&hcan1, &packetHeader, message, &packetMailbox);
-	return;
-}
-
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
 	HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &(currentFifo0ReceivedPacket.CAN_RxPacket_Header), currentFifo0ReceivedPacket.CAN_RxPacket_Data);
@@ -217,7 +203,7 @@ void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef *hcan)
 
 void HAL_CAN_TxMailbox2CompleteCallback(CAN_HandleTypeDef *hcan)
 {
-	xSemaphoreGiveFromISR(CAN_SendDataSemaphoreCounterHandle, &CAN_Tx21xHigherPriorityTaskWoken);
+	xSemaphoreGiveFromISR(CAN_SendDataSemaphoreCounterHandle, &CAN_Tx2xHigherPriorityTaskWoken);
 	portYIELD_FROM_ISR(CAN_Tx2xHigherPriorityTaskWoken);
 	return;
 }

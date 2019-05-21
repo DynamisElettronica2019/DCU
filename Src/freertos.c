@@ -34,6 +34,7 @@
 #include "adc.h"
 #include "data.h"
 #include "data_conversion.h"
+#include "id_can.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -85,6 +86,7 @@ osThreadId startAcquisitionStateMachineHandle;
 osThreadId canFifo0UnpackHandle;
 osThreadId canFifo1UnpackHandle;
 osThreadId sendDebugDataHandle;
+osThreadId CAN_SendManagerHandle;
 osMessageQId digitalAuxQueueHandle;
 osMessageQId ErrorQueueHandle;
 osMessageQId Usart1TxModeQueueHandle;
@@ -103,7 +105,7 @@ osSemaphoreId sendStateSemaphoreHandle;
 osSemaphoreId receiveCommandSemaphoreHandle;
 osSemaphoreId sendFollowingDataSemaphoreHandle;
 osSemaphoreId saveUsbSemaphoreHandle;
-osSemaphoreId CAN_SendDebugDataHandle;
+osSemaphoreId CAN_SendSemaphoreHandle;
 osSemaphoreId CAN_SendDataSemaphoreCounterHandle;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -128,6 +130,7 @@ void startAcquisitionStateMachineTask(void const * argument);
 void canFifo0UnpackTask(void const * argument);
 void canFifo1UnpackTask(void const * argument);
 void sendDebugDataTask(void const * argument);
+void CAN_SendManagerTask(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -182,9 +185,9 @@ void MX_FREERTOS_Init(void) {
   osSemaphoreDef(saveUsbSemaphore);
   saveUsbSemaphoreHandle = osSemaphoreCreate(osSemaphore(saveUsbSemaphore), 1);
 
-  /* definition and creation of CAN_SendDebugData */
-  osSemaphoreDef(CAN_SendDebugData);
-  CAN_SendDebugDataHandle = osSemaphoreCreate(osSemaphore(CAN_SendDebugData), 1);
+  /* definition and creation of CAN_SendSemaphore */
+  osSemaphoreDef(CAN_SendSemaphore);
+  CAN_SendSemaphoreHandle = osSemaphoreCreate(osSemaphore(CAN_SendSemaphore), 1);
 
   /* definition and creation of CAN_SendDataSemaphoreCounter */
   osSemaphoreDef(CAN_SendDataSemaphoreCounter);
@@ -201,7 +204,7 @@ void MX_FREERTOS_Init(void) {
 	xSemaphoreTake(adc2SemaphoreHandle, portMAX_DELAY); 									/* Start with the task locked */
 	xSemaphoreTake(autogearSemaphoreHandle, portMAX_DELAY); 							/* Start with the task locked */
 	xSemaphoreTake(USB_OvercurrentSemaphoreHandle, portMAX_DELAY); 				/* Start with the task locked */
-	xSemaphoreTake(CAN_SendDebugDataHandle, portMAX_DELAY); 							/* Start with the task locked */
+	xSemaphoreTake(CAN_SendSemaphoreHandle, portMAX_DELAY); 							/* Start with the task locked */
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -242,7 +245,7 @@ void MX_FREERTOS_Init(void) {
   canFifo1QueueHandle = osMessageCreate(osMessageQ(canFifo1Queue), NULL);
 
   /* definition and creation of CAN_SendDataQueue */
-  osMessageQDef(CAN_SendDataQueue, 32, CAN_TxHeaderTypeDef);
+  osMessageQDef(CAN_SendDataQueue, 32, CAN_TxPacketTypedef);
   CAN_SendDataQueueHandle = osMessageCreate(osMessageQ(CAN_SendDataQueue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
@@ -319,6 +322,10 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of sendDebugData */
   osThreadDef(sendDebugData, sendDebugDataTask, osPriorityLow, 0, 128);
   sendDebugDataHandle = osThreadCreate(osThread(sendDebugData), NULL);
+
+  /* definition and creation of CAN_SendManager */
+  osThreadDef(CAN_SendManager, CAN_SendManagerTask, osPriorityNormal, 0, 128);
+  CAN_SendManagerHandle = osThreadCreate(osThread(CAN_SendManager), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -441,13 +448,22 @@ void digitalAuxManagerTask(void const * argument)
 void autogearManagerTask(void const * argument)
 {
   /* USER CODE BEGIN autogearManagerTask */
+	CAN_TxPacketTypedef CAN_AutogearPacket;
+	
   /* Infinite loop */
   for(;;) {
-    xSemaphoreTake(autogearSemaphoreHandle, portMAX_DELAY); 			/* Unlock when interrupt callback is called */
-		osDelay(15);																									/* Wait for fail trigger detection */
+    xSemaphoreTake(autogearSemaphoreHandle, portMAX_DELAY); 															/* Unlock when interrupt callback is called */
+		osDelay(15);																																					/* Wait for fail trigger detection */
 		
 		if(HAL_GPIO_ReadPin(AUTOGEAR_SWTICH_MCU_GPIO_Port, AUTOGEAR_SWTICH_MCU_Pin) == GPIO_PIN_RESET) {
-			/* Put here the code to handling autogear event */
+			CAN_AutogearPacket.CAN_RxPacketData[0] = 0;
+			CAN_AutogearPacket.CAN_RxPacketData[1] = 1;
+			CAN_AutogearPacket.CAN_RtPacketHeader.StdId = DCU_AUTOGEARSHIFT_GCU_ID;
+			CAN_AutogearPacket.CAN_RtPacketHeader.RTR = CAN_RTR_DATA;
+			CAN_AutogearPacket.CAN_RtPacketHeader.IDE = CAN_ID_STD;
+			CAN_AutogearPacket.CAN_RtPacketHeader.DLC = 2;
+			CAN_AutogearPacket.CAN_RtPacketHeader.TransmitGlobalTime = DISABLE;
+			xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_AutogearPacket, (TickType_t)0);		/* Add CAN message to queue */
 		}
   }
   /* USER CODE END autogearManagerTask */
@@ -573,7 +589,7 @@ void ReceiveTelemFunc(void const * argument)
 							case START_ACQ_ID:
 								/* Put here the code necessary for starting acquisition */
 								temp = '6';
-								xQueueSend(startAcquisitionEventHandle, (void *)&temp, (TickType_t)0); 			/* Add flag to queue */
+								xQueueSend(startAcquisitionEventHandle, (void *)&temp, (TickType_t)0); 		/* Add flag to queue */
 							
 								xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);			/* Lock if DMA is in use */
 								commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = START_ACQ_ID; 								/* Set the correct identifier */
@@ -714,13 +730,39 @@ void saveUsbTask(void const * argument)
 /* USER CODE END Header_usbManagerTask */
 void usbManagerTask(void const * argument)
 {
-  /* USER CODE BEGIN usbManagerTask */
+  /* USER CODE BEGIN usbManageTask */
+	osEvent usbEvent;
+	
   /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END usbManagerTask */
+  for(;;) {
+		usbEvent = osMessageGet(usbEventQueueHandle, osWaitForever);
+		
+		if(usbEvent.status == osEventMessage) {
+			switch(usbEvent.value.v) {
+				case DISCONNECTION_EVENT:
+					f_mount(NULL, (TCHAR const *)"", 1);
+					FATFS_UnLinkDriver(USBHPath);
+					resetUsbReadyState();					/* Update of the status packet */
+					resetUsbPresentState();				/* Update of the status packet */
+					/* Put here the code to manage errors */
+					break;
+
+				case CONNECTED_EVENT:
+					if(FATFS_LinkDriver(&USBH_Driver, USBHPath) == 0) {
+						f_mount(&USBHFatFS, (TCHAR const *)USBHPath, 1);
+						setUsbReadyState();					/* Update of the status packet */
+						setUsbReadyState();					/* Update of the status packet */
+					}
+					
+					/* Put here the code to manage errors */
+					break;
+	    
+				default:
+					break;
+			}
+		}
+	}
+  /* USER CODE END usbManageTask */
 }
 
 /* USER CODE BEGIN Header_startAcquisitionStateMachineTask */
@@ -800,15 +842,78 @@ void canFifo1UnpackTask(void const * argument)
 void sendDebugDataTask(void const * argument)
 {
   /* USER CODE BEGIN sendDebugDataTask */
+	CAN_TxPacketTypedef CAN_DebugPacket1Packet;
+	CAN_TxPacketTypedef CAN_DebugPacket2Packet;
+	CAN_TxPacketTypedef CAN_AcquisitionStatePacket;	
+	
   /* Infinite loop */
   for(;;) {
-		xSemaphoreTake(, portMAX_DELAY);		/* Unlock when timer callback is called */
-		CAN_SendMessage();
+		xSemaphoreTake(CAN_SendSemaphoreHandle, portMAX_DELAY); 																	/* Unlock when timer callback is called */
 		
-		DCU_DEBUG_1_ID
-		DCU_DEBUG_2_ID
+		/* DCU_DEBUG_1_ID */
+		CAN_DebugPacket1Packet.CAN_RxPacketData[0] = (uint8_t)(((uint16_t)(adcBufferConvertedDebug[DCU_TEMP_SENSE_POSITION]) >> 8) & 0x00FF);
+		CAN_DebugPacket1Packet.CAN_RxPacketData[1] = (uint8_t)((uint16_t)(adcBufferConvertedDebug[DCU_TEMP_SENSE_POSITION]) & 0x00FF);
+		CAN_DebugPacket1Packet.CAN_RxPacketData[2] = (uint8_t)(((uint16_t)(adcBufferConvertedDebug[MAIN_CURRENT_SENSE_POSITION]) >> 8) & 0x00FF);
+		CAN_DebugPacket1Packet.CAN_RxPacketData[3] = (uint8_t)((uint16_t)(adcBufferConvertedDebug[MAIN_CURRENT_SENSE_POSITION]) & 0x00FF);
+		CAN_DebugPacket1Packet.CAN_RxPacketData[4] = (uint8_t)(((uint16_t)(adcBufferConvertedDebug[XBEE_CURRENT_SENSE_POSITION]) >> 8) & 0x00FF);
+		CAN_DebugPacket1Packet.CAN_RxPacketData[5] = (uint8_t)((uint16_t)(adcBufferConvertedDebug[XBEE_CURRENT_SENSE_POSITION]) & 0x00FF);
+		CAN_DebugPacket1Packet.CAN_RxPacketData[6] = (uint8_t)(((uint16_t)(adcBufferConvertedDebug[DCU_CURRENT_SENSE_POSITION]) >> 8) & 0x00FF);
+		CAN_DebugPacket1Packet.CAN_RxPacketData[7] = (uint8_t)((uint16_t)(adcBufferConvertedDebug[DCU_CURRENT_SENSE_POSITION]) & 0x00FF);
+		CAN_DebugPacket1Packet.CAN_RtPacketHeader.StdId = DCU_DEBUG_1_ID;
+		CAN_DebugPacket1Packet.CAN_RtPacketHeader.RTR = CAN_RTR_DATA;
+		CAN_DebugPacket1Packet.CAN_RtPacketHeader.IDE = CAN_ID_STD;
+		CAN_DebugPacket1Packet.CAN_RtPacketHeader.DLC = 8;
+		CAN_DebugPacket1Packet.CAN_RtPacketHeader.TransmitGlobalTime = DISABLE;
+		xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_DebugPacket1Packet, (TickType_t)0);					/* Add CAN message to queue */
+		
+		/* DCU_DEBUG_2_ID */
+		CAN_DebugPacket2Packet.CAN_RxPacketData[0] = (uint8_t)(((uint16_t)(adcBufferConvertedDebug[_12V_POST_DIODES_SENSE_POSITION]) >> 8) & 0x00FF);
+		CAN_DebugPacket2Packet.CAN_RxPacketData[1] = (uint8_t)((uint16_t)(adcBufferConvertedDebug[_12V_POST_DIODES_SENSE_POSITION]) & 0x00FF);
+		CAN_DebugPacket2Packet.CAN_RxPacketData[2] = (uint8_t)(((uint16_t)(adcBufferConvertedDebug[_5V_DCU_POSITION]) >> 8) & 0x00FF);
+		CAN_DebugPacket2Packet.CAN_RxPacketData[3] = (uint8_t)((uint16_t)(adcBufferConvertedDebug[_5V_DCU_POSITION]) & 0x00FF);
+		CAN_DebugPacket2Packet.CAN_RxPacketData[4] = (uint8_t)(((uint16_t)(adcBufferConvertedDebug[_3V3_MCU_POSITION]) >> 8) & 0x00FF);
+		CAN_DebugPacket2Packet.CAN_RxPacketData[5] = (uint8_t)((uint16_t)(adcBufferConvertedDebug[_3V3_MCU_POSITION]) & 0x00FF);
+		CAN_DebugPacket2Packet.CAN_RtPacketHeader.StdId = DCU_DEBUG_2_ID;
+		CAN_DebugPacket2Packet.CAN_RtPacketHeader.RTR = CAN_RTR_DATA;
+		CAN_DebugPacket2Packet.CAN_RtPacketHeader.IDE = CAN_ID_STD;
+		CAN_DebugPacket2Packet.CAN_RtPacketHeader.DLC = 6;
+		CAN_DebugPacket2Packet.CAN_RtPacketHeader.TransmitGlobalTime = DISABLE;
+		xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_DebugPacket2Packet, (TickType_t)0);					/* Add CAN message to queue */
+		
+		/* DCU_ACQUISITION_SW_ID */
+		CAN_AcquisitionStatePacket.CAN_RxPacketData[0] = 0;
+		CAN_AcquisitionStatePacket.CAN_RxPacketData[1] = getAcquisitionState() - '0';
+		CAN_AcquisitionStatePacket.CAN_RtPacketHeader.StdId = DCU_ACQUISITION_SW_ID;
+		CAN_AcquisitionStatePacket.CAN_RtPacketHeader.RTR = CAN_RTR_DATA;
+		CAN_AcquisitionStatePacket.CAN_RtPacketHeader.IDE = CAN_ID_STD;
+		CAN_AcquisitionStatePacket.CAN_RtPacketHeader.DLC = 2;
+		CAN_AcquisitionStatePacket.CAN_RtPacketHeader.TransmitGlobalTime = DISABLE;
+		xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_AcquisitionStatePacket, (TickType_t)0);			/* Add CAN message to queue */
+		return;
   }
   /* USER CODE END sendDebugDataTask */
+}
+
+/* USER CODE BEGIN Header_CAN_SendManagerTask */
+/**
+* @brief Function implementing the CAN_SendManager thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_CAN_SendManagerTask */
+void CAN_SendManagerTask(void const * argument)
+{
+  /* USER CODE BEGIN CAN_SendManagerTask */
+	CAN_TxPacketTypedef CAN_TxPacket;
+	uint32_t packetMailbox;
+	
+  /* Infinite loop */
+  for(;;) {
+		xSemaphoreTake(CAN_SendDataSemaphoreCounterHandle, portMAX_DELAY);																									/* Decrement CAN counting semapgore */
+		xQueueReceive(CAN_SendDataQueueHandle, &CAN_TxPacket, portMAX_DELAY);																								/* Wait to transmit a packet */
+		HAL_CAN_AddTxMessage(&hcan1, &CAN_TxPacket.CAN_RtPacketHeader, CAN_TxPacket.CAN_RxPacketData, &packetMailbox);			/* Send CAN message */
+  }
+  /* USER CODE END CAN_SendManagerTask */
 }
 
 /* Private application code --------------------------------------------------*/
