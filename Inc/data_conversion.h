@@ -21,6 +21,17 @@
 //#define ANALOG_AUX_2_VOLTAGE_GAIN					1.7876f
 //#define ANALOG_AUX_3_VOLTAGE_GAIN					1.7963f
 
+
+extern inline float EFI_TEMPERATURE_DataConversion(uint16_t input);
+extern inline float T_H20_ENGINE_DataConversion(uint16_t input);
+extern inline float BATTERY_VOLTAGE_DataConversion(uint16_t input);
+extern inline float TPS_DataConversion(uint16_t input);
+extern inline float WATER_PRESSURE_DataConversion(uint16_t input);
+extern inline float EXHAUST_TEMPERATURE_DataConversion(uint16_t input);
+extern inline float H20_PUMP_DUTY_CYCLE_DataConversion(uint16_t input);
+extern inline float FUEL_LEVEL_DataConversion(uint16_t input);
+
+
 extern inline uint16_t mainCurrentSenseConversion(uint32_t rawData);
 extern inline uint16_t dcuCurrentSenseConversion(uint32_t rawData);
 extern inline uint16_t xbeeCurrentSenseConversion(uint32_t rawData);

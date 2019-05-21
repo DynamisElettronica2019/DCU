@@ -1,9 +1,17 @@
 #include "data.h"
 #include "usb_host.h"
 #include "id_can.h"
+#include "data_conversion.h"
 #include "string_utility.h"
 
-
+uint16_t data1;
+uint16_t data2;
+uint16_t data3;
+uint16_t data4;
+float fData1 = 0.0f;
+float fData2 = 0.0f;
+float fData3 = 0.0f;
+float fData4 = 0.0f;
 uint8_t DATA_BlockBuffer [BUFFER_BLOCK_LEN];
 uint8_t DATA_StateBuffer [BUFFER_STATE_LEN] = "[S;0;0;0;0;0;0;0;0]";
 uint8_t acquisitionState = ACQUISITION_OFF_STATE;
@@ -13,10 +21,10 @@ extern uint32_t CAN_ReceivedPacketsCounter [NUMBER_OF_ACQUIRED_CHANNELS];
 extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 {	
 	/* Get the four 16 bit data from the 8 bit CAN messages */
-	uint16_t data1 = (unpackedData->packetData[0] << 8) | unpackedData->packetData[1]; 			/* First data in the packet */
-	uint16_t data2 = (unpackedData->packetData[2] << 8) | unpackedData->packetData[3]; 			/* Second data in the packet */
-	uint16_t data3 = (unpackedData->packetData[4] << 8) | unpackedData->packetData[5]; 			/* Third data in the packet */
-	uint16_t data4 = (unpackedData->packetData[6] << 8) | unpackedData->packetData[7]; 			/* Fourth data in the packet */
+	data1 = (unpackedData->packetData[0] << 8) | unpackedData->packetData[1]; 			/* First data in the packet */
+	data2 = (unpackedData->packetData[2] << 8) | unpackedData->packetData[3]; 			/* Second data in the packet */
+	data3 = (unpackedData->packetData[4] << 8) | unpackedData->packetData[5]; 			/* Third data in the packet */
+	data4 = (unpackedData->packetData[6] << 8) | unpackedData->packetData[7]; 			/* Fourth data in the packet */
 	
 	/* Manage the conversions of all the data types */
 	switch(unpackedData->packetHeader.StdId) {
@@ -25,64 +33,78 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 		
 		case EFI_HALL_WHEEL_ID:
 			CAN_ReceivedPacketsCounter[EFI_HALL_WHEEL_ID_COUNTER_INDEX]++;
-			intToStringUnsigned(data1, &DATA_BlockBuffer[HALL_EFFECT_FR_CSV_INDEX], 5);
-			intToStringUnsigned(data2, &DATA_BlockBuffer[HALL_EFFECT_FL_CSV_INDEX], 5);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[HALL_EFFECT_RR_CSV_INDEX], 5);
-			intToStringUnsigned(data4, &DATA_BlockBuffer[HALL_EFFECT_RL_CSV_INDEX], 5);
+			decimalToStringUnsigned(data1, &DATA_BlockBuffer[HALL_EFFECT_FR_CSV_INDEX], 3, 1); 		/* Taking into account the division by 10 */
+			decimalToStringUnsigned(data2, &DATA_BlockBuffer[HALL_EFFECT_FL_CSV_INDEX], 3, 1); 		/* Taking into account the division by 10 */
+			decimalToStringUnsigned(data3, &DATA_BlockBuffer[HALL_EFFECT_RR_CSV_INDEX], 3, 1); 		/* Taking into account the division by 10 */
+			decimalToStringUnsigned(data4, &DATA_BlockBuffer[HALL_EFFECT_RL_CSV_INDEX], 3, 1); 		/* Taking into account the division by 10 */
 			break;
 		
 		case EFI_WATER_TEMPERATURE_ID:
 			CAN_ReceivedPacketsCounter[EFI_WATER_TEMPERATURE_ID_COUNTER_INDEX]++;
-			intToStringUnsigned(data1, &DATA_BlockBuffer[T_H20_SX_IN_CSV_INDEX], 5);
-			intToStringUnsigned(data2, &DATA_BlockBuffer[T_H20_SX_OUT_CSV_INDEX], 5);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[T_H20_DX_IN_CSV_INDEX], 5);
-			intToStringUnsigned(data4, &DATA_BlockBuffer[T_H20_DX_OUT_CSV_INDEX], 5);
+			fData1 = EFI_TEMPERATURE_DataConversion(data1);
+			fData2 = EFI_TEMPERATURE_DataConversion(data2);
+			fData3 = EFI_TEMPERATURE_DataConversion(data3);
+			fData4 = EFI_TEMPERATURE_DataConversion(data4);
+			intToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[T_H20_SX_IN_CSV_INDEX], 3);
+			intToStringUnsigned((uint16_t)fData2, &DATA_BlockBuffer[T_H20_SX_OUT_CSV_INDEX], 3);
+			intToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[T_H20_DX_IN_CSV_INDEX], 3);
+			intToStringUnsigned((uint16_t)fData4, &DATA_BlockBuffer[T_H20_DX_OUT_CSV_INDEX], 3);
 			break;
 		
 		case EFI_OIL_T_ENGINE_BAT_ID:
 			CAN_ReceivedPacketsCounter[EFI_OIL_T_ENGINE_BAT_ID_COUNTER_INDEX]++;
-			intToStringUnsigned(data1, &DATA_BlockBuffer[T_OIL_IN_CSV_INDEX], 5);
-			intToStringUnsigned(data2, &DATA_BlockBuffer[T_OIL_OUT_CSV_INDEX], 5);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[T_H20_ENGINE_CSV_INDEX], 5);
-			intToStringUnsigned(data4, &DATA_BlockBuffer[BATTERY_VOLTAGE_CSV_INDEX], 5);
+			fData1 = EFI_TEMPERATURE_DataConversion(data1);
+			fData2 = EFI_TEMPERATURE_DataConversion(data2);
+			fData3 = T_H20_ENGINE_DataConversion(data3);
+			fData4 = BATTERY_VOLTAGE_DataConversion(data4) * 100.0f; 		/* Taking into account the division by 100 */
+			intToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[T_OIL_IN_CSV_INDEX], 3);
+			intToStringUnsigned((uint16_t)fData2, &DATA_BlockBuffer[T_OIL_OUT_CSV_INDEX], 3);
+			intToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[T_H20_ENGINE_CSV_INDEX], 3);
+			decimalToStringUnsigned((uint16_t)fData4, &DATA_BlockBuffer[BATTERY_VOLTAGE_CSV_INDEX], 2, 2);
 			break;
 		
 		case EFI_GEAR_RPM_TPS_PH2O_ID:
 			CAN_ReceivedPacketsCounter[EFI_MANUAL_LIMITER_FAN_H2O_PIT_LANE_COUNTER_INDEX]++;
-			intToStringUnsigned(data1, &DATA_BlockBuffer[GEAR_CSV_INDEX], 5);
+			fData3 = TPS_DataConversion(data3);
+			fData4 = WATER_PRESSURE_DataConversion(data4);
+			intToStringUnsigned(data1, &DATA_BlockBuffer[GEAR_CSV_INDEX], 1);
 			intToStringUnsigned(data2, &DATA_BlockBuffer[RPM_CSV_INDEX], 5);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[TPS1_CSV_INDEX], 5);
-			intToStringUnsigned(data4, &DATA_BlockBuffer[PH2O_CSV_INDEX], 5);
+			intToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[TPS1_CSV_INDEX], 3);
+			intToStringUnsigned((uint16_t)fData4, &DATA_BlockBuffer[PH2O_CSV_INDEX], 5);
 			break;
 		
 		case EFI_TRACTION_CONTROL_ID:
 			CAN_ReceivedPacketsCounter[EFI_TRACTION_CONTROL_ID_COUNTER_INDEX]++;
-			intToStringUnsigned(data1, &DATA_BlockBuffer[VH_SPEED_CSV_INDEX], 5);
-			intToStringUnsigned(data2, &DATA_BlockBuffer[SLIP_TARGET_CSV_INDEX], 5);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[SLIP_CSV_INDEX], 5);
+			decimalToStringUnsigned(data1, &DATA_BlockBuffer[VH_SPEED_CSV_INDEX], 3, 1); 				/* Taking into account the division by 10 */
+			decimalToStringUnsigned(data2, &DATA_BlockBuffer[SLIP_TARGET_CSV_INDEX], 3, 1); 		/* Taking into account the division by 10 */
+			decimalToString((int16_t)data3, &DATA_BlockBuffer[SLIP_CSV_INDEX], 4, 1); 					/* Taking into account the division by 10 */
 			break;
 		
 		case EFI_FUEL_FAN_H2O_LAUNCH_ID_COUNTER_INDEX:
 			CAN_ReceivedPacketsCounter[EFI_FUEL_FAN_H2O_LAUNCH_ID_COUNTER_INDEX]++;
-			intToStringUnsigned(data1, &DATA_BlockBuffer[MANUAL_LIMITER_ACTIVE_CSV_INDEX], 5);
-			intToStringUnsigned(data2, &DATA_BlockBuffer[FAN_CSV_INDEX], 5);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[H20_PUMP_DUTY_CYCLE_CSV_INDEX], 5);
-			intToStringUnsigned(data4, &DATA_BlockBuffer[PIT_LANE_ACTIVE_CSV_INDEX], 5);
+			fData3 = H20_PUMP_DUTY_CYCLE_DataConversion(data3);
+			intToStringUnsigned(data1, &DATA_BlockBuffer[MANUAL_LIMITER_ACTIVE_CSV_INDEX], 1);
+			intToStringUnsigned(data2, &DATA_BlockBuffer[FAN_CSV_INDEX], 1);
+			intToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[H20_PUMP_DUTY_CYCLE_CSV_INDEX], 3);
+			intToStringUnsigned(data4, &DATA_BlockBuffer[PIT_LANE_ACTIVE_CSV_INDEX], 1);
 			break;
 		
 		case EFI_PRESSURES_LAMBDA_SMOT_ID:
 			CAN_ReceivedPacketsCounter[EFI_PRESSURES_LAMBDA_SMOT_ID_COUNTER_INDEX]++;
 			intToStringUnsigned(data1, &DATA_BlockBuffer[FUEL_PRESSURE_CSV_INDEX], 5);
 			intToStringUnsigned(data2, &DATA_BlockBuffer[OIL_PRESSURE_CSV_INDEX], 5);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[LAMBDA_CSV_INDEX], 5);
+			decimalToStringUnsigned(data3, &DATA_BlockBuffer[LAMBDA_CSV_INDEX], 1, 3);		/* Taking into account the division by 1000 */
 			intToStringUnsigned(data4, &DATA_BlockBuffer[FLAG_SMOT_CSV_INDEX], 5);
 			break;
 		
 		case EFI_LOIL_EXHAUST_ID:
 			CAN_ReceivedPacketsCounter[EFI_LOIL_EXHAUST_ID_COUNTER_INDEX]++;
-			intToStringUnsigned(data1, &DATA_BlockBuffer[L_FUEL_CSV_INDEX], 5);
-			intToStringUnsigned(data2, &DATA_BlockBuffer[T_SCARICO_1_CSV_INDEX], 5);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[T_SCARICO_2_CSV_INDEX], 5);
+			fData1 = FUEL_LEVEL_DataConversion(data1);
+			fData2 = EXHAUST_TEMPERATURE_DataConversion(data2);
+			fData3 = EXHAUST_TEMPERATURE_DataConversion(data3);
+			decimalToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[L_FUEL_CSV_INDEX], 2, 2);
+			intToStringUnsigned((uint16_t)fData2, &DATA_BlockBuffer[T_SCARICO_1_CSV_INDEX], 3);
+			intToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[T_SCARICO_2_CSV_INDEX], 3);
 			break;
 		
 		/* DAU ID range */
@@ -213,8 +235,6 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			intToStringUnsigned(data2, &DATA_BlockBuffer[FAN_DX_CURRENT_CSV_INDEX], 5);
 			break;
 	}
-	
-	return;
 }
 
 extern inline void startAcquisitionStateMachine(uint8_t startAcquisitionEvent)
@@ -310,8 +330,6 @@ extern inline void startAcquisitionStateMachine(uint8_t startAcquisitionEvent)
 			acquisitionState = ACQUISITION_OFF_STATE;
 			break;
 	}
-
-	return;
 }
 
 extern inline uint8_t DATA_GetUsbReadyState(void)
@@ -327,37 +345,31 @@ extern inline uint8_t DATA_GetAcquisitionState(void)
 extern inline void DATA_SetUsbPresentState(void)
 {
 	DATA_StateBuffer[STATE_USB_PRESENT_INDEX] = STATE_ON;
-	return;
 }
 
 extern inline void DATA_SetUsbReadyState(void)
 {
 	DATA_StateBuffer[STATE_USB_READY_INDEX] = STATE_ON;
-	return;
 }
 
 extern inline void DATA_SetAcquisitionState(void)
 {
 	DATA_StateBuffer[STATE_ACQUISITION_ON_INDEX] = STATE_ON;
-	return;
 }
 
 extern inline void DATA_ResetUsbPresentState(void)
 {
 	DATA_StateBuffer[STATE_USB_PRESENT_INDEX] = STATE_OFF;
-	return;
 }
 
 extern inline void DATA_ResetUsbReadyState(void)
 {
 	DATA_StateBuffer[STATE_USB_READY_INDEX] = STATE_OFF;
-	return;
 }
 
 extern inline void DATA_ResetAcquisitionState(void)
 {
 	DATA_StateBuffer[STATE_ACQUISITION_ON_INDEX] = STATE_OFF;
-	return;
 }
 
 extern void DATA_PacketReset(void)
@@ -467,5 +479,4 @@ extern void DATA_PacketReset(void)
 	DATA_BlockBuffer[END_DATA_CSV_INDEX] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[END_ROW_CSV_INDEX - 1] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[END_ROW_CSV_INDEX] = END_LINE;
-	return;
 }

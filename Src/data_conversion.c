@@ -2,6 +2,70 @@
 #include "data_conversion.h"
 
 
+extern inline float EFI_TEMPERATURE_DataConversion(uint16_t input)
+{
+	float temp;
+	
+	temp = (float)input * (-0.35572f);
+	temp = temp + 190.95f;
+  return temp;
+}
+
+extern inline float T_H20_ENGINE_DataConversion(uint16_t input)
+{	
+	float temp;
+	
+	temp = (float)input * 0.625f;
+	temp = temp -10.0f;
+  return temp;
+}
+
+extern inline float BATTERY_VOLTAGE_DataConversion(uint16_t input)
+{
+  return (0.01758f * (float)input);
+}
+
+extern inline float TPS_DataConversion(uint16_t input)
+{
+  return (0.39216f * (float)input);
+}
+
+extern inline float WATER_PRESSURE_DataConversion(uint16_t input)
+{	
+	float temp;
+	
+	temp = (float)input * 0.009768f;
+	temp = temp - 0.996336f;
+  return temp;
+}
+
+extern inline float EXHAUST_TEMPERATURE_DataConversion(uint16_t input)
+{
+  return (1.2219f * (float)input);
+}
+
+extern inline float H20_PUMP_DUTY_CYCLE_DataConversion(uint16_t input)
+{
+	float temp;
+	
+	temp = (float)input / 255.0f;
+	temp = temp * 100.0f;
+	return temp;
+}
+
+extern inline float FUEL_LEVEL_DataConversion(uint16_t input)
+{
+	float temp1;
+	float temp2;
+
+	temp1 = 0.111721f * (float)input;
+	temp1 = temp1 - 18.7223f;
+	temp2 = 0.007224f * (float)input;
+	temp2 = temp2 + 12.29331f;
+	temp1 = temp1 / temp2;
+	return temp1;
+}
+
 extern inline uint16_t mainCurrentSenseConversion(uint32_t rawData) {
 	float data;
 	
