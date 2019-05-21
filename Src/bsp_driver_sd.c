@@ -43,7 +43,7 @@ uint8_t BSP_SD_Init(void)
 {
   uint8_t sd_state = MSD_OK;
   /* Check if the SD card is plugged in the slot */
-  /*if (BSP_SD_IsDetected() != SD_PRESENT)
+  if (BSP_SD_IsDetected() != SD_PRESENT)
   {
     return MSD_ERROR_SD_NOT_PRESENT;
   }

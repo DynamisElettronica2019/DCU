@@ -172,44 +172,35 @@ void HAL_SD_MspDeInit(SD_HandleTypeDef* sdHandle)
 
 uint8_t SD_Init()
 {
-	FRESULT SD_Status;
+	uint8_t SD_Status;
 	
 	//SD_Status = BSP_SD_Init();
 	
 	 /* HAL SD initialization */
-  SD_Status = (FRESULT)HAL_SD_Init(&hsd1);
+  SD_Status = (uint8_t)HAL_SD_Init(&hsd1);
   /* Configure SD Bus width (4 bits mode selected) */
-  if (SD_Status == MSD_OK)
+  if (SD_Status == (uint8_t)MSD_OK)
   {
     /* Enable wide operation */
-    if (HAL_SD_ConfigWideBusOperation(&hsd1, SDMMC_BUS_WIDE_4B) != HAL_OK)
+		SD_Status = (uint8_t)HAL_SD_ConfigWideBusOperation(&hsd1, SDMMC_BUS_WIDE_4B);		
+    if (SD_Status != (uint8_t)HAL_OK)
     {
-      SD_Status = (FRESULT)MSD_ERROR;
 			SD_onError(SD_Status);
 			return SD_Status;
     }
   }
-	
-	if(SD_Status != FR_OK)
+	else
 	{
 		SD_onError(SD_Status);
-		return SD_Status;
-	}	
-	SD_Status = f_mount(&SDFatFS, SDPath, 1);
+		return SD_Status;		
+	}
 	
-	if(SD_Status != FR_OK)
-	{		
-		if(SD_Status == FR_NO_FILESYSTEM)
-		{
-			/*uint8_t SDWorkBuffer[_MAX_SS];
-			
-			SD_Status = f_mkfs((TCHAR const*)SDPath, FM_FAT, 0, SDWorkBuffer, sizeof(SDWorkBuffer));
-			if(SD_Status != FR_OK)
-			{*/
-				SD_onError(SD_Status);	
-				return SD_Status;
-			//}
-		}
+	SD_Status = (uint8_t)f_mount(&SDFatFS, SDPath, 1);
+	
+	if(SD_Status != (uint8_t)FR_OK)
+	{
+		SD_onError(SD_Status);	
+		return SD_Status;
 	}	
 	
 	return SD_Status;
@@ -217,11 +208,11 @@ uint8_t SD_Init()
 
 uint8_t SD_openFile(uint8_t* fileName, FIL* MyFile)
 {
-	FRESULT SD_Status;
+	uint8_t SD_Status;
 	
-	SD_Status = f_open(MyFile, (const TCHAR*)fileName, FA_OPEN_APPEND|FA_WRITE|FA_READ);
+	SD_Status = (uint8_t)f_open(MyFile, (const TCHAR*)fileName, FA_OPEN_APPEND|FA_WRITE|FA_READ);
 	
-	if(SD_Status != FR_OK)
+	if(SD_Status != (uint8_t)FR_OK)
 	{
 		SD_onError(SD_Status);
 		return SD_Status;	
@@ -232,19 +223,19 @@ uint8_t SD_openFile(uint8_t* fileName, FIL* MyFile)
 
 uint8_t SD_refreshFile(uint8_t* fileName, FIL* MyFile)
 {
-	FRESULT SD_Status;
+	uint8_t SD_Status;
 	
-	SD_Status = f_close(MyFile);
+	SD_Status = (uint8_t)f_close(MyFile);
 	
-	if(SD_Status != FR_OK)
+	if(SD_Status != (uint8_t)FR_OK)
 	{
 		SD_onError(SD_Status);
 		return SD_Status;	
 	}
 	
-	SD_Status = f_open(MyFile, (const TCHAR*)fileName, FA_OPEN_APPEND|FA_WRITE|FA_READ);
+	SD_Status = (uint8_t)f_open(MyFile, (const TCHAR*)fileName, FA_OPEN_APPEND|FA_WRITE|FA_READ);
 	
-	if(SD_Status != FR_OK)
+	if(SD_Status != (uint8_t)FR_OK)
 	{
 		SD_onError(SD_Status);
 		return SD_Status;	
@@ -255,12 +246,12 @@ uint8_t SD_refreshFile(uint8_t* fileName, FIL* MyFile)
 
 uint8_t SD_writeString(uint8_t *writeBuffer, uint32_t bufferLen, FIL* MyFile)
 {
-	FRESULT SD_Status;
+	uint8_t SD_Status;
 	uint32_t writtenBytes = 0;
 	
-	SD_Status = f_write(MyFile, writeBuffer, bufferLen, (void*)&writtenBytes);
+	SD_Status = (uint8_t)f_write(MyFile, writeBuffer, bufferLen, (void*)&writtenBytes);
 	
-	if(SD_Status != FR_OK)
+	if(SD_Status != (uint8_t)FR_OK)
 	{
 		SD_onError(SD_Status);
 		return SD_Status;	
@@ -274,7 +265,7 @@ uint8_t SD_writeString(uint8_t *writeBuffer, uint32_t bufferLen, FIL* MyFile)
 	return SD_Status;
 }
 
-void SD_onError(FRESULT code)
+void SD_onError(uint8_t code)
 {
 	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);			
 }

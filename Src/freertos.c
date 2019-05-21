@@ -140,32 +140,30 @@ void aliveTask(void const * argument)
 void uSD_ControlTask(void const * argument)
 {
   /* USER CODE BEGIN uSD_ControlTask */
-	uint8_t SD_ErrorCode = FR_OK;
+	uint8_t SD_ErrorCode = (uint8_t)FR_OK;
 	
 	FIL SD_File;
 	uint8_t SDFileName[] = "td.txt";
 	
-	uint8_t SD_WriteBuffer[20];
-	uint32_t queueData = 0;
+	uint8_t SD_WriteBuffer[] = "First SD + DMA + RTOS + DCU Try\n";
 	
 	SD_ErrorCode = SD_Init();
-	if(SD_ErrorCode != FR_OK) while(1);
+	if(SD_ErrorCode != (uint8_t)FR_OK) while(1);
 	
 	SD_ErrorCode = SD_openFile(SDFileName, &SD_File);
-	if(SD_ErrorCode != FR_OK) while(1);
+	if(SD_ErrorCode != (uint8_t)FR_OK) while(1);
 	
   /* Infinite loop */
   for(;;) {
 		xSemaphoreTake(uSD_WriteSemaphoreHandle, portMAX_DELAY);		/* Unlock when timer callback is called */
-		sprintf(SD_WriteBuffer, "Count -> %8d\n", queueData);
-		SD_ErrorCode = SD_writeString(SD_WriteBuffer, 18, &SD_File);
+		SD_ErrorCode = SD_writeString(SD_WriteBuffer, 32, &SD_File);
 		
-		if(SD_ErrorCode != FR_OK) {
+		if(SD_ErrorCode != (uint8_t)FR_OK) {
 			while(1);			
 		}
 		else {
 			SD_ErrorCode = SD_refreshFile(SDFileName, &SD_File);
-			if(SD_ErrorCode != FR_OK) while(1);		
+			if(SD_ErrorCode != (uint8_t)FR_OK) while(1);		
 			HAL_GPIO_TogglePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin);	
 		}
 

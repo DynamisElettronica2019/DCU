@@ -43,7 +43,7 @@ uint8_t SD_Init(void);
 uint8_t SD_openFile(uint8_t* fileName, FIL* MyFile);
 uint8_t SD_refreshFile(uint8_t* fileName, FIL* MyFile);
 uint8_t SD_writeString(uint8_t *writeBuffer, uint32_t bufferLen, FIL* MyFile);
-void SD_onError(FRESULT code);
+void SD_onError(uint8_t code);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
