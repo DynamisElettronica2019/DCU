@@ -151,6 +151,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			intToStringUnsigned(data1, &DATA_BlockBuffer[IR1_FL_CSV_INDEX], 5);
 			intToStringUnsigned(data2, &DATA_BlockBuffer[IR2_FL_CSV_INDEX], 5);
 			intToStringUnsigned(data3, &DATA_BlockBuffer[IR3_FL_CSV_INDEX], 5);
+			intToStringUnsigned(data3, &DATA_BlockBuffer[BRAKE_IR_FL_CSV_SEPARATOR], 5);
 			break;
 		
 		case DAU_FR_IR_ID:
@@ -158,6 +159,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			intToStringUnsigned(data1, &DATA_BlockBuffer[IR1_FR_CSV_INDEX], 5);
 			intToStringUnsigned(data2, &DATA_BlockBuffer[IR2_FR_CSV_INDEX], 5);
 			intToStringUnsigned(data3, &DATA_BlockBuffer[IR3_FR_CSV_INDEX], 5);
+			intToStringUnsigned(data3, &DATA_BlockBuffer[BRAKE_IR_FR_CSV_SEPARATOR], 5);
 			break;
 		
 		case DAU_REAR_IR_RL_ID:
@@ -165,6 +167,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			intToStringUnsigned(data1, &DATA_BlockBuffer[IR1_RL_CSV_INDEX], 5);
 			intToStringUnsigned(data2, &DATA_BlockBuffer[IR2_RL_CSV_INDEX], 5);
 			intToStringUnsigned(data3, &DATA_BlockBuffer[IR3_RL_CSV_INDEX], 5);
+			intToStringUnsigned(data3, &DATA_BlockBuffer[BRAKE_IR_RL_CSV_SEPARATOR], 5);
 			break;
 		
 		case DAU_REAR_IR_RR_ID:
@@ -172,6 +175,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			intToStringUnsigned(data1, &DATA_BlockBuffer[IR1_RR_CSV_INDEX], 5);
 			intToStringUnsigned(data2, &DATA_BlockBuffer[IR2_RR_CSV_INDEX], 5);
 			intToStringUnsigned(data3, &DATA_BlockBuffer[IR3_RR_CSV_INDEX], 5);
+			intToStringUnsigned(data3, &DATA_BlockBuffer[BRAKE_IR_RR_CSV_SEPARATOR], 5);
 			break;
 		
 		/* IMU ID range */
@@ -260,19 +264,27 @@ extern inline void startAcquisitionStateMachine(uint8_t startAcquisitionEvent)
 			/* Get next state, based on the request received */
 			switch(startAcquisitionEvent) {
 				case ACQUISITION_ON_SW_REQUEST:
-					acquisitionState = ACQUISITION_ON_FROM_SW_STATE;
+					if(DATA_GetUsbReadyState() == STATE_ON) {
+						acquisitionState = ACQUISITION_ON_FROM_SW_STATE;
+					}
 					break;
 						
 				case ACQUISITION_ON_TELEMETRY_REQUEST:
-					acquisitionState = ACQUISITION_ON_FROM_TELEMETRY_STATE;
+					if(DATA_GetUsbReadyState() == STATE_ON) {
+						acquisitionState = ACQUISITION_ON_FROM_TELEMETRY_STATE;
+					}
 					break;
 				
 				case ACQUISITION_ON_AUTO_REQUEST:
-					acquisitionState = ACQUISITION_ON_FROM_AUTO_STATE;
+					if(DATA_GetUsbReadyState() == STATE_ON) {
+						acquisitionState = ACQUISITION_ON_FROM_AUTO_STATE;
+					}
 					break;
 				
 				case ACQUISITION_ON_DEBUG_REQUEST:
-					acquisitionState = ACQUISITION_ON_FROM_DEBUG_STATE;
+					if(DATA_GetUsbReadyState() == STATE_ON) {
+						acquisitionState = ACQUISITION_ON_FROM_DEBUG_STATE;
+					}
 					break;
 				
 				default:
@@ -393,7 +405,7 @@ extern inline void DATA_SetEfiIsAlive(void)
 
 extern inline void DATA_ResetEfiIsAlive(void)
 {
-	EFI_IsAlive = EFI_IS_ALIVE_SET;
+	EFI_IsAlive = EFI_IS_ALIVE_RESET;
 }
 
 extern inline uint8_t DATA_GetUsbReadyState(void)
@@ -497,15 +509,19 @@ extern void DATA_PacketReset(void)
 	DATA_BlockBuffer[IR1_FL_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IR2_FL_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IR3_FL_CSV_SEPARATOR] = CHANNEL_SEPARATION;
+	DATA_BlockBuffer[BRAKE_IR_FL_CSV_INDEX] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IR1_FR_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IR2_FR_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IR3_FR_CSV_SEPARATOR] = CHANNEL_SEPARATION;
+	DATA_BlockBuffer[BRAKE_IR_FR_CSV_INDEX] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IR1_RL_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IR2_RL_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IR3_RL_CSV_SEPARATOR] = CHANNEL_SEPARATION;
+	DATA_BlockBuffer[BRAKE_IR_RL_CSV_INDEX] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IR1_RR_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IR2_RR_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IR3_RR_CSV_SEPARATOR] = CHANNEL_SEPARATION;
+	DATA_BlockBuffer[BRAKE_IR_RR_CSV_INDEX] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IMU1_ACC_X_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IMU1_ACC_Y_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IMU1_GYR_X_CSV_SEPARATOR] = CHANNEL_SEPARATION;
@@ -550,7 +566,6 @@ extern void DATA_PacketReset(void)
 	DATA_BlockBuffer[DCU_12V_VOLTAGE_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[DCU_5V_VOLTAGE_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[DCU_3V3_VOLTAGE_CSV_SEPARATOR] = CHANNEL_SEPARATION;
-	DATA_BlockBuffer[END_DATA_CSV_INDEX] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[END_ROW_CSV_INDEX - 1] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[END_ROW_CSV_INDEX] = END_LINE;
 }

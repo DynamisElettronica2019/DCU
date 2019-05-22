@@ -57,6 +57,8 @@ extern uint8_t DATA_BlockBuffer [BUFFER_BLOCK_LEN];
 extern uint8_t DATA_StateBuffer [BUFFER_STATE_LEN];
 extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
 
+uint32_t packetMailbox;
+
 /* USER CODE END Variables */
 osThreadId aliveHandle;
 osThreadId adc1ConversionHandle;
@@ -234,15 +236,15 @@ void MX_FREERTOS_Init(void) {
   startAcquisitionEventHandle = osMessageCreate(osMessageQ(startAcquisitionEvent), NULL);
 
   /* definition and creation of canFifo0Queue */
-  osMessageQDef(canFifo0Queue, 32, CAN_RxPacket_t);
+  osMessageQDef(canFifo0Queue, 8, CAN_RxPacket_t);
   canFifo0QueueHandle = osMessageCreate(osMessageQ(canFifo0Queue), NULL);
 
   /* definition and creation of canFifo1Queue */
-  osMessageQDef(canFifo1Queue, 32, CAN_RxPacket_t);
+  osMessageQDef(canFifo1Queue, 8, CAN_RxPacket_t);
   canFifo1QueueHandle = osMessageCreate(osMessageQ(canFifo1Queue), NULL);
 
   /* definition and creation of CAN_SendDataQueue */
-  osMessageQDef(CAN_SendDataQueue, 32, CAN_TxPacket_t);
+  osMessageQDef(CAN_SendDataQueue, 8, CAN_TxPacket_t);
   CAN_SendDataQueueHandle = osMessageCreate(osMessageQ(CAN_SendDataQueue), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
@@ -270,39 +272,39 @@ void MX_FREERTOS_Init(void) {
   digitalAuxManagerHandle = osThreadCreate(osThread(digitalAuxManager), NULL);
 
   /* definition and creation of autogearManager */
-  osThreadDef(autogearManager, autogearManagerTask, osPriorityBelowNormal, 0, 128);
+  osThreadDef(autogearManager, autogearManagerTask, osPriorityLow, 0, 128);
   autogearManagerHandle = osThreadCreate(osThread(autogearManager), NULL);
 
   /* definition and creation of USB_OvercurrentManager */
-  osThreadDef(USB_OvercurrentManager, USB_OvercurrentManagerTask, osPriorityBelowNormal, 0, 128);
+  osThreadDef(USB_OvercurrentManager, USB_OvercurrentManagerTask, osPriorityLow, 0, 128);
   USB_OvercurrentManagerHandle = osThreadCreate(osThread(USB_OvercurrentManager), NULL);
 
   /* definition and creation of SendStates */
-  osThreadDef(SendStates, SendStatesFunc, osPriorityNormal, 0, 128);
+  osThreadDef(SendStates, SendStatesFunc, osPriorityBelowNormal, 0, 128);
   SendStatesHandle = osThreadCreate(osThread(SendStates), NULL);
 
   /* definition and creation of SendData */
-  osThreadDef(SendData, SendDataFunc, osPriorityNormal, 0, 128);
+  osThreadDef(SendData, SendDataFunc, osPriorityBelowNormal, 0, 128);
   SendDataHandle = osThreadCreate(osThread(SendData), NULL);
 
   /* definition and creation of ReceiveTelem */
-  osThreadDef(ReceiveTelem, ReceiveTelemFunc, osPriorityAboveNormal, 0, 128);
+  osThreadDef(ReceiveTelem, ReceiveTelemFunc, osPriorityNormal, 0, 128);
   ReceiveTelemHandle = osThreadCreate(osThread(ReceiveTelem), NULL);
 
   /* definition and creation of SendError */
-  osThreadDef(SendError, SendErrorFunc, osPriorityAboveNormal, 0, 128);
+  osThreadDef(SendError, SendErrorFunc, osPriorityNormal, 0, 128);
   SendErrorHandle = osThreadCreate(osThread(SendError), NULL);
 
   /* definition and creation of SendFollowingData */
-  osThreadDef(SendFollowingData, SendFollowingDataFunc, osPriorityNormal, 0, 128);
+  osThreadDef(SendFollowingData, SendFollowingDataFunc, osPriorityBelowNormal, 0, 128);
   SendFollowingDataHandle = osThreadCreate(osThread(SendFollowingData), NULL);
 
   /* definition and creation of saveUsb */
-  osThreadDef(saveUsb, saveUsbTask, osPriorityAboveNormal, 0, 512);
+  osThreadDef(saveUsb, saveUsbTask, osPriorityRealtime, 0, 512);
   saveUsbHandle = osThreadCreate(osThread(saveUsb), NULL);
 
   /* definition and creation of usbManager */
-  osThreadDef(usbManager, usbManagerTask, osPriorityBelowNormal, 0, 512);
+  osThreadDef(usbManager, usbManagerTask, osPriorityNormal, 0, 512);
   usbManagerHandle = osThreadCreate(osThread(usbManager), NULL);
 
   /* definition and creation of startAcquisitionStateMachine */
@@ -318,11 +320,11 @@ void MX_FREERTOS_Init(void) {
   canFifo1UnpackHandle = osThreadCreate(osThread(canFifo1Unpack), NULL);
 
   /* definition and creation of sendDebugData */
-  osThreadDef(sendDebugData, sendDebugDataTask, osPriorityLow, 0, 128);
+  osThreadDef(sendDebugData, sendDebugDataTask, osPriorityBelowNormal, 0, 512);
   sendDebugDataHandle = osThreadCreate(osThread(sendDebugData), NULL);
 
   /* definition and creation of CAN_SendManager */
-  osThreadDef(CAN_SendManager, CAN_SendManagerTask, osPriorityNormal, 0, 128);
+  osThreadDef(CAN_SendManager, CAN_SendManagerTask, osPriorityNormal, 0, 512);
   CAN_SendManagerHandle = osThreadCreate(osThread(CAN_SendManager), NULL);
 
   /* definition and creation of automaticStartAcquisitionMonitoring */
@@ -600,11 +602,11 @@ void saveUsbTask(void const * argument)
 void usbManagerTask(void const * argument)
 {
   /* USER CODE BEGIN usbManageTask */
-	osEvent USB_Event;
+	uint8_t USB_Event;
 	
   /* Infinite loop */
-  for(;;) {
-		USB_Event = osMessageGet(usbEventQueueHandle, osWaitForever); 		/* Wait for and event */
+  for(;;) {	
+		xQueueReceive(usbEventQueueHandle, &USB_Event, portMAX_DELAY);		/* Wait for and event */
 		USB_EventHandler(USB_Event); 																			/* Manage USB insertion evets */
 	}
   /* USER CODE END usbManageTask */
@@ -690,7 +692,7 @@ void sendDebugDataTask(void const * argument)
   /* Infinite loop */
   for(;;) {
 		xSemaphoreTake(CAN_SendSemaphoreHandle, portMAX_DELAY);			/* Unlock when timer callback is called */
-		CAN_SendDebugPackets();																			/* Send debug packets over CAN network */
+		CAN_SendDebugPackets();
   }
   /* USER CODE END sendDebugDataTask */
 }
@@ -706,7 +708,6 @@ void CAN_SendManagerTask(void const * argument)
 {
   /* USER CODE BEGIN CAN_SendManagerTask */
 	CAN_TxPacket_t CAN_TxPacket;
-	uint32_t packetMailbox;
 	
   /* Infinite loop */
   for(;;) {

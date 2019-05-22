@@ -125,8 +125,6 @@ extern inline void GPIO_UsbOvercurrentISR(void)
 			portYIELD_FROM_ISR(GPIO_OvercurrentxHigherPriorityTaskWoken);																					/* Do context-switch if needed */
 		}
 	}
-	
-	return;
 }
 
 
@@ -138,8 +136,6 @@ extern inline void GPIO_AutogearSwitchISR(void)
 			portYIELD_FROM_ISR(GPIO_AutogearxHigherPriorityTaskWoken);																						/* Do context-switch if needed */
 		}
 	}
-	
-	return;
 }
 
 extern inline void GPIO_AuxSamplingFunction(void)
@@ -158,8 +154,6 @@ extern inline void GPIO_AuxSamplingFunction(void)
 		digitalAuxEvent = DIGITAL_EVENT_AUX_3;
 		xQueueSendFromISR(digitalAuxQueueHandle, &digitalAuxEvent, &GPIO_Aux3xHigherPriorityTaskWoken);					/* Add digital aux event to queue */
 	}
-	
-	return;
 }
 
 extern inline void GPIO_AuxManageEvent(uint8_t event)
@@ -177,8 +171,6 @@ extern inline void GPIO_AuxManageEvent(uint8_t event)
 			/* Put here the code to handling digital aux 1 event */
 			break;
 	}
-
-	return;
 }
 
 /* USER CODE END 2 */

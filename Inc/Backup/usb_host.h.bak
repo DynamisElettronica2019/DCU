@@ -48,7 +48,7 @@ extern inline void USB_SavingRequest(void);
 extern inline void USB_SavingTask(void);
 extern inline void USB_OpenFile(void);
 extern inline void USB_CloseFile(void);
-extern inline void USB_EventHandler(osEvent event);
+extern inline void USB_EventHandler(uint8_t USB_Event);
 extern inline void USB_OvercurrentEvent(void);
 static inline void USB_WriteLen(uint8_t *buffer);
 /* USER CODE END INCLUDE */

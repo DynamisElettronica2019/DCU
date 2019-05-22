@@ -9,7 +9,7 @@
 #define NUMBER_OF_RECEIVED_PACKETS														(uint8_t)25
 #define NUMBER_OF_ACQUIRED_CHANNELS														(uint8_t)91
 #define BUFFER_STATE_LEN 																			(uint8_t)19
-#define BUFFER_BLOCK_LEN 																			(uint16_t)1024
+#define BUFFER_BLOCK_LEN 																			(uint16_t)552
 
 /* Packet position in CAN data packet counter vector */
 #define EFI_HALL_WHEEL_ID_COUNTER_INDEX 											(uint8_t)0
@@ -142,8 +142,7 @@
 #define DCU_12V_VOLTAGE_CSV_INDEX 														(uint16_t)535
 #define DCU_5V_VOLTAGE_CSV_INDEX 															(uint16_t)541
 #define DCU_3V3_VOLTAGE_CSV_INDEX 														(uint16_t)546
-#define END_DATA_CSV_INDEX 																		(uint16_t)551
-#define END_ROW_CSV_INDEX 																		(uint16_t)1023
+#define END_ROW_CSV_INDEX 																		(uint16_t)551
 
 /* Data separator position in CSV file */
 #define HALL_EFFECT_FR_CSV_SEPARATOR													(HALL_EFFECT_FR_CSV_INDEX - 1)

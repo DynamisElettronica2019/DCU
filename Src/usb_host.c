@@ -94,7 +94,8 @@ extern inline void USB_SavingTask(void)
 	uint32_t timestamp;
 	
 	if(DATA_GetAcquisitionState() == STATE_ON) {
-		timestamp = getDataTimestamp();
+		timestamp = getDataTimestamp();			/* Get data timestamp private variable */
+		incrementDataTimestamp();						/* Incremente data timestamp private variable by 10 ms */
 		uint32ToString(timestamp, &DATA_BlockBuffer[TIMESTAMP_CSV_INDEX], 7);
 		f_write(&USBHFile, DATA_BlockBuffer, BUFFER_BLOCK_LEN, (void *)&bytesWritten);
 		/* Put here the code to manage errors */
@@ -108,12 +109,11 @@ extern inline void USB_OpenFile(void)
 		openResult = f_open(&USBHFile, "DynamisPRC_USB_test.csv", FA_CREATE_ALWAYS | FA_WRITE);
 	
 		if(openResult == FR_OK) {
-			DATA_PacketReset();								/* Reset the data saving buffer */
 			USB_WriteLen(fileHeader);
 			USB_WriteLen(channelNameHeader);
 			HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
-			resetDataTimestamp();							/* Reset data timestamp private variable */
 			DATA_SetAcquisitionState();				/* Update of the status packet */
+			resetDataTimestamp();							/* Reset data timestamp private variable */
 			/* Put here the code to manage errors */
 		}
 	}
@@ -127,36 +127,35 @@ extern inline void USB_CloseFile(void)
 		if(closeResult == FR_OK) {
 			HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
 			DATA_ResetAcquisitionState();			/* Update of the status packet */
+			DATA_PacketReset();								/* Reset the data saving buffer */
 			/* Put here the code to manage errors */
 		}
 	}
 }
 
-extern inline void USB_EventHandler(osEvent event)
+extern inline void USB_EventHandler(uint8_t USB_Event)
 {
-	if(event.status == osEventMessage) {
-		switch(event.value.v) {
-			case DISCONNECTION_EVENT:
-				f_mount(NULL, (TCHAR const *)"", 1);
-				FATFS_UnLinkDriver(USBHPath);
-				DATA_ResetUsbReadyState();					/* Update of the status packet */
-				DATA_ResetUsbPresentState();				/* Update of the status packet */
-				/* Put here the code to manage errors */
-				break;
+	switch(USB_Event) {
+		case DISCONNECTION_EVENT:
+			f_mount(NULL, (TCHAR const *)"", 1);
+			FATFS_UnLinkDriver(USBHPath);
+			DATA_ResetUsbReadyState();					/* Update of the status packet */
+			DATA_ResetUsbPresentState();				/* Update of the status packet */
+			/* Put here the code to manage errors */
+			break;
 
-			case CONNECTED_EVENT:
-				if(FATFS_LinkDriver(&USBH_Driver, USBHPath) == 0) {
-					f_mount(&USBHFatFS, (TCHAR const *)USBHPath, 1);
-					DATA_SetUsbReadyState();					/* Update of the status packet */
-					DATA_SetUsbReadyState();					/* Update of the status packet */
-				}
-				
-				/* Put here the code to manage errors */
-				break;
-		
-			default:
-				break;
-		}
+		case CONNECTED_EVENT:
+			if(FATFS_LinkDriver(&USBH_Driver, USBHPath) == 0) {
+				f_mount(&USBHFatFS, (TCHAR const *)USBHPath, 1);
+				DATA_SetUsbReadyState();					/* Update of the status packet */
+				DATA_SetUsbReadyState();					/* Update of the status packet */
+			}
+			
+			/* Put here the code to manage errors */
+			break;
+	
+		default:
+			break;
 	}
 }
 

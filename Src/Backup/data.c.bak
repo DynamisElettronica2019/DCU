@@ -12,11 +12,15 @@ float fData1 = 0.0f;
 float fData2 = 0.0f;
 float fData3 = 0.0f;
 float fData4 = 0.0f;
+uint8_t EFI_OffCounter = 0;
 uint8_t EFI_IsAlive = EFI_IS_ALIVE_RESET;
 uint8_t DATA_BlockBuffer [BUFFER_BLOCK_LEN];
 uint8_t DATA_StateBuffer [BUFFER_STATE_LEN] = "[S;0;0;0;0;0;0;0;0]";
 uint8_t acquisitionState = ACQUISITION_OFF_STATE;
+BaseType_t EFI_IsAlive_xHigherPriorityTaskWoken = pdFALSE;
 extern uint32_t CAN_ReceivedPacketsCounter [NUMBER_OF_ACQUIRED_CHANNELS];
+extern osSemaphoreId automaticStartAcquisitionSemaphoreHandle;
+extern osMessageQId startAcquisitionEventHandle;
 
 
 extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
@@ -147,6 +151,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			intToStringUnsigned(data1, &DATA_BlockBuffer[IR1_FL_CSV_INDEX], 5);
 			intToStringUnsigned(data2, &DATA_BlockBuffer[IR2_FL_CSV_INDEX], 5);
 			intToStringUnsigned(data3, &DATA_BlockBuffer[IR3_FL_CSV_INDEX], 5);
+			intToStringUnsigned(data3, &DATA_BlockBuffer[BRAKE_IR_FL_CSV_SEPARATOR], 5);
 			break;
 		
 		case DAU_FR_IR_ID:
@@ -154,6 +159,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			intToStringUnsigned(data1, &DATA_BlockBuffer[IR1_FR_CSV_INDEX], 5);
 			intToStringUnsigned(data2, &DATA_BlockBuffer[IR2_FR_CSV_INDEX], 5);
 			intToStringUnsigned(data3, &DATA_BlockBuffer[IR3_FR_CSV_INDEX], 5);
+			intToStringUnsigned(data3, &DATA_BlockBuffer[BRAKE_IR_FR_CSV_SEPARATOR], 5);
 			break;
 		
 		case DAU_REAR_IR_RL_ID:
@@ -161,6 +167,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			intToStringUnsigned(data1, &DATA_BlockBuffer[IR1_RL_CSV_INDEX], 5);
 			intToStringUnsigned(data2, &DATA_BlockBuffer[IR2_RL_CSV_INDEX], 5);
 			intToStringUnsigned(data3, &DATA_BlockBuffer[IR3_RL_CSV_INDEX], 5);
+			intToStringUnsigned(data3, &DATA_BlockBuffer[BRAKE_IR_RL_CSV_SEPARATOR], 5);
 			break;
 		
 		case DAU_REAR_IR_RR_ID:
@@ -168,6 +175,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			intToStringUnsigned(data1, &DATA_BlockBuffer[IR1_RR_CSV_INDEX], 5);
 			intToStringUnsigned(data2, &DATA_BlockBuffer[IR2_RR_CSV_INDEX], 5);
 			intToStringUnsigned(data3, &DATA_BlockBuffer[IR3_RR_CSV_INDEX], 5);
+			intToStringUnsigned(data3, &DATA_BlockBuffer[BRAKE_IR_RR_CSV_SEPARATOR], 5);
 			break;
 		
 		/* IMU ID range */
@@ -256,19 +264,27 @@ extern inline void startAcquisitionStateMachine(uint8_t startAcquisitionEvent)
 			/* Get next state, based on the request received */
 			switch(startAcquisitionEvent) {
 				case ACQUISITION_ON_SW_REQUEST:
-					acquisitionState = ACQUISITION_ON_FROM_SW_STATE;
+					if(DATA_GetUsbReadyState() == STATE_ON) {
+						acquisitionState = ACQUISITION_ON_FROM_SW_STATE;
+					}
 					break;
 						
 				case ACQUISITION_ON_TELEMETRY_REQUEST:
-					acquisitionState = ACQUISITION_ON_FROM_TELEMETRY_STATE;
+					if(DATA_GetUsbReadyState() == STATE_ON) {
+						acquisitionState = ACQUISITION_ON_FROM_TELEMETRY_STATE;
+					}
 					break;
 				
 				case ACQUISITION_ON_AUTO_REQUEST:
-					acquisitionState = ACQUISITION_ON_FROM_AUTO_STATE;
+					if(DATA_GetUsbReadyState() == STATE_ON) {
+						acquisitionState = ACQUISITION_ON_FROM_AUTO_STATE;
+					}
 					break;
 				
 				case ACQUISITION_ON_DEBUG_REQUEST:
-					acquisitionState = ACQUISITION_ON_FROM_DEBUG_STATE;
+					if(DATA_GetUsbReadyState() == STATE_ON) {
+						acquisitionState = ACQUISITION_ON_FROM_DEBUG_STATE;
+					}
 					break;
 				
 				default:
@@ -343,7 +359,48 @@ extern inline void startAcquisitionStateMachine(uint8_t startAcquisitionEvent)
 
 extern inline void DATA_CheckEfiIsAlive(void)
 {
+	if(automaticStartAcquisitionSemaphoreHandle != NULL) { 																												/* Check on system start if semaphore is already created */
+		xSemaphoreGiveFromISR(automaticStartAcquisitionSemaphoreHandle, &EFI_IsAlive_xHigherPriorityTaskWoken); 		/* Give semaphore to task when DMA is clear */
+		portYIELD_FROM_ISR(EFI_IsAlive_xHigherPriorityTaskWoken); 																									/* Do context-switch if needed */
+	}
+}
+
+extern inline void DATA_AutomaticStartAcquisitionManager(void)
+{
+	uint8_t startAquisitionEvent = ACQUISITION_IDLE_REQUEST;
+	BaseType_t startAcquisition_xHigherPriorityTaskWoken = pdFALSE;
 	
+	/* Check if there are the automatic acquisition start conditions */
+	if((DATA_GetAcquisitionState() == STATE_OFF) && (EFI_IsAlive == EFI_IS_ALIVE_SET)) {
+		if((DATA_BlockBuffer[RPM_CSV_INDEX + 2] != '0') || (DATA_BlockBuffer[RPM_CSV_INDEX + 3] != '0')) {
+			EFI_OffCounter = 0;
+			startAquisitionEvent = ACQUISITION_ON_AUTO_REQUEST;
+			xQueueSendFromISR(startAcquisitionEventHandle, &startAquisitionEvent, &startAcquisition_xHigherPriorityTaskWoken);
+		}
+	}
+	
+	/* Check if there are the automatic acquisition stop conditions */
+	else if(DATA_GetAcquisitionState() == STATE_ON) {
+		
+		/* EFI_IsAlive is reset every second and set evert EFI packet received */
+		if(EFI_IsAlive == EFI_IS_ALIVE_RESET) {
+			EFI_OffCounter++;
+			
+			/* If EFI alive flag is off for more than 30 seconds: stop automatic acquisition */
+			if((EFI_OffCounter >= 30)) {
+				startAquisitionEvent = ACQUISITION_OFF_AUTO_REQUEST;
+				xQueueSendFromISR(startAcquisitionEventHandle, &startAquisitionEvent, &startAcquisition_xHigherPriorityTaskWoken);
+			}
+		}
+		else if(EFI_IsAlive == EFI_IS_ALIVE_SET) {
+			EFI_OffCounter = 0;
+		}
+	}
+}
+
+extern inline void DATA_SetEfiIsAlive(void)
+{
+	EFI_IsAlive = EFI_IS_ALIVE_SET;
 }
 
 extern inline void DATA_ResetEfiIsAlive(void)
@@ -452,15 +509,19 @@ extern void DATA_PacketReset(void)
 	DATA_BlockBuffer[IR1_FL_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IR2_FL_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IR3_FL_CSV_SEPARATOR] = CHANNEL_SEPARATION;
+	DATA_BlockBuffer[BRAKE_IR_FL_CSV_INDEX] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IR1_FR_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IR2_FR_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IR3_FR_CSV_SEPARATOR] = CHANNEL_SEPARATION;
+	DATA_BlockBuffer[BRAKE_IR_FR_CSV_INDEX] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IR1_RL_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IR2_RL_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IR3_RL_CSV_SEPARATOR] = CHANNEL_SEPARATION;
+	DATA_BlockBuffer[BRAKE_IR_RL_CSV_INDEX] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IR1_RR_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IR2_RR_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IR3_RR_CSV_SEPARATOR] = CHANNEL_SEPARATION;
+	DATA_BlockBuffer[BRAKE_IR_RR_CSV_INDEX] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IMU1_ACC_X_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IMU1_ACC_Y_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[IMU1_GYR_X_CSV_SEPARATOR] = CHANNEL_SEPARATION;
@@ -505,12 +566,7 @@ extern void DATA_PacketReset(void)
 	DATA_BlockBuffer[DCU_12V_VOLTAGE_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[DCU_5V_VOLTAGE_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[DCU_3V3_VOLTAGE_CSV_SEPARATOR] = CHANNEL_SEPARATION;
-	DATA_BlockBuffer[END_DATA_CSV_INDEX] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[END_ROW_CSV_INDEX - 1] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[END_ROW_CSV_INDEX] = END_LINE;
 }
 
-static inline void DATA_SetEfiIsAlive(void)
-{
-	EFI_IsAlive = EFI_IS_ALIVE_SET;
-}
