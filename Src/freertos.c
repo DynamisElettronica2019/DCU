@@ -497,9 +497,12 @@ void SendDataFunc(void const * argument)
 	/* Infinite loop */
   for(;;) {
     xSemaphoreTake(sendDataSemaphoreHandle, portMAX_DELAY); 														/* Unlock when timer callback is called */
-		xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);								/* Lock if DMA is in use */
-		xQueueSend(Usart1TxModeQueueHandle, (void *)&secondTxModeFlag, (TickType_t)0); 			/* Add flag to queue */
-		HAL_UART_Transmit_DMA(&huart1, DATA_BlockBuffer, HALF_DATA_INDEX); 									/* Transmit first half of data message */
+		
+		if(DATA_GetTelemetryState() == STATE_ON) {
+			xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);								/* Lock if DMA is in use */
+			xQueueSend(Usart1TxModeQueueHandle, (void *)&secondTxModeFlag, (TickType_t)0); 			/* Add flag to queue */
+			HAL_UART_Transmit_DMA(&huart1, DATA_BlockBuffer, HALF_DATA_INDEX); 									/* Transmit first half of data message */
+		}
   }
   /* USER CODE END SendDataFunc */
 }

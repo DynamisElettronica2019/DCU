@@ -247,6 +247,7 @@ static inline void USER_SystemInit(void)
 	ADC_BuffersInit();																														/* ADC buffer initialization */
 	USB_InitStart();																															/* USB peripheral config and start */
 	MX_FATFS_Init();																															/* FatFS init */
+	DATA_SetTelemetryState();																											/* Start telemetry as default */
 	HAL_Delay(500);																																/* Delay for Vbus stabilization */
 	return;
 }

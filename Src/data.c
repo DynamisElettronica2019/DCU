@@ -418,6 +418,11 @@ extern inline uint8_t DATA_GetAcquisitionState(void)
 	return DATA_StateBuffer[STATE_ACQUISITION_ON_INDEX];
 }
 
+extern inline uint8_t DATA_GetTelemetryState(void)
+{
+	return DATA_StateBuffer[STATE_TELEMETRY_ON_INDEX];
+}
+
 extern inline void DATA_SetUsbPresentState(void)
 {
 	DATA_StateBuffer[STATE_USB_PRESENT_INDEX] = STATE_ON;

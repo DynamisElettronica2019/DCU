@@ -15,6 +15,7 @@
 #define NORMAL_MODE_TX_FLAG         													(uint8_t)'N'
 #define MESSAGE_INIT_ID             													(uint8_t)'['
 #define MESSAGE_END_ID              													(uint8_t)']'
+#define SET_TELEM_ID              														(uint8_t)'D'
 #define RESET_TELEM_ID              													(uint8_t)'M'
 #define START_ACQ_ID                													(uint8_t)'B'
 #define STOP_ACQ_ID                 													(uint8_t)'V'

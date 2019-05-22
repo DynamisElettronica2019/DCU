@@ -283,6 +283,7 @@ extern inline void DATA_SetEfiIsAlive(void);
 extern inline void DATA_ResetEfiIsAlive(void);
 extern inline uint8_t DATA_GetUsbReadyState(void);
 extern inline uint8_t DATA_GetAcquisitionState(void);
+extern inline uint8_t DATA_GetTelemetryState(void);
 extern inline void DATA_SetUsbPresentState(void);
 extern inline void DATA_SetUsbReadyState(void);
 extern inline void DATA_SetAcquisitionState(void);
