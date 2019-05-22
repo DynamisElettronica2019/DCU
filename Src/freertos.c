@@ -76,6 +76,7 @@ osThreadId canFifo0UnpackHandle;
 osThreadId canFifo1UnpackHandle;
 osThreadId sendDebugDataHandle;
 osThreadId CAN_SendManagerHandle;
+osThreadId automaticStartAcquisitionMonitoringHandle;
 osMessageQId digitalAuxQueueHandle;
 osMessageQId ErrorQueueHandle;
 osMessageQId Usart1TxModeQueueHandle;
@@ -95,6 +96,7 @@ osSemaphoreId receiveCommandSemaphoreHandle;
 osSemaphoreId sendFollowingDataSemaphoreHandle;
 osSemaphoreId saveUsbSemaphoreHandle;
 osSemaphoreId CAN_SendSemaphoreHandle;
+osSemaphoreId automaticStartAcquisitionSemaphoreHandle;
 osSemaphoreId CAN_SendDataSemaphoreCounterHandle;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -120,6 +122,7 @@ void canFifo0UnpackTask(void const * argument);
 void canFifo1UnpackTask(void const * argument);
 void sendDebugDataTask(void const * argument);
 void CAN_SendManagerTask(void const * argument);
+void automaticStartAcquisitionMonitoringTask(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -178,22 +181,27 @@ void MX_FREERTOS_Init(void) {
   osSemaphoreDef(CAN_SendSemaphore);
   CAN_SendSemaphoreHandle = osSemaphoreCreate(osSemaphore(CAN_SendSemaphore), 1);
 
+  /* definition and creation of automaticStartAcquisitionSemaphore */
+  osSemaphoreDef(automaticStartAcquisitionSemaphore);
+  automaticStartAcquisitionSemaphoreHandle = osSemaphoreCreate(osSemaphore(automaticStartAcquisitionSemaphore), 1);
+
   /* definition and creation of CAN_SendDataSemaphoreCounter */
   osSemaphoreDef(CAN_SendDataSemaphoreCounter);
   CAN_SendDataSemaphoreCounterHandle = osSemaphoreCreate(osSemaphore(CAN_SendDataSemaphoreCounter), 3);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
-	xSemaphoreTake(saveUsbSemaphoreHandle, portMAX_DELAY);								/* Start with the task locked */
-	xSemaphoreTake(sendStateSemaphoreHandle, portMAX_DELAY); 							/* Start with the task locked */
-	xSemaphoreTake(sendDataSemaphoreHandle, portMAX_DELAY); 							/* Start with the task locked */
-	xSemaphoreTake(receiveCommandSemaphoreHandle, portMAX_DELAY); 				/* Start with the task locked */
-	xSemaphoreTake(sendFollowingDataSemaphoreHandle, portMAX_DELAY); 			/* Start with the task locked */
-	xSemaphoreTake(adc1SemaphoreHandle, portMAX_DELAY);										/* Start with the task locked */
-	xSemaphoreTake(adc2SemaphoreHandle, portMAX_DELAY); 									/* Start with the task locked */
-	xSemaphoreTake(autogearSemaphoreHandle, portMAX_DELAY); 							/* Start with the task locked */
-	xSemaphoreTake(USB_OvercurrentSemaphoreHandle, portMAX_DELAY); 				/* Start with the task locked */
-	xSemaphoreTake(CAN_SendSemaphoreHandle, portMAX_DELAY); 							/* Start with the task locked */
+	xSemaphoreTake(saveUsbSemaphoreHandle, portMAX_DELAY);											/* Start with the task locked */
+	xSemaphoreTake(sendStateSemaphoreHandle, portMAX_DELAY); 										/* Start with the task locked */
+	xSemaphoreTake(sendDataSemaphoreHandle, portMAX_DELAY); 										/* Start with the task locked */
+	xSemaphoreTake(receiveCommandSemaphoreHandle, portMAX_DELAY); 							/* Start with the task locked */
+	xSemaphoreTake(sendFollowingDataSemaphoreHandle, portMAX_DELAY); 						/* Start with the task locked */
+	xSemaphoreTake(adc1SemaphoreHandle, portMAX_DELAY);													/* Start with the task locked */
+	xSemaphoreTake(adc2SemaphoreHandle, portMAX_DELAY); 												/* Start with the task locked */
+	xSemaphoreTake(autogearSemaphoreHandle, portMAX_DELAY); 										/* Start with the task locked */
+	xSemaphoreTake(USB_OvercurrentSemaphoreHandle, portMAX_DELAY); 							/* Start with the task locked */
+	xSemaphoreTake(CAN_SendSemaphoreHandle, portMAX_DELAY); 										/* Start with the task locked */
+	xSemaphoreTake(automaticStartAcquisitionSemaphoreHandle, portMAX_DELAY); 		/* Start with the task locked */
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -317,6 +325,10 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(CAN_SendManager, CAN_SendManagerTask, osPriorityNormal, 0, 128);
   CAN_SendManagerHandle = osThreadCreate(osThread(CAN_SendManager), NULL);
 
+  /* definition and creation of automaticStartAcquisitionMonitoring */
+  osThreadDef(automaticStartAcquisitionMonitoring, automaticStartAcquisitionMonitoringTask, osPriorityBelowNormal, 0, 128);
+  automaticStartAcquisitionMonitoringHandle = osThreadCreate(osThread(automaticStartAcquisitionMonitoring), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -332,6 +344,7 @@ void MX_FREERTOS_Init(void) {
 /* USER CODE END Header_aliveTask */
 void aliveTask(void const * argument)
 {
+
   /* USER CODE BEGIN aliveTask */
 	HAL_TIM_Base_Start_IT(&htim5); 				/* Start timer 5 in interrupt mode */
 	HAL_TIM_Base_Start_IT(&htim6); 				/* Start timer 6 in interrupt mode */
@@ -702,6 +715,24 @@ void CAN_SendManagerTask(void const * argument)
 		HAL_CAN_AddTxMessage(&hcan1, &CAN_TxPacket.packetHeader, CAN_TxPacket.packetData, &packetMailbox);		/* Send CAN message */
   }
   /* USER CODE END CAN_SendManagerTask */
+}
+
+/* USER CODE BEGIN Header_automaticStartAcquisitionMonitoringTask */
+/**
+* @brief Function implementing the automaticStartAcquisitionMonitoring thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_automaticStartAcquisitionMonitoringTask */
+void automaticStartAcquisitionMonitoringTask(void const * argument)
+{
+  /* USER CODE BEGIN automaticStartAcquisitionMonitoringTask */
+  /* Infinite loop */
+  for(;;) {
+		xSemaphoreTake(automaticStartAcquisitionSemaphoreHandle, portMAX_DELAY);		/* Unlock when timer callback is called */
+		DATA_AutomaticStartAcquisitionManager(); 																		/* Check if start/stop automatic start acquisition */
+  }
+  /* USER CODE END automaticStartAcquisitionMonitoringTask */
 }
 
 /* Private application code --------------------------------------------------*/

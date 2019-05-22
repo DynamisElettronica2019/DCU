@@ -21,7 +21,17 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
+#include "cmsis_os.h"
+#include "telemetry.h"
 
+uint8_t queueUartTransmitFlag; 								/* Receive from queue and store into this variable */
+uint8_t usart1LockFlag = UART1_CLEAR_FLAG;		/* Set item to send to queue */
+BaseType_t UART1_TxHigherPriorityTaskWoken = pdFALSE;
+BaseType_t UART1_RxHigherPriorityTaskWoken = pdFALSE;
+extern osSemaphoreId sendFollowingDataSemaphoreHandle;
+extern osSemaphoreId receiveCommandSemaphoreHandle;
+extern osMessageQId Usart1LockQueueHandle;
+extern osMessageQId Usart1TxModeQueueHandle;
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart1;
@@ -237,6 +247,52 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 } 
 
 /* USER CODE BEGIN 1 */
+
+extern inline void UART1_TxCallback(void)
+{
+	xQueueReceiveFromISR(Usart1TxModeQueueHandle, (void *)&queueUartTransmitFlag, &UART1_TxHigherPriorityTaskWoken);
+	
+	/* Check which flag you have received and unlock the correct semaphore */
+	switch(queueUartTransmitFlag) {
+		
+		/* To send second part of data, unlock the secont part tx task and keep the UART semaphore locked to avoit its use from other tasks */
+		case SECOND_HALF_TX_FLAG:
+			if(sendFollowingDataSemaphoreHandle != NULL) { 																									/* Check on system start if semaphore is already created */
+				xSemaphoreGiveFromISR(sendFollowingDataSemaphoreHandle, &UART1_TxHigherPriorityTaskWoken); 		/* Give semaphore to task when DMA is clear */
+				portYIELD_FROM_ISR(UART1_TxHigherPriorityTaskWoken); 																					/* Do context-switch if needed */
+			}
+			
+			break;
+		
+		/* To return to normal mode, unlock the UART locking semaphore */
+		case NORMAL_MODE_TX_FLAG: 
+			if(Usart1LockQueueHandle != NULL) { 																															/* Check on system start if semaphore is already created */
+				xQueueSendFromISR(Usart1LockQueueHandle, &usart1LockFlag, &UART1_TxHigherPriorityTaskWoken);		/* Send wake up signal to task when DMA is clear */
+				portYIELD_FROM_ISR(UART1_TxHigherPriorityTaskWoken); 																						/* Do context-switch if needed */
+			}
+			
+			break;
+		
+		/* If the flag is unrecognised, raise eventually an error and return to normal mode */
+		default:
+			
+			/* Eventual error throwing code to be inserted here */
+			if(Usart1LockQueueHandle != NULL) { 																															/* Check on system start if semaphore is already created */
+				xQueueSendFromISR(Usart1LockQueueHandle, &usart1LockFlag, &UART1_TxHigherPriorityTaskWoken);		/* Send wake up signal to task when DMA is clear */
+				portYIELD_FROM_ISR(UART1_TxHigherPriorityTaskWoken); 																						/* Do context-switch if needed */
+			}
+			
+			break;
+	}
+}
+
+extern inline void UART1_RxCallback(void)
+{	
+	if(receiveCommandSemaphoreHandle != NULL) { 																									/* Check on system start if semaphore is already created */
+		xSemaphoreGiveFromISR(receiveCommandSemaphoreHandle, &UART1_RxHigherPriorityTaskWoken); 		/* Give semaphore to task when DMA is clear */
+		portYIELD_FROM_ISR(UART1_RxHigherPriorityTaskWoken); 																				/* Do context-switch if needed */
+	}
+}
 
 /* USER CODE END 1 */
 

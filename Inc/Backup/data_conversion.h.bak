@@ -17,18 +17,24 @@
 #define ANALOG_AUX_1_VOLTAGE_GAIN						1.56f	
 #define ANALOG_AUX_2_VOLTAGE_GAIN						1.56f
 #define ANALOG_AUX_3_VOLTAGE_GAIN						1.56f
-//#define ANALOG_AUX_1_VOLTAGE_GAIN					1.7905f	
-//#define ANALOG_AUX_2_VOLTAGE_GAIN					1.7876f
-//#define ANALOG_AUX_3_VOLTAGE_GAIN					1.7963f
 
-extern inline uint16_t mainCurrentSenseConversion(uint32_t rawData);
-extern inline uint16_t dcuCurrentSenseConversion(uint32_t rawData);
-extern inline uint16_t xbeeCurrentSenseConversion(uint32_t rawData);
-extern inline float _3v3SenseConversion(uint32_t rawData);
-extern inline float _5vSenseConversion(uint32_t rawData);
-extern inline float _12vSenseConversion(uint32_t rawData);
-extern inline float dcuTempSenseConversion(uint32_t rawData);
-extern inline float vbatConversion(uint32_t rawData);
+
+extern inline float EFI_TEMPERATURE_DataConversion(uint16_t input);
+extern inline float T_H20_ENGINE_DataConversion(uint16_t input);
+extern inline float BATTERY_VOLTAGE_DataConversion(uint16_t input);
+extern inline float TPS_DataConversion(uint16_t input);
+extern inline float WATER_PRESSURE_DataConversion(uint16_t input);
+extern inline float EXHAUST_TEMPERATURE_DataConversion(uint16_t input);
+extern inline float H20_PUMP_DUTY_CYCLE_DataConversion(uint16_t input);
+extern inline float FUEL_LEVEL_DataConversion(uint16_t input);
+extern inline uint16_t DCU_MainCurrentSenseConversion(uint32_t rawData);
+extern inline uint16_t DCU_CurrentSenseConversion(uint32_t rawData);
+extern inline uint16_t DCU_XbeeCurrentSenseConversion(uint32_t rawData);
+extern inline float DCU_3v3SenseConversion(uint32_t rawData);
+extern inline float DCU_5vSenseConversion(uint32_t rawData);
+extern inline float DCU_12vSenseConversion(uint32_t rawData);
+extern inline float DCU_TempSenseConversion(uint32_t rawData);
+extern inline float DCU_VbatConversion(uint32_t rawData);
 extern inline float analogAux1Conversion(uint32_t rawData);
 extern inline float analogAux2Conversion(uint32_t rawData);
 extern inline float analogAux3Conversion(uint32_t rawData);

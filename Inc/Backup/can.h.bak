@@ -35,23 +35,26 @@ extern CAN_HandleTypeDef hcan1;
 /* USER CODE BEGIN Private defines */
 typedef struct
 {
-	CAN_RxHeaderTypeDef CAN_RxPacket_Header;
-	uint8_t CAN_RxPacket_Data[8];
-} CAN_RxPacketTypeDef;
+	CAN_RxHeaderTypeDef packetHeader;
+	uint8_t packetData[8];
+} CAN_RxPacket_t;
 
 typedef struct
 {
-	CAN_TxHeaderTypeDef CAN_RtPacketHeader;
-	uint8_t CAN_RxPacketData[8];
-} CAN_TxPacketTypedef;
+	CAN_TxHeaderTypeDef packetHeader;
+	uint8_t packetData[8];
+} CAN_TxPacket_t;
 /* USER CODE END Private defines */
 
 void MX_CAN1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-extern void canStart(void);
-extern inline void CAN_SendMessage(uint32_t id, uint8_t *message, uint8_t bytesNumber);
-static void canFilterConfig(void);
+extern void CAN_Start(void);
+extern inline void CAN_SendPackets(void);
+extern inline void CAN_SendDebugPackets(void);
+extern inline void CAN_SendAutogearPacket(void);
+extern void CAN_PacketCounterReset(void);
+static void CAN_FilterConfig(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

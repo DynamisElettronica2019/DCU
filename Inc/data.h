@@ -265,16 +265,6 @@
 #define ACQUISITION_OFF_DEBUG_REQUEST 												(uint8_t)'D'
 #define ACQUISITION_IDLE_REQUEST															(uint8_t)'E'
 
-#define IDLE_COMMAND																					(uint8_t)'I'
-#define ACQUISITION_ON_SW_COMMAND															(uint8_t)'S'
-#define ACQUISITION_OFF_SW_COMMAND 														(uint8_t)'W'
-#define ACQUISITION_ON_TELEMETRY_COMMAND 											(uint8_t)'T'
-#define ACQUISITION_OFF_TELEMETRY_COMMAND 										(uint8_t)'M'
-#define ACQUISITION_ON_ETH_COMMAND 														(uint8_t)'E'
-#define ACQUISITION_OFF_ETH_COMMAND 													(uint8_t)'H'
-#define ACQUISITION_ON_DEBUG_COMMAND 													(uint8_t)'D'
-#define ACQUISITION_OFF_DEBUG_COMMAND 												(uint8_t)'B'
-
 #define STATE_ON 																							(uint8_t)'1'
 #define STATE_OFF																							(uint8_t)'0'
 #define STATE_USB_PRESENT_INDEX 															(uint8_t)3
@@ -283,17 +273,25 @@
 #define STATE_uSD_READY_INDEX 																(uint8_t)9
 #define STATE_ACQUISITION_ON_INDEX 														(uint8_t)11
 #define STATE_TELEMETRY_ON_INDEX  														(uint8_t)13
+#define EFI_IS_ALIVE_RESET 																		(uint8_t)0
+#define EFI_IS_ALIVE_SET 																			(uint8_t)1
 
 extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData);
 extern inline void startAcquisitionStateMachine(uint8_t startAcquisitionEvent);
+extern inline void DATA_CheckEfiIsAlive(void);
+extern inline void DATA_AutomaticStartAcquisitionManager(void);
+extern inline void DATA_SetEfiIsAlive(void);
+extern inline void DATA_ResetEfiIsAlive(void);
 extern inline uint8_t DATA_GetUsbReadyState(void);
 extern inline uint8_t DATA_GetAcquisitionState(void);
 extern inline void DATA_SetUsbPresentState(void);
 extern inline void DATA_SetUsbReadyState(void);
 extern inline void DATA_SetAcquisitionState(void);
+extern inline void DATA_SetTelemetryState(void);
 extern inline void DATA_ResetUsbPresentState(void);
 extern inline void DATA_ResetUsbReadyState(void);
 extern inline void DATA_ResetAcquisitionState(void);
+extern inline void DATA_ResetTelemetryState(void);
 extern void DATA_PacketReset(void);
 
 #endif

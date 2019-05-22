@@ -40,7 +40,10 @@
 void MX_GPIO_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+extern inline void GPIO_UsbOvercurrentISR(void);
+extern inline void GPIO_AutogearSwitchISR(void);
+extern inline void GPIO_AuxSamplingFunction(void);
+extern inline void GPIO_AuxManageEvent(uint8_t event);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

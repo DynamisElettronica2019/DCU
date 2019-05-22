@@ -12,10 +12,15 @@ float fData1 = 0.0f;
 float fData2 = 0.0f;
 float fData3 = 0.0f;
 float fData4 = 0.0f;
+uint8_t EFI_OffCounter = 0;
+uint8_t EFI_IsAlive = EFI_IS_ALIVE_RESET;
 uint8_t DATA_BlockBuffer [BUFFER_BLOCK_LEN];
 uint8_t DATA_StateBuffer [BUFFER_STATE_LEN] = "[S;0;0;0;0;0;0;0;0]";
 uint8_t acquisitionState = ACQUISITION_OFF_STATE;
+BaseType_t EFI_IsAlive_xHigherPriorityTaskWoken = pdFALSE;
 extern uint32_t CAN_ReceivedPacketsCounter [NUMBER_OF_ACQUIRED_CHANNELS];
+extern osSemaphoreId automaticStartAcquisitionSemaphoreHandle;
+extern osMessageQId startAcquisitionEventHandle;
 
 
 extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
@@ -32,6 +37,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 		/* EFI ID range */
 		
 		case EFI_HALL_WHEEL_ID:
+			DATA_SetEfiIsAlive();
 			CAN_ReceivedPacketsCounter[EFI_HALL_WHEEL_ID_COUNTER_INDEX]++;
 			decimalToStringUnsigned(data1, &DATA_BlockBuffer[HALL_EFFECT_FR_CSV_INDEX], 3, 1); 		/* Taking into account the division by 10 */
 			decimalToStringUnsigned(data2, &DATA_BlockBuffer[HALL_EFFECT_FL_CSV_INDEX], 3, 1); 		/* Taking into account the division by 10 */
@@ -40,6 +46,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			break;
 		
 		case EFI_WATER_TEMPERATURE_ID:
+			DATA_SetEfiIsAlive();
 			CAN_ReceivedPacketsCounter[EFI_WATER_TEMPERATURE_ID_COUNTER_INDEX]++;
 			fData1 = EFI_TEMPERATURE_DataConversion(data1);
 			fData2 = EFI_TEMPERATURE_DataConversion(data2);
@@ -52,6 +59,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			break;
 		
 		case EFI_OIL_T_ENGINE_BAT_ID:
+			DATA_SetEfiIsAlive();
 			CAN_ReceivedPacketsCounter[EFI_OIL_T_ENGINE_BAT_ID_COUNTER_INDEX]++;
 			fData1 = EFI_TEMPERATURE_DataConversion(data1);
 			fData2 = EFI_TEMPERATURE_DataConversion(data2);
@@ -64,6 +72,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			break;
 		
 		case EFI_GEAR_RPM_TPS_PH2O_ID:
+			DATA_SetEfiIsAlive();
 			CAN_ReceivedPacketsCounter[EFI_MANUAL_LIMITER_FAN_H2O_PIT_LANE_COUNTER_INDEX]++;
 			fData3 = TPS_DataConversion(data3);
 			fData4 = WATER_PRESSURE_DataConversion(data4);
@@ -74,6 +83,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			break;
 		
 		case EFI_TRACTION_CONTROL_ID:
+			DATA_SetEfiIsAlive();
 			CAN_ReceivedPacketsCounter[EFI_TRACTION_CONTROL_ID_COUNTER_INDEX]++;
 			decimalToStringUnsigned(data1, &DATA_BlockBuffer[VH_SPEED_CSV_INDEX], 3, 1); 				/* Taking into account the division by 10 */
 			decimalToStringUnsigned(data2, &DATA_BlockBuffer[SLIP_TARGET_CSV_INDEX], 3, 1); 		/* Taking into account the division by 10 */
@@ -81,6 +91,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			break;
 		
 		case EFI_FUEL_FAN_H2O_LAUNCH_ID_COUNTER_INDEX:
+			DATA_SetEfiIsAlive();
 			CAN_ReceivedPacketsCounter[EFI_FUEL_FAN_H2O_LAUNCH_ID_COUNTER_INDEX]++;
 			fData3 = H20_PUMP_DUTY_CYCLE_DataConversion(data3);
 			intToStringUnsigned(data1, &DATA_BlockBuffer[MANUAL_LIMITER_ACTIVE_CSV_INDEX], 1);
@@ -90,6 +101,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			break;
 		
 		case EFI_PRESSURES_LAMBDA_SMOT_ID:
+			DATA_SetEfiIsAlive();
 			CAN_ReceivedPacketsCounter[EFI_PRESSURES_LAMBDA_SMOT_ID_COUNTER_INDEX]++;
 			intToStringUnsigned(data1, &DATA_BlockBuffer[FUEL_PRESSURE_CSV_INDEX], 5);
 			intToStringUnsigned(data2, &DATA_BlockBuffer[OIL_PRESSURE_CSV_INDEX], 5);
@@ -98,6 +110,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			break;
 		
 		case EFI_LOIL_EXHAUST_ID:
+			DATA_SetEfiIsAlive();
 			CAN_ReceivedPacketsCounter[EFI_LOIL_EXHAUST_ID_COUNTER_INDEX]++;
 			fData1 = FUEL_LEVEL_DataConversion(data1);
 			fData2 = EXHAUST_TEMPERATURE_DataConversion(data2);
@@ -332,6 +345,57 @@ extern inline void startAcquisitionStateMachine(uint8_t startAcquisitionEvent)
 	}
 }
 
+extern inline void DATA_CheckEfiIsAlive(void)
+{
+	if(automaticStartAcquisitionSemaphoreHandle != NULL) { 																												/* Check on system start if semaphore is already created */
+		xSemaphoreGiveFromISR(automaticStartAcquisitionSemaphoreHandle, &EFI_IsAlive_xHigherPriorityTaskWoken); 		/* Give semaphore to task when DMA is clear */
+		portYIELD_FROM_ISR(EFI_IsAlive_xHigherPriorityTaskWoken); 																									/* Do context-switch if needed */
+	}
+}
+
+extern inline void DATA_AutomaticStartAcquisitionManager(void)
+{
+	uint8_t startAquisitionEvent = ACQUISITION_IDLE_REQUEST;
+	BaseType_t startAcquisition_xHigherPriorityTaskWoken = pdFALSE;
+	
+	/* Check if there are the automatic acquisition start conditions */
+	if((DATA_GetAcquisitionState() == STATE_OFF) && (EFI_IsAlive == EFI_IS_ALIVE_SET)) {
+		if((DATA_BlockBuffer[RPM_CSV_INDEX + 2] != '0') || (DATA_BlockBuffer[RPM_CSV_INDEX + 3] != '0')) {
+			EFI_OffCounter = 0;
+			startAquisitionEvent = ACQUISITION_ON_AUTO_REQUEST;
+			xQueueSendFromISR(startAcquisitionEventHandle, &startAquisitionEvent, &startAcquisition_xHigherPriorityTaskWoken);
+		}
+	}
+	
+	/* Check if there are the automatic acquisition stop conditions */
+	else if(DATA_GetAcquisitionState() == STATE_ON) {
+		
+		/* EFI_IsAlive is reset every second and set evert EFI packet received */
+		if(EFI_IsAlive == EFI_IS_ALIVE_RESET) {
+			EFI_OffCounter++;
+			
+			/* If EFI alive flag is off for more than 30 seconds: stop automatic acquisition */
+			if((EFI_OffCounter >= 30)) {
+				startAquisitionEvent = ACQUISITION_OFF_AUTO_REQUEST;
+				xQueueSendFromISR(startAcquisitionEventHandle, &startAquisitionEvent, &startAcquisition_xHigherPriorityTaskWoken);
+			}
+		}
+		else if(EFI_IsAlive == EFI_IS_ALIVE_SET) {
+			EFI_OffCounter = 0;
+		}
+	}
+}
+
+extern inline void DATA_SetEfiIsAlive(void)
+{
+	EFI_IsAlive = EFI_IS_ALIVE_SET;
+}
+
+extern inline void DATA_ResetEfiIsAlive(void)
+{
+	EFI_IsAlive = EFI_IS_ALIVE_SET;
+}
+
 extern inline uint8_t DATA_GetUsbReadyState(void)
 {
 	return DATA_StateBuffer[STATE_USB_READY_INDEX];
@@ -357,6 +421,11 @@ extern inline void DATA_SetAcquisitionState(void)
 	DATA_StateBuffer[STATE_ACQUISITION_ON_INDEX] = STATE_ON;
 }
 
+extern inline void DATA_SetTelemetryState(void)
+{
+	DATA_StateBuffer[STATE_TELEMETRY_ON_INDEX] = STATE_ON;
+}
+
 extern inline void DATA_ResetUsbPresentState(void)
 {
 	DATA_StateBuffer[STATE_USB_PRESENT_INDEX] = STATE_OFF;
@@ -370,6 +439,11 @@ extern inline void DATA_ResetUsbReadyState(void)
 extern inline void DATA_ResetAcquisitionState(void)
 {
 	DATA_StateBuffer[STATE_ACQUISITION_ON_INDEX] = STATE_OFF;
+}
+
+extern inline void DATA_ResetTelemetryState(void)
+{
+	DATA_StateBuffer[STATE_TELEMETRY_ON_INDEX] = STATE_OFF;
 }
 
 extern void DATA_PacketReset(void)
@@ -480,3 +554,4 @@ extern void DATA_PacketReset(void)
 	DATA_BlockBuffer[END_ROW_CSV_INDEX - 1] = CHANNEL_SEPARATION;
 	DATA_BlockBuffer[END_ROW_CSV_INDEX] = END_LINE;
 }
+

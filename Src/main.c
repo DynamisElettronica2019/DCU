@@ -83,6 +83,7 @@ int main(void)
 
   /* USER CODE END 1 */
   
+
   /* Enable I-Cache---------------------------------------------------------*/
   SCB_EnableICache();
 
@@ -272,6 +273,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	/* Timer 5: 1 Hz */
 	if (htim->Instance == TIM5) {	
 		CAN_SendPackets(); 										/* CAN send: temperature, currents, voltages and acquisition status */
+		DATA_ResetEfiIsAlive();								/* Reset EFI alive flag */
 		TELEMETRY_StateSendTimCallback(); 		/* Telemetry DCU state packet */
 		ADC_SamplingFunction(); 							/* ADC sampling: debug and aux channels*/
 		GPIO_AuxSamplingFunction(); 					/* GPIO aux sampling */
@@ -279,6 +281,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 	/* Timer 6: 10 Hz */
 	if(htim->Instance == TIM6) {
+		DATA_CheckEfiIsAlive();								/* Check EFI status: switch on/off automatic start acquisition */
 		TELEMETRY_DataSendTimCallback();			/* Send telemetry data */
 	}
 
