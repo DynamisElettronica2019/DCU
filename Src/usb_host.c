@@ -108,6 +108,7 @@ extern inline void USB_OpenFile(void)
 		openResult = f_open(&USBHFile, "DynamisPRC_USB_test.csv", FA_CREATE_ALWAYS | FA_WRITE);
 	
 		if(openResult == FR_OK) {
+			DATA_PacketReset();								/* Reset the data saving buffer */
 			USB_WriteLen(fileHeader);
 			USB_WriteLen(channelNameHeader);
 			HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
