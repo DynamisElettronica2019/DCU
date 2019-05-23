@@ -104,7 +104,7 @@ NMEA_GGA_type_t GPS_GGA_conversion(uint8_t * buffer){
 			switch(skipped){
 				
 				case 0:		//UTC TIME
-					GPSOutputGGA.UTC_time.hours = ((uint8_t)GPS_str_to_int(0, buffer[i], buffer[i+1]));		/*riverifica che effettivamente vengano mandati cosi i valori*/
+					GPSOutputGGA.UTC_time.hours = ((uint8_t)GPS_str_to_int(0, buffer[i], buffer[i+1])) + 2;		/*riverifica che effettivamente vengano mandati cosi i valori*/
 					GPSOutputGGA.UTC_time.minutes = ((uint8_t)GPS_str_to_int(0, buffer[i+2], buffer[i+3]));
 					GPSOutputGGA.UTC_time.seconds = ((uint8_t)GPS_str_to_int(0, buffer[i+4], buffer[i+5]));
 					GPSOutputGGA.UTC_time.decimal_seconds = ((uint8_t)GPS_str_to_int(0, buffer[i+7], buffer[i+8])); //salto il punto
@@ -211,7 +211,7 @@ NMEA_GLL_type_t GPS_GLL_conversion(uint8_t * buffer){
 					break;
 				
 				case 4: 	//UTC TIME
-					GPSOutputGLL.UTC_time.hours = ((uint8_t)GPS_str_to_int(0, buffer[i], buffer[i+1]));		/*riverifica che effettivamente vengano mandati cosi i valori*/
+					GPSOutputGLL.UTC_time.hours = ((uint8_t)GPS_str_to_int(0, buffer[i], buffer[i+1])) + 2;		/*riverifica che effettivamente vengano mandati cosi i valori*/
 					GPSOutputGLL.UTC_time.minutes = ((uint8_t)GPS_str_to_int(0, buffer[i+2], buffer[i+3]));
 					GPSOutputGLL.UTC_time.seconds = ((uint8_t)GPS_str_to_int(0, buffer[i+4], buffer[i+5]));
 					GPSOutputGLL.UTC_time.decimal_seconds = ((uint8_t)GPS_str_to_int(0, buffer[i+7], buffer[i+8])); //salto il punto
@@ -300,7 +300,7 @@ NMEA_RMC_type_t GPS_RMC_conversion(uint8_t * buffer){
 			switch(skipped){
 				
 				case 0:		//UTC TIME
-					GPSOutputRMC.UTC_time.hours = ((uint8_t)GPS_str_to_int(0, buffer[i], buffer[i+1]));		/*riverifica che effettivamente vengano mandati cosi i valori*/
+					GPSOutputRMC.UTC_time.hours = ((uint8_t)GPS_str_to_int(0, buffer[i], buffer[i+1])) + 2;		/*riverifica che effettivamente vengano mandati cosi i valori*/
 					GPSOutputRMC.UTC_time.minutes = ((uint8_t)GPS_str_to_int(0, buffer[i+2], buffer[i+3]));
 					GPSOutputRMC.UTC_time.seconds = ((uint8_t)GPS_str_to_int(0, buffer[i+4], buffer[i+5]));
 					GPSOutputRMC.UTC_time.decimal_seconds = ((uint8_t)GPS_str_to_int(0, buffer[i+7], buffer[i+8])); //salto il punto
