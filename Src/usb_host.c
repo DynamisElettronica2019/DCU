@@ -209,6 +209,9 @@ void MX_USB_HOST_Init(void)
 static void USBH_UserProcess  (USBH_HandleTypeDef *phost, uint8_t id)
 {
   /* USER CODE BEGIN CALL_BACK_1 */
+	uint8_t temp;
+	BaseType_t usbEvent = pdFALSE;
+	
 	switch(id)
   {
     case HOST_USER_SELECT_CONFIGURATION:
@@ -216,12 +219,16 @@ static void USBH_UserProcess  (USBH_HandleTypeDef *phost, uint8_t id)
       
     case HOST_USER_DISCONNECTION:
       Appli_state = APPLICATION_DISCONNECT;
-			osMessagePut(usbEventQueueHandle, DISCONNECTION_EVENT, 0);
+			temp = DISCONNECTION_EVENT;
+			xQueueSendFromISR(usbEventQueueHandle, &temp, &usbEvent);
+			portYIELD_FROM_ISR(usbEvent); 
 			break;
       
     case HOST_USER_CLASS_ACTIVE:
       Appli_state = APPLICATION_READY;
-			osMessagePut(usbEventQueueHandle, CONNECTED_EVENT, 0);
+			temp = CONNECTED_EVENT;
+			xQueueSendFromISR(usbEventQueueHandle, &temp, &usbEvent);
+			portYIELD_FROM_ISR(usbEvent); 
 			break;
 
     case HOST_USER_CONNECTION:
