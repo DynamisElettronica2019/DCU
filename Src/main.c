@@ -59,7 +59,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -214,8 +214,8 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-	GPIO_UsbOvercurrentISR(); 				/* USB overcurrent ISR */
-	GPIO_AutogearSwitchISR(); 				/* Autogear switch ISR */
+	GPIO_UsbOvercurrentISR(); 		/* USB overcurrent ISR */
+	GPIO_AutogearSwitchISR(); 		/* Autogear switch ISR */
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
@@ -290,6 +290,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if(htim->Instance == TIM7) {		
 		USB_SavingRequest();									/* USB data saving */
 	}
+  
   /* USER CODE END Callback 1 */
 }
 

@@ -8,7 +8,7 @@
 #define END_LINE																							(uint8_t)'\n'
 #define NUMBER_OF_RECEIVED_PACKETS														(uint8_t)25
 #define NUMBER_OF_ACQUIRED_CHANNELS														(uint8_t)91
-#define BUFFER_STATE_LEN 																			(uint8_t)19
+#define BUFFER_STATE_LEN 																			(uint8_t)17
 #define BUFFER_BLOCK_LEN 																			(uint16_t)552
 
 /* Packet position in CAN data packet counter vector */
@@ -266,12 +266,12 @@
 
 #define STATE_ON 																							(uint8_t)'1'
 #define STATE_OFF																							(uint8_t)'0'
-#define STATE_USB_PRESENT_INDEX 															(uint8_t)3
-#define STATE_USB_READY_INDEX 																(uint8_t)5
-#define STATE_uSD_PRESENT_INDEX 															(uint8_t)7
-#define STATE_uSD_READY_INDEX 																(uint8_t)9
-#define STATE_ACQUISITION_ON_INDEX 														(uint8_t)11
-#define STATE_TELEMETRY_ON_INDEX  														(uint8_t)13
+#define STATE_USB_PRESENT_INDEX 															(uint8_t)2
+#define STATE_USB_READY_INDEX 																(uint8_t)4
+#define STATE_uSD_PRESENT_INDEX 															(uint8_t)6
+#define STATE_uSD_READY_INDEX 																(uint8_t)8
+#define STATE_ACQUISITION_ON_INDEX 														(uint8_t)10
+#define STATE_TELEMETRY_ON_INDEX  														(uint8_t)12
 #define EFI_IS_ALIVE_RESET 																		(uint8_t)0
 #define EFI_IS_ALIVE_SET 																			(uint8_t)1
 

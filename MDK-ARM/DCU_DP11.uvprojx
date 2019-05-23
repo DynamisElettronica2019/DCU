@@ -388,6 +388,9 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>::CMSIS</GroupName>
+        </Group>
+        <Group>
           <GroupName>Application/User</GroupName>
           <Files>
             <File>
@@ -501,6 +504,11 @@
               <FilePath>../Src/stm32f7xx_hal_timebase_tim.c</FilePath>
             </File>
             <File>
+              <FileName>data.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\data.c</FilePath>
+            </File>
+            <File>
               <FileName>data_conversion.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\data_conversion.c</FilePath>
@@ -524,11 +532,6 @@
               <FileName>timestamp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\timestamp.c</FilePath>
-            </File>
-            <File>
-              <FileName>data.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\data.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -806,9 +809,6 @@
               <FilePath>../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Src/usbh_msc_scsi.c</FilePath>
             </File>
           </Files>
-        </Group>
-        <Group>
-          <GroupName>::CMSIS</GroupName>
         </Group>
       </Groups>
     </Target>

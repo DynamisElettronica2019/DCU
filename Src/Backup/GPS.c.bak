@@ -15,7 +15,7 @@ uint8_t GPSRawBuffer [GPS_MAX_LENGTH];
 extern osSemaphoreId GPSUnboxSemHandle;
 extern osSemaphoreId GPSSetSemHandle;
 BaseType_t xGPSHigherPriorityTaskWoken;
-
+uint8_t received [100];
 
 void GPS_Rx_Cplt(void)
 {
@@ -45,7 +45,8 @@ void GPS_parse_data(uint8_t * GPSRawBuffer){
 	switch (GPSMessageID){											// in base al messaggio che mi è arrivato faccio la conversione del pacchetto
 		
 		case MESSAGE_TYPE_GGA :
-			NMEA_output.NMEA_GGA_type = GPS_GGA_conversion(GPSRawBuffer); 
+			NMEA_output.NMEA_GGA_type = GPS_GGA_conversion(GPSRawBuffer);
+			HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
 			break;
 		
 		case MESSAGE_TYPE_GLL :
@@ -582,12 +583,17 @@ void GPS_get_date(uint8_t *day, uint8_t *month, uint8_t *year){		//se i dati son
 }
 
 
-void GPS_init(void){		
+void GPS_init(void){	
+	uint8_t buffer1[] = "$PUBX,41,1,0007,0003,38400,0*20\r\n";
+	uint8_t buffer2[] = {0xB5, 0x62, 0x06, 0x08, 0x06, 0x00,0x64, 0x00, 0x01, 0x00,0x01, 0x00,0x7A, 0x12};
 	/*decidere quali messaggio escludere dall'invio*/
-	HAL_UART_Transmit(&huart2, (uint8_t *)SET_BAUDRATE_38400, SET_BAUDRATE_38400_LENGTH, 100);			/*setto il baudrate del gps a 38400*/
+	HAL_UART_Transmit(&huart2, (uint8_t *)buffer1, SET_BAUDRATE_38400_LENGTH, 100);			/*setto il baudrate del gps a 38400*/
 	GPS_USART2_UART_Init_38400();																																		/*reinizializzo la uart a 38400*/
 	HAL_Delay(50);																																									/*necessario?*/
-	HAL_UART_Transmit(&huart2,(uint8_t *)GPS_SET_FIX_RATE_10HZ, GPS_SET_FIX_RATE_10HZ_LENGTH, 100); /*SETTO IL FIX RATE A 10HZ*/
+	HAL_UART_Transmit(&huart2,(uint8_t *)buffer2, 14, 100); /*SETTO IL FIX RATE A 10HZ*/
+	
+//	HAL_UART_Transmit(&huart2,(uint8_t *)"0xB5,0x62,0x06,0x08,0x00,0x00,0x0E,0x30", 8, 100);
+//	HAL_UART_Receive_DMA(&huart2,received, 400);
 }
 
 void GPS_clear_buffer(uint8_t *buffer, uint8_t length){
@@ -600,8 +606,7 @@ void GPS_clear_buffer(uint8_t *buffer, uint8_t length){
 
 }
 
-void GPS_USART2_UART_Init_38400(void){			//reinizializza la uart2 a 38400
-	
+void GPS_USART2_UART_Init_38400(void){			//reinizializza la uart2 a 38400	
 	huart2.Instance = USART2;
   huart2.Init.BaudRate = 38400;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
@@ -618,7 +623,6 @@ void GPS_USART2_UART_Init_38400(void){			//reinizializza la uart2 a 38400
   {
     Error_Handler();
   }
-	
 }
 void GPS_USART2_UART_Init_57600(void){			//reinizializza la uart2 a 57600
 	

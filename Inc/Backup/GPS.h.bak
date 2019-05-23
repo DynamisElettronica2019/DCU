@@ -226,7 +226,7 @@ uint16_t GPS_str_to_int(uint8_t centinaia, uint8_t decine, uint8_t unita);
 double    GPS_str_to_float(uint8_t decimi, uint8_t centesimi);
 void GPS_clear_buffer(uint8_t *buffer, uint8_t length);
 void GPS_USART2_UART_Init_38400(void);
-void GPS_USART2_UART_Init_57600(void)
+void GPS_USART2_UART_Init_57600(void);
 
 
 #endif
