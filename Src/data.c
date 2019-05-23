@@ -15,7 +15,7 @@ float fData4 = 0.0f;
 uint8_t EFI_OffCounter = 0;
 uint8_t EFI_IsAlive = EFI_IS_ALIVE_RESET;
 uint8_t DATA_BlockBuffer [BUFFER_BLOCK_LEN];
-uint8_t DATA_StateBuffer [BUFFER_STATE_LEN] = "0;0;0;0;0;0;0;0";
+uint8_t DATA_StateBuffer [BUFFER_STATE_LEN] = "0;0;0;0;0";
 uint8_t acquisitionState = ACQUISITION_OFF_STATE;
 BaseType_t EFI_IsAlive_xHigherPriorityTaskWoken = pdFALSE;
 extern uint32_t CAN_ReceivedPacketsCounter [NUMBER_OF_ACQUIRED_CHANNELS];
@@ -235,7 +235,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			CAN_ReceivedPacketsCounter[IMU2_DATA_2_ID_COUNTER_INDEX]++;
 			decimalToString((int16_t)data1, &DATA_BlockBuffer[IMU2_HEADING_CSV_INDEX], 3, 2);			/* Taking into account the division by 100 */
 			decimalToString((int16_t)data2, &DATA_BlockBuffer[IMU2_ACC_Z_CSV_INDEX], 3, 2);				/* Taking into account the division by 100 */
-			decimalToString((int16_t)data3, &DATA_BlockBuffer[IMU2_GYR_Y_CSV_INDEX], 4,1);				/* Taking into account the division by 10 */
+			decimalToString((int16_t)data3, &DATA_BlockBuffer[IMU2_GYR_Y_CSV_INDEX], 3,1);				/* Taking into account the division by 10 */
 			break;
 		
 		/* Debug ID range */
@@ -451,11 +451,6 @@ extern inline uint8_t DATA_GetTelemetryState(void)
 	return DATA_StateBuffer[STATE_TELEMETRY_ON_INDEX];
 }
 
-extern inline void DATA_SetUsbPresentState(void)
-{
-	DATA_StateBuffer[STATE_USB_PRESENT_INDEX] = STATE_ON;
-}
-
 extern inline void DATA_SetUsbReadyState(void)
 {
 	DATA_StateBuffer[STATE_USB_READY_INDEX] = STATE_ON;
@@ -469,11 +464,6 @@ extern inline void DATA_SetAcquisitionState(void)
 extern inline void DATA_SetTelemetryState(void)
 {
 	DATA_StateBuffer[STATE_TELEMETRY_ON_INDEX] = STATE_ON;
-}
-
-extern inline void DATA_ResetUsbPresentState(void)
-{
-	DATA_StateBuffer[STATE_USB_PRESENT_INDEX] = STATE_OFF;
 }
 
 extern inline void DATA_ResetUsbReadyState(void)

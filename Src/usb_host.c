@@ -44,6 +44,7 @@ BaseType_t USB_xHigherPriorityTaskWoken = pdFALSE;
 extern uint8_t DATA_BlockBuffer [BUFFER_BLOCK_LEN];
 extern osSemaphoreId saveUsbSemaphoreHandle;
 extern osMessageQId usbEventQueueHandle;
+extern osMessageQId startAcquisitionEventHandle;
 /* USER CODE END PV */
 
 /* USER CODE BEGIN PFP */
@@ -135,19 +136,22 @@ extern inline void USB_CloseFile(void)
 
 extern inline void USB_EventHandler(uint8_t USB_Event)
 {
+	uint8_t startAquisitionEvent = ACQUISITION_IDLE_REQUEST;
+	BaseType_t startAcquisition_xHigherPriorityTaskWoken = pdFALSE;
+	
 	switch(USB_Event) {
 		case DISCONNECTION_EVENT:
 			f_mount(NULL, (TCHAR const *)"", 1);
+			startAquisitionEvent = ACQUISITION_OFF_TELEMETRY_REQUEST;			/* Stop acquisition */
+			xQueueSendFromISR(startAcquisitionEventHandle, &startAquisitionEvent, &startAcquisition_xHigherPriorityTaskWoken);
 			FATFS_UnLinkDriver(USBHPath);
-			DATA_ResetUsbReadyState();					/* Update of the status packet */
-			DATA_ResetUsbPresentState();				/* Update of the status packet */
+			DATA_ResetUsbReadyState();																		/* Update of the status packet */
 			/* Put here the code to manage errors */
 			break;
 
 		case CONNECTED_EVENT:
 			if(FATFS_LinkDriver(&USBH_Driver, USBHPath) == 0) {
 				f_mount(&USBHFatFS, (TCHAR const *)USBHPath, 1);
-				DATA_SetUsbReadyState();					/* Update of the status packet */
 				DATA_SetUsbReadyState();					/* Update of the status packet */
 			}
 			

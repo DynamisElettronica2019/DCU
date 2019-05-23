@@ -43,6 +43,7 @@
 #define ENCODE_OPEN_SQUARE           0x5
 #define ENCODE_CLOSE_SQUARE          0x6
 #define ENCODE_BLANK                 0x7
+#define ENCODE_MINUS                 0xE
 
 #define DATA_MESSAGE_ID							 (uint8_t)'1'
 #define SECOND_DATA_MESSAGE_ID			 (uint8_t)'N'

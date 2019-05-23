@@ -200,6 +200,9 @@ uint16_t encodeString(uint8_t* string, uint8_t* outString, uint16_t len, uint8_t
 			case '.':
 				outString[outStrIndex] = setUpperNibble(outString[outStrIndex], ENCODE_COLON);
 				break;
+			case '-':
+				outString[outStrIndex] = setUpperNibble(outString[outStrIndex], ENCODE_MINUS);
+				break;
 			default:
 				outString[outStrIndex] = setUpperNibble(outString[outStrIndex], ENCODE_BLANK);
 				break;
@@ -250,6 +253,9 @@ uint16_t encodeString(uint8_t* string, uint8_t* outString, uint16_t len, uint8_t
 			case '.':
 				outString[outStrIndex] = setLowerNibble(outString[outStrIndex], ENCODE_COLON);
 				break;
+			case '-':
+				outString[outStrIndex] = setUpperNibble(outString[outStrIndex], ENCODE_MINUS);
+				break;
 			default:
 				outString[outStrIndex] = setLowerNibble(outString[outStrIndex], ENCODE_BLANK);
 				break;
@@ -294,6 +300,9 @@ uint16_t encodeString(uint8_t* string, uint8_t* outString, uint16_t len, uint8_t
 			case '.':
 				outString[outStrIndex] = setUpperNibble(outString[outStrIndex], ENCODE_COLON);
 				break;
+			case '-':
+				outString[outStrIndex] = setUpperNibble(outString[outStrIndex], ENCODE_MINUS);
+				break;
 			default:
 				outString[outStrIndex] = setUpperNibble(outString[outStrIndex], ENCODE_9);
 				break;
@@ -335,6 +344,9 @@ uint16_t encodeString(uint8_t* string, uint8_t* outString, uint16_t len, uint8_t
 				break;
 			case '.':
 				outString[outStrIndex] = setLowerNibble(outString[outStrIndex], ENCODE_COLON);
+				break;
+			case '-':
+				outString[outStrIndex] = setUpperNibble(outString[outStrIndex], ENCODE_MINUS);
 				break;
 			default:
 				outString[outStrIndex] = setLowerNibble(outString[outStrIndex], ENCODE_9);
@@ -381,6 +393,9 @@ uint16_t encodeString(uint8_t* string, uint8_t* outString, uint16_t len, uint8_t
 				break;
 			case ',':
 				outString[outStrIndex] = setUpperNibble(outString[outStrIndex], ENCODE_COLON);
+				break;
+			case '-':
+				outString[outStrIndex] = setUpperNibble(outString[outStrIndex], ENCODE_MINUS);
 				break;
 			default:
 				outString[outStrIndex] = setUpperNibble(outString[outStrIndex], ENCODE_BLANK);

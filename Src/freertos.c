@@ -59,7 +59,7 @@ extern uint8_t DATA_BlockBuffer [BUFFER_BLOCK_LEN];
 extern uint8_t DATA_StateBuffer [BUFFER_STATE_LEN];
 extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
 extern BaseType_t xGPSHigherPriorityTaskWoken;
-extern uint8_t GPSRawBuffer[GPS_MAX_LENGTH];
+extern uint8_t GPSRawBuffer [GPS_MAX_LENGTH];
 extern uint8_t GPSFirstChar;
 
 /* USER CODE END Variables */
