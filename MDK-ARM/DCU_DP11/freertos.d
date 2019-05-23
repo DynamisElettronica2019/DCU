@@ -64,4 +64,5 @@ dcu_dp11\freertos.o: ../Inc/usart.h
 dcu_dp11\freertos.o: ../Inc/usb_host.h
 dcu_dp11\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
 dcu_dp11\freertos.o: ../Inc/data.h
+dcu_dp11\freertos.o: ../Inc/GPS.h
 dcu_dp11\freertos.o: ../Inc/telemetry.h

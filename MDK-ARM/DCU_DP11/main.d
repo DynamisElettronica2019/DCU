@@ -95,3 +95,4 @@ dcu_dp11\main.o: ../Inc/gpio.h
 dcu_dp11\main.o: ../Inc/data.h
 dcu_dp11\main.o: ../Inc/telemetry.h
 dcu_dp11\main.o: ../Inc/timestamp.h
+dcu_dp11\main.o: ../Inc/GPS.h

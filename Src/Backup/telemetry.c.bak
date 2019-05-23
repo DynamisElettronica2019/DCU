@@ -59,8 +59,15 @@ extern inline void TELEMETRY_Receive(void)
 			if(telemetryReceivedBuffer[BUFFER_COMMAND_LEN - 1] == MESSAGE_END_ID) { 					/* If message ends correctly as standard message */
 					
 				switch(telemetryReceivedBuffer[BUFFER_COMMAND_LEN - 2]) {
+					case SET_TELEM_ID:																													
+						DATA_SetTelemetryState();																										/* Start telemetry */
+						xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);				/* Lock if DMA is in use */
+						commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = SET_TELEM_ID; 									/* Set the correct identifier */
+						HAL_UART_Transmit_DMA(&huart1, commandAckMsg, COMMAND_ACK_MSG_LEN); 				/* Transmit ack message */
+						break;
+					
 					case RESET_TELEM_ID:																													
-						DATA_ResetTelemetryState();																									/* Reset telemetry */
+						DATA_ResetTelemetryState();																									/* Stop telemetry */
 						xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);				/* Lock if DMA is in use */
 						commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = RESET_TELEM_ID; 								/* Set the correct identifier */
 						HAL_UART_Transmit_DMA(&huart1, commandAckMsg, COMMAND_ACK_MSG_LEN); 				/* Transmit ack message */

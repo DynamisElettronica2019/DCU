@@ -33,6 +33,7 @@
 #include "usart.h"
 #include "usb_host.h"
 #include "data.h"
+#include "GPS.h"
 #include "telemetry.h"
 /* USER CODE END Includes */
 
@@ -56,8 +57,9 @@
 extern uint8_t DATA_BlockBuffer [BUFFER_BLOCK_LEN];
 extern uint8_t DATA_StateBuffer [BUFFER_STATE_LEN];
 extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
-
-uint32_t packetMailbox;
+extern BaseType_t xGPSHigherPriorityTaskWoken;
+extern uint8_t GPSRawBuffer[GPS_MAX_LENGTH];
+extern uint8_t GPSFirstChar;
 
 /* USER CODE END Variables */
 osThreadId aliveHandle;
@@ -79,6 +81,7 @@ osThreadId canFifo1UnpackHandle;
 osThreadId sendDebugDataHandle;
 osThreadId CAN_SendManagerHandle;
 osThreadId automaticStartAcquisitionMonitoringHandle;
+osThreadId GPSUnboxingTaskHandle;
 osMessageQId digitalAuxQueueHandle;
 osMessageQId ErrorQueueHandle;
 osMessageQId Usart1TxModeQueueHandle;
@@ -99,6 +102,7 @@ osSemaphoreId sendFollowingDataSemaphoreHandle;
 osSemaphoreId saveUsbSemaphoreHandle;
 osSemaphoreId CAN_SendSemaphoreHandle;
 osSemaphoreId automaticStartAcquisitionSemaphoreHandle;
+osSemaphoreId GPSUnboxSemHandle;
 osSemaphoreId CAN_SendDataSemaphoreCounterHandle;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -125,6 +129,7 @@ void canFifo1UnpackTask(void const * argument);
 void sendDebugDataTask(void const * argument);
 void CAN_SendManagerTask(void const * argument);
 void automaticStartAcquisitionMonitoringTask(void const * argument);
+void GPSUnboxingFunc(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -187,6 +192,10 @@ void MX_FREERTOS_Init(void) {
   osSemaphoreDef(automaticStartAcquisitionSemaphore);
   automaticStartAcquisitionSemaphoreHandle = osSemaphoreCreate(osSemaphore(automaticStartAcquisitionSemaphore), 1);
 
+  /* definition and creation of GPSUnboxSem */
+  osSemaphoreDef(GPSUnboxSem);
+  GPSUnboxSemHandle = osSemaphoreCreate(osSemaphore(GPSUnboxSem), 1);
+
   /* definition and creation of CAN_SendDataSemaphoreCounter */
   osSemaphoreDef(CAN_SendDataSemaphoreCounter);
   CAN_SendDataSemaphoreCounterHandle = osSemaphoreCreate(osSemaphore(CAN_SendDataSemaphoreCounter), 3);
@@ -204,8 +213,7 @@ void MX_FREERTOS_Init(void) {
 	xSemaphoreTake(USB_OvercurrentSemaphoreHandle, portMAX_DELAY); 							/* Start with the task locked */
 	xSemaphoreTake(CAN_SendSemaphoreHandle, portMAX_DELAY); 										/* Start with the task locked */
 	xSemaphoreTake(automaticStartAcquisitionSemaphoreHandle, portMAX_DELAY); 		/* Start with the task locked */
-  /* USER CODE END RTOS_SEMAPHORES */
-
+	xSemaphoreTake(GPSUnboxSemHandle, 0);																				/* Start with the task locked */
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
@@ -331,6 +339,10 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(automaticStartAcquisitionMonitoring, automaticStartAcquisitionMonitoringTask, osPriorityBelowNormal, 0, 128);
   automaticStartAcquisitionMonitoringHandle = osThreadCreate(osThread(automaticStartAcquisitionMonitoring), NULL);
 
+  /* definition and creation of GPSUnboxingTask */
+  osThreadDef(GPSUnboxingTask, GPSUnboxingFunc, osPriorityNormal, 0, 512);
+  GPSUnboxingTaskHandle = osThreadCreate(osThread(GPSUnboxingTask), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -346,7 +358,6 @@ void MX_FREERTOS_Init(void) {
 /* USER CODE END Header_aliveTask */
 void aliveTask(void const * argument)
 {
-
   /* USER CODE BEGIN aliveTask */
 	HAL_TIM_Base_Start_IT(&htim5); 				/* Start timer 5 in interrupt mode */
 	HAL_TIM_Base_Start_IT(&htim6); 				/* Start timer 6 in interrupt mode */
@@ -356,7 +367,7 @@ void aliveTask(void const * argument)
   for(;;) {
     HAL_GPIO_TogglePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin);
 		osDelay(250);
-  }
+	}
   /* USER CODE END aliveTask */
 }
 
@@ -711,6 +722,7 @@ void CAN_SendManagerTask(void const * argument)
 {
   /* USER CODE BEGIN CAN_SendManagerTask */
 	CAN_TxPacket_t CAN_TxPacket;
+	uint32_t packetMailbox;
 	
   /* Infinite loop */
   for(;;) {
@@ -737,6 +749,26 @@ void automaticStartAcquisitionMonitoringTask(void const * argument)
 		DATA_AutomaticStartAcquisitionManager(); 																		/* Check if start/stop automatic start acquisition */
   }
   /* USER CODE END automaticStartAcquisitionMonitoringTask */
+}
+
+/* USER CODE BEGIN Header_GPSUnboxingFunc */
+/**
+* @brief Function implementing the GPSUnboxingTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_GPSUnboxingFunc */
+void GPSUnboxingFunc(void const * argument)
+{
+  /* USER CODE BEGIN GPSUnboxingFunc */
+	HAL_UART_Receive_DMA(&huart2,&GPSFirstChar, 1);
+  
+	/* Infinite loop */
+  for(;;) {
+		xSemaphoreTake(GPSUnboxSemHandle, portMAX_DELAY);
+		GPS_parse_data(GPSRawBuffer);
+  }
+  /* USER CODE END GPSUnboxingFunc */
 }
 
 /* Private application code --------------------------------------------------*/

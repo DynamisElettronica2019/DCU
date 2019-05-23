@@ -336,7 +336,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F767xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;            ../Drivers/STM32F7xx_HAL_Driver/Inc;            ../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy;            ../Middlewares/Third_Party/FatFs/src;            ../Middlewares/Third_Party/FreeRTOS/Source/include;            ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;            ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM7/r0p1;            ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc;            ../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc;            ../Drivers/CMSIS/Device/ST/STM32F7xx/Include;            ../Drivers/CMSIS/Include</IncludePath>
+              <IncludePath>../Inc;../Drivers/STM32F7xx_HAL_Driver/Inc;../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FatFs/src;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM7/r0p1;../Middlewares/ST/STM32_USB_Host_Library/Core/Inc;../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc;../Drivers/CMSIS/Device/ST/STM32F7xx/Include;../Drivers/CMSIS/Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -378,33 +378,18 @@
       </TargetOption>
       <Groups>
         <Group>
-          <GroupName>Application/User</GroupName>
+          <GroupName>Application/MDK-ARM</GroupName>
           <Files>
             <File>
-              <FileName>data.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\data.c</FilePath>
+              <FileName>startup_stm32f767xx.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>startup_stm32f767xx.s</FilePath>
             </File>
-            <File>
-              <FileName>data_conversion.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\data_conversion.c</FilePath>
-            </File>
-            <File>
-              <FileName>string_utility.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\string_utility.c</FilePath>
-            </File>
-            <File>
-              <FileName>telemetry.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\telemetry.c</FilePath>
-            </File>
-            <File>
-              <FileName>timestamp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\timestamp.c</FilePath>
-            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Application/User</GroupName>
+          <Files>
             <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
@@ -515,165 +500,35 @@
               <FileType>1</FileType>
               <FilePath>../Src/stm32f7xx_hal_timebase_tim.c</FilePath>
             </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>Header Files</GroupName>
-          <Files>
             <File>
-              <FileName>adc.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\adc.h</FilePath>
+              <FileName>data_conversion.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\data_conversion.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_driver_sd.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\bsp_driver_sd.h</FilePath>
+              <FileName>GPS.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\GPS.c</FilePath>
             </File>
             <File>
-              <FileName>can.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\can.h</FilePath>
+              <FileName>string_utility.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\string_utility.c</FilePath>
             </File>
             <File>
-              <FileName>data.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\data.h</FilePath>
+              <FileName>telemetry.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\telemetry.c</FilePath>
             </File>
             <File>
-              <FileName>data_conversion.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\data_conversion.h</FilePath>
+              <FileName>timestamp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\timestamp.c</FilePath>
             </File>
             <File>
-              <FileName>dma.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\dma.h</FilePath>
-            </File>
-            <File>
-              <FileName>fatfs.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\fatfs.h</FilePath>
-            </File>
-            <File>
-              <FileName>fatfs_platform.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\fatfs_platform.h</FilePath>
-            </File>
-            <File>
-              <FileName>ffconf.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\ffconf.h</FilePath>
-            </File>
-            <File>
-              <FileName>FreeRTOSConfig.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\FreeRTOSConfig.h</FilePath>
-            </File>
-            <File>
-              <FileName>gpio.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\gpio.h</FilePath>
-            </File>
-            <File>
-              <FileName>i2c.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\i2c.h</FilePath>
-            </File>
-            <File>
-              <FileName>id_can.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\id_can.h</FilePath>
-            </File>
-            <File>
-              <FileName>main.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\main.h</FilePath>
-            </File>
-            <File>
-              <FileName>rtc.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\rtc.h</FilePath>
-            </File>
-            <File>
-              <FileName>sd_diskio.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\sd_diskio.h</FilePath>
-            </File>
-            <File>
-              <FileName>sdmmc.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\sdmmc.h</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f7xx_hal_conf.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\stm32f7xx_hal_conf.h</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f7xx_it.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\stm32f7xx_it.h</FilePath>
-            </File>
-            <File>
-              <FileName>string_utility.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\string_utility.h</FilePath>
-            </File>
-            <File>
-              <FileName>telemetry.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\telemetry.h</FilePath>
-            </File>
-            <File>
-              <FileName>tim.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\tim.h</FilePath>
-            </File>
-            <File>
-              <FileName>usart.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\usart.h</FilePath>
-            </File>
-            <File>
-              <FileName>usb_host.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\usb_host.h</FilePath>
-            </File>
-            <File>
-              <FileName>usbh_conf.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\usbh_conf.h</FilePath>
-            </File>
-            <File>
-              <FileName>usbh_diskio.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\usbh_diskio.h</FilePath>
-            </File>
-            <File>
-              <FileName>usbh_platform.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\usbh_platform.h</FilePath>
-            </File>
-            <File>
-              <FileName>file_headers.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\file_headers.h</FilePath>
-            </File>
-            <File>
-              <FileName>timestamp.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Inc\timestamp.h</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>Application/MDK-ARM</GroupName>
-          <Files>
-            <File>
-              <FileName>startup_stm32f767xx.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>startup_stm32f767xx.s</FilePath>
+              <FileName>data.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\data.c</FilePath>
             </File>
           </Files>
         </Group>

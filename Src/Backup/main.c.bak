@@ -38,6 +38,7 @@
 #include "data.h"
 #include "telemetry.h"
 #include "timestamp.h"
+#include "GPS.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -224,6 +225,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		UART1_RxCallback();
 	}
 	else if(huart->Instance == USART2) {
+		GPS_Rx_Cplt();
 	}
 }
 
@@ -247,6 +249,7 @@ static inline void USER_SystemInit(void)
 	ADC_BuffersInit();																														/* ADC buffer initialization */
 	USB_InitStart();																															/* USB peripheral config and start */
 	MX_FATFS_Init();																															/* FatFS init */
+	DATA_SetTelemetryState();																											/* Start telemetry as default */
 	HAL_Delay(500);																																/* Delay for Vbus stabilization */
 	return;
 }

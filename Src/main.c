@@ -38,6 +38,7 @@
 #include "data.h"
 #include "telemetry.h"
 #include "timestamp.h"
+#include "GPS.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -83,7 +84,6 @@ int main(void)
 
   /* USER CODE END 1 */
   
-
   /* Enable I-Cache---------------------------------------------------------*/
   SCB_EnableICache();
 
@@ -224,6 +224,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		UART1_RxCallback();
 	}
 	else if(huart->Instance == USART2) {
+		GPS_Rx_Cplt();
 	}
 }
 
@@ -231,8 +232,6 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
 	if(huart->Instance == USART1) {
 		UART1_TxCallback();
-	}
-	else if(huart->Instance == USART2) {
 	}
 }
 
@@ -245,6 +244,7 @@ static inline void USER_SystemInit(void)
 	CAN_PacketCounterReset();																											/* Reset the CAN packets recevide counter */
 	CAN_Start();																																	/* CAN filter config and start */
 	ADC_BuffersInit();																														/* ADC buffer initialization */
+	GPS_init();																																		/* GPS init */
 	USB_InitStart();																															/* USB peripheral config and start */
 	MX_FATFS_Init();																															/* FatFS init */
 	DATA_SetTelemetryState();																											/* Start telemetry as default */

@@ -408,7 +408,7 @@ extern inline void ADC_ReadDataDebug(void)
 		intToStringUnsigned(ADC_BufferConvertedDebug[DCU_TEMP_SENSE_POSITION], &DATA_BlockBuffer[DCU_TEMP_CSV_INDEX], 2);
 		intToStringUnsigned(ADC_BufferConvertedDebug[MAIN_CURRENT_SENSE_POSITION], &DATA_BlockBuffer[DCU_CURRENT_CSV_INDEX], 4);
 		intToStringUnsigned(ADC_BufferConvertedDebug[DCU_CURRENT_SENSE_POSITION], &DATA_BlockBuffer[DUC_3V3_CURRENT_CSV_INDEX], 3);
-		decimalToStringUnsigned((uint16_t)_5vTemp, &DATA_BlockBuffer[_5V_DCU_POSITION], 1, 2);
+		decimalToStringUnsigned((uint16_t)_5vTemp, &DATA_BlockBuffer[DCU_5V_VOLTAGE_CSV_INDEX], 1, 2);
 		decimalToStringUnsigned((uint16_t)_12vTemp, &DATA_BlockBuffer[DCU_12V_VOLTAGE_CSV_INDEX], 2, 2);
 		decimalToStringUnsigned((uint16_t)_3v3Temp, &DATA_BlockBuffer[DCU_3V3_VOLTAGE_CSV_INDEX], 1, 2);
 		intToStringUnsigned(ADC_BufferConvertedDebug[XBEE_CURRENT_SENSE_POSITION], &DATA_BlockBuffer[XBEE_CURRENT_CSV_INDEX], 3);
