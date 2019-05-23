@@ -581,11 +581,12 @@ void GPS_get_date(uint8_t *day, uint8_t *month, uint8_t *year){		//se i dati son
 }
 
 
-void GPS_init(void){		/*questi tipi di messaggio sono sbagliati*/
-	HAL_UART_Transmit(&huart2,(uint8_t *)NMEA_SET_GGA_RMC_VTG, NMEA_SET_GGA_RMC_VTG_LENGTH, 100);		//mandami solo RMC, GGA, VTG
-	HAL_UART_Transmit(&huart2, (uint8_t *)NMEA_SET_BAUDRATE_57600, NMEA_SET_BAUDRATE_57600_LENGTH, 100); //setta la comunicazione del gps a 57600
-	GPS_USART2_UART_Init();																																				//setta la uart2 a 57600
-	HAL_UART_Transmit(&huart2, (uint8_t *)NMEA_SET_10_HZ_NAVIGATION , NMEA_SET_10_HZ_NAVIGATION_LENGTH, 100); //aumenta il fix rate a 10Hz
+void GPS_init(void){		
+	/*decidere quali messaggio escludere dall'invio*/
+	HAL_UART_Transmit(&huart2, (uint8_t *)SET_BAUDRATE_38400, SET_BAUDRATE_38400_LENGTH, 100);			/*setto il baudrate del gps a 38400*/
+	GPS_USART2_UART_Init_38400();																																		/*reinizializzo la uart a 38400*/
+	HAL_Delay(50);																																									/*necessario?*/
+	HAL_UART_Transmit(&huart2,(uint8_t *)GPS_SET_FIX_RATE_10HZ, GPS_SET_FIX_RATE_10HZ_LENGTH, 100); /*SETTO IL FIX RATE A 10HZ*/
 }
 
 void GPS_clear_buffer(uint8_t *buffer, uint8_t length){
@@ -598,7 +599,27 @@ void GPS_clear_buffer(uint8_t *buffer, uint8_t length){
 
 }
 
-void GPS_USART2_UART_Init(void){			//reinizializza la uart2 a 57600
+void GPS_USART2_UART_Init_38400(void){			//reinizializza la uart2 a 38400
+	
+	huart2.Instance = USART2;
+  huart2.Init.BaudRate = 38400;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart2.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart2.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_RXOVERRUNDISABLE_INIT|UART_ADVFEATURE_DMADISABLEONERROR_INIT;
+  huart2.AdvancedInit.OverrunDisable = UART_ADVFEATURE_OVERRUN_DISABLE;
+  huart2.AdvancedInit.DMADisableonRxError = UART_ADVFEATURE_DMA_DISABLEONRXERROR;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+	
+}
+void GPS_USART2_UART_Init_57600(void){			//reinizializza la uart2 a 57600
 	
 	huart2.Instance = USART2;
   huart2.Init.BaudRate = 57600;
