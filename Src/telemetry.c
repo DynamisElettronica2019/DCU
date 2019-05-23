@@ -295,7 +295,7 @@ uint16_t encodeString(uint8_t* string, uint8_t* outString, uint16_t len, uint8_t
 				outString[outStrIndex] = setUpperNibble(outString[outStrIndex], ENCODE_COLON);
 				break;
 			default:
-				outString[outStrIndex] = setUpperNibble(outString[outStrIndex], ENCODE_BLANK);
+				outString[outStrIndex] = setUpperNibble(outString[outStrIndex], ENCODE_9);
 				break;
 		}
 		
@@ -337,7 +337,7 @@ uint16_t encodeString(uint8_t* string, uint8_t* outString, uint16_t len, uint8_t
 				outString[outStrIndex] = setLowerNibble(outString[outStrIndex], ENCODE_COLON);
 				break;
 			default:
-				outString[outStrIndex] = setLowerNibble(outString[outStrIndex], ENCODE_BLANK);
+				outString[outStrIndex] = setLowerNibble(outString[outStrIndex], ENCODE_9);
 				break;
 		}
 		

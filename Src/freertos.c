@@ -479,7 +479,7 @@ void SendStatesFunc(void const * argument)
 	/* Infinite loop */
   for(;;) {
     xSemaphoreTake(sendStateSemaphoreHandle, portMAX_DELAY); 														/* Unlock when timer callback is called */
-		strToSenLen = encodeString(DATA_StateBuffer, strToSend, BUFFER_STATE_LEN, DATA_MESSAGE_ID); 					/* Get the encoded string */		
+		strToSenLen = encodeString(DATA_StateBuffer, strToSend, BUFFER_STATE_LEN, STATE_MESSAGE_ID); 					/* Get the encoded string */		
 		xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);								/* Lock if DMA is in use */
 		xQueueSend(Usart1TxModeQueueHandle, (void *)&normalTxModeFlag, (TickType_t)0); 			/* Add flag to queue */
 		HAL_UART_Transmit_DMA(&huart1, strToSend, strToSenLen); 														/* Transmit state message */
