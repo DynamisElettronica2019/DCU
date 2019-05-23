@@ -115,10 +115,9 @@ void aliveTask(void const * argument)
 
   /* USER CODE BEGIN aliveTask */
   /* Infinite loop */
-  for(;;)
-  {
+  for(;;) {
     HAL_GPIO_TogglePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin);
-		vTaskDelay(500 / portTICK_PERIOD_MS);
+		osDelay(250);
   }
   /* USER CODE END aliveTask */
 }
