@@ -156,14 +156,14 @@ uint8_t setUpperNibble(uint8_t editByte, uint8_t nibble) {
 * Function for encoding strings, parameters are in string reference, out string reference and in string lenght
 * Gives back the out string lenght
 */
-uint16_t encodeString(uint8_t* string, uint8_t* outString, uint16_t len) {
+uint16_t encodeString(uint8_t* string, uint8_t* outString, uint16_t len, uint8_t messageType) {
 	uint16_t outStrIndex = 0; // Declaring variable for index
 	
 	outString[outStrIndex] = setUpperNibble(outString[outStrIndex], ENCODE_OPEN_SQUARE); //Setting open bracket on start
 	outString[outStrIndex] = setLowerNibble(outString[outStrIndex], ENCODE_BLANK); //Setting open bracket on start
 	outStrIndex++;
 	
-	switch(string[0]) { // Set upper nibble with corresponding 4 bits from message recogniser
+	switch(messageType) { // Set upper nibble with corresponding 4 bits from message recogniser
 			case '0':
 				outString[outStrIndex] = setUpperNibble(outString[outStrIndex], ENCODE_0);
 				break;
@@ -205,6 +205,55 @@ uint16_t encodeString(uint8_t* string, uint8_t* outString, uint16_t len) {
 				break;
 	}
 	outString[outStrIndex] = setLowerNibble(outString[outStrIndex], ENCODE_BLANK); //Set lower part of the bit on blank
+	outStrIndex++;
+	
+	if(messageType == SECOND_DATA_MESSAGE_ID) {
+		outString[outStrIndex] = setUpperNibble(outString[outStrIndex], ENCODE_BLANK); //Set lower part of the bit on blank
+	}
+	else {
+		outString[outStrIndex] = setUpperNibble(outString[outStrIndex], ENCODE_SEMICOLON); //Set lower part of the bit on blank
+	}
+	switch(string[0]) { // Set lower nibble with corresponding 4 bits from message, higher is occupied by ;
+			case '0':
+				outString[outStrIndex] = setLowerNibble(outString[outStrIndex], ENCODE_0);
+				break;
+			case '1':
+				outString[outStrIndex] = setLowerNibble(outString[outStrIndex], ENCODE_1);
+				break;
+			case '2':
+				outString[outStrIndex] = setLowerNibble(outString[outStrIndex], ENCODE_2);
+				break;
+			case '3':
+				outString[outStrIndex] = setLowerNibble(outString[outStrIndex], ENCODE_3);
+				break;
+			case '4':
+				outString[outStrIndex] = setLowerNibble(outString[outStrIndex], ENCODE_4);
+				break;
+			case '5':
+				outString[outStrIndex] = setLowerNibble(outString[outStrIndex], ENCODE_5);
+				break;
+			case '6':
+				outString[outStrIndex] = setLowerNibble(outString[outStrIndex], ENCODE_6);
+				break;
+			case '7':
+				outString[outStrIndex] = setLowerNibble(outString[outStrIndex], ENCODE_7);
+				break;
+			case '8':
+				outString[outStrIndex] = setLowerNibble(outString[outStrIndex], ENCODE_8);
+				break;
+			case '9':
+				outString[outStrIndex] = setLowerNibble(outString[outStrIndex], ENCODE_9);
+				break;
+			case ';':
+				outString[outStrIndex] = setLowerNibble(outString[outStrIndex], ENCODE_SEMICOLON);
+				break;
+			case '.':
+				outString[outStrIndex] = setLowerNibble(outString[outStrIndex], ENCODE_COLON);
+				break;
+			default:
+				outString[outStrIndex] = setLowerNibble(outString[outStrIndex], ENCODE_BLANK);
+				break;
+	}
 	outStrIndex++;
 	
 	for (int i = 1; i < len-1; i += 2) { // Take characters 2 by 2

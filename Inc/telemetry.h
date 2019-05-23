@@ -44,11 +44,17 @@
 #define ENCODE_CLOSE_SQUARE          0x6
 #define ENCODE_BLANK                 0x7
 
+#define DATA_MESSAGE_ID							 (uint8_t)'1'
+#define SECOND_DATA_MESSAGE_ID			 (uint8_t)'N'
+#define STATE_MESSAGE_ID						 (uint8_t)'2'
+#define COMMAND_MESSAGE_ID					 (uint8_t)'3'
+#define ERROR_MESSAGE_ID						 (uint8_t)'4'
+
 extern inline void TELEMETRY_StateSendTimCallback(void);
 extern inline void TELEMETRY_DataSendTimCallback(void);
 extern inline void TELEMETRY_Receive(void);
 
-uint16_t encodeString(uint8_t* string, uint8_t* outString, uint16_t len);
+uint16_t encodeString(uint8_t* string, uint8_t* outString, uint16_t len, uint8_t messageType);
 uint8_t setUpperNibble(uint8_t editByte, uint8_t nibble);
 uint8_t setLowerNibble(uint8_t editByte, uint8_t nibble);
 
