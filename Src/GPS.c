@@ -490,9 +490,9 @@ double GPS_speed_decimal_conversion(uint8_t decimi, uint8_t  centesimi, uint8_t 
 
 void GPS_get_time(uint8_t *hour, uint8_t *minut, uint8_t *second){  /*da testare*/
 	if (GPS_is_fix_valid() == FIX_VALID){									//se i dati che ho a disposizione non hanno problemi, riempo le variabili passate con dati coerenti
-		*hour = NMEA_output.NMEA_GGA_type.UTC_time.hours;
-		*minut = NMEA_output.NMEA_GGA_type.UTC_time.minutes;
-		*second = NMEA_output.NMEA_GGA_type.UTC_time.seconds;
+		*hour = NMEA_output.NMEA_RMC_type.UTC_time.hours;
+		*minut = NMEA_output.NMEA_RMC_type.UTC_time.minutes;
+		*second = NMEA_output.NMEA_RMC_type.UTC_time.seconds;
 	}
 	else{																		//altrimenti gli riempo con dati non coerenti
 		*hour = 255;
@@ -502,8 +502,7 @@ void GPS_get_time(uint8_t *hour, uint8_t *minut, uint8_t *second){  /*da testare
 }
 
 uint8_t GPS_is_fix_valid(void){		//ritorna FIX_VALID  se i dati presenti nella variabile globale sono efettivamente coerenti, altrimenti ritorna FIX_NOT_VALID
-	if (NMEA_output.NMEA_GGA_type.GGA_fix_valid == 1 || NMEA_output.NMEA_GGA_type.GGA_fix_valid == 2){
-		if(NMEA_output.NMEA_RMC_type.RMC_status == 'A')
+	if (NMEA_output.NMEA_RMC_type.RMC_status == 'A'){
 			return FIX_VALID;
 	}
 	return FIX_NOT_VALID;		/*da testare*/

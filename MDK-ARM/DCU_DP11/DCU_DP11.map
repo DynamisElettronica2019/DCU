@@ -1754,11 +1754,11 @@ Removing Unused input sections from the image.
     Removing gps.o(i.GPS_USART2_UART_Init_38400), (76 bytes).
     Removing gps.o(i.GPS_USART2_UART_Init_57600), (76 bytes).
     Removing gps.o(i.GPS_clear_buffer), (26 bytes).
-    Removing gps.o(i.GPS_get_date), (64 bytes).
+    Removing gps.o(i.GPS_get_date), (48 bytes).
     Removing gps.o(i.GPS_get_messageID), (46 bytes).
-    Removing gps.o(i.GPS_get_time), (60 bytes).
+    Removing gps.o(i.GPS_get_time), (48 bytes).
     Removing gps.o(i.GPS_init), (300 bytes).
-    Removing gps.o(i.GPS_is_fix_valid), (36 bytes).
+    Removing gps.o(i.GPS_is_fix_valid), (20 bytes).
     Removing gps.o(i.GPS_minuts_conversion), (144 bytes).
     Removing gps.o(i.GPS_speed_decimal_conversion), (80 bytes).
     Removing gps.o(i.GPS_str_to_float), (40 bytes).
@@ -2676,7 +2676,7 @@ Removing Unused input sections from the image.
     Removing system_stm32f7xx.o(.rrx_text), (6 bytes).
     Removing system_stm32f7xx.o(i.SystemCoreClockUpdate), (144 bytes).
 
-928 unused section(s) (total 82427 bytes) removed from the image.
+928 unused section(s) (total 82383 bytes) removed from the image.
 
 ==============================================================================
 
