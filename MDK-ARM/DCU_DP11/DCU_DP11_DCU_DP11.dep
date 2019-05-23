@@ -1,6 +1,6 @@
 Dependencies for Project 'DCU_DP11', Target 'DCU_DP11': (DO NOT MODIFY !)
-F (..\Src\GPS.c)(0x5CE2E662)(--c99 -c --cpu Cortex-M7.fp.dp -D__MICROLIB -g -O3 -Otime --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F7xx_HAL_Driver/Inc -I ../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FatFs/src -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM7/r0p1 -I ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I ../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I ../Drivers/CMSIS/Device/ST/STM32F7xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_DCU_DP11-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32F7xx_DFP\2.9.0\Drivers\CMSIS\Device\ST\STM32F7xx\Include-D__UVISION_VERSION="524" -D_RTE_ -DSTM32F767xx -DUSE_HAL_DRIVER -DSTM32F767xx-o dcu_dp11\gps.o --omf_browse dcu_dp11\gps.crf --depend dcu_dp11\gps.d)
-I (../Inc/GPS.h)(0x5CE2DE6C)
+F (..\Src\GPS.c)(0x5CE6E036)(--c99 -c --cpu Cortex-M7.fp.dp -D__MICROLIB -g -O3 -Otime --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F7xx_HAL_Driver/Inc -I ../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FatFs/src -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM7/r0p1 -I ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I ../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I ../Drivers/CMSIS/Device/ST/STM32F7xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_DCU_DP11-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32F7xx_DFP\2.9.0\Drivers\CMSIS\Device\ST\STM32F7xx\Include-D__UVISION_VERSION="524" -D_RTE_ -DSTM32F767xx -DUSE_HAL_DRIVER -DSTM32F767xx-o dcu_dp11\gps.o --omf_browse dcu_dp11\gps.crf --depend dcu_dp11\gps.d)
+I (../Inc/GPS.h)(0x5CE6DBDA)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x588BD7A4)
 I (../Inc/usart.h)(0x5CE2DC74)
 I (../Inc/main.h)(0x5CE2DC76)
@@ -147,7 +147,7 @@ I (../Inc/tim.h)(0x5CE2DC74)
 I (../Inc/usart.h)(0x5CE2DC74)
 I (../Inc/usb_host.h)(0x5CE2DC74)
 I (../Inc/gpio.h)(0x5CE2DC65)
-I (../Inc/GPS.h)(0x5CE2DE6C)
+I (../Inc/GPS.h)(0x5CE6DBDA)
 F (../Src/gpio.c)(0x5CE2DC64)(--c99 -c --cpu Cortex-M7.fp.dp -D__MICROLIB -g -O3 -Otime --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F7xx_HAL_Driver/Inc -I ../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FatFs/src -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM7/r0p1 -I ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I ../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I ../Drivers/CMSIS/Device/ST/STM32F7xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_DCU_DP11-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32F7xx_DFP\2.9.0\Drivers\CMSIS\Device\ST\STM32F7xx\Include-D__UVISION_VERSION="524" -D_RTE_ -DSTM32F767xx -DUSE_HAL_DRIVER -DSTM32F767xx-o dcu_dp11\gpio.o --omf_browse dcu_dp11\gpio.crf --depend dcu_dp11\gpio.d)
 I (../Inc/gpio.h)(0x5CE2DC65)
 I (../Inc/main.h)(0x5CE2DC76)
@@ -701,7 +701,7 @@ I (../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h)(0x5CAF820E)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h)(0x5CAF820E)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h)(0x5CAF820E)
 I (../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h)(0x5CAF820E)
-I (../Inc/GPS.h)(0x5CE2DE6C)
+I (../Inc/GPS.h)(0x5CE6DBDA)
 I (../Inc/usart.h)(0x5CE2DC74)
 F (../Src/i2c.c)(0x5CE2DC73)(--c99 -c --cpu Cortex-M7.fp.dp -D__MICROLIB -g -O3 -Otime --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32F7xx_HAL_Driver/Inc -I ../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/Third_Party/FatFs/src -I ../Middlewares/Third_Party/FreeRTOS/Source/include -I ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM7/r0p1 -I ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I ../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I ../Drivers/CMSIS/Device/ST/STM32F7xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_DCU_DP11-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.2.0\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32F7xx_DFP\2.9.0\Drivers\CMSIS\Device\ST\STM32F7xx\Include-D__UVISION_VERSION="524" -D_RTE_ -DSTM32F767xx -DUSE_HAL_DRIVER -DSTM32F767xx-o dcu_dp11\i2c.o --omf_browse dcu_dp11\i2c.crf --depend dcu_dp11\i2c.d)
 I (../Inc/i2c.h)(0x5CE2DC73)

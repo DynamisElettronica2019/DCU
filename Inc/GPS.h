@@ -6,26 +6,42 @@
 
 // NMEA command defines
 
-#define GPS_SET_FIX_RATE_10HZ 				"0xB5, 0x62,0x06, 0x08,0x06, 0x00,0x64, 0x00, 0x01, 0x00,0x01, 0x00,0x7A, 0x12"
-#define GPS_SET_FIX_RATE_10HZ_LENGTH	(uint8_t)14
-
-#define GPS_POLL_FIX_RATE							"0xB5,0x62,0x06,0x08,0x00,0x00,0x0E,0x30"
-#define GPS_POLL_FIX_RATE_LENGTH			(uint8_t)8
-
 #define STOP_GLL  										"$PUBX,40,GLL,0,0,0,0,0,0*5C\r\n"  
 #define STOP_GLL_LENGTH								(uint8_t) 29
 
 /*scrivere start e stop di tutti gli altri messagi*/
 
-#define START_GLL											"$PUBX,40,GLL,0,1,0,0,0,0*5D\r\n" 
-#define START_GLL_LENGTH							(uint8_t) 29
+#define STOP_GGA								"$PUBX,40,GGA,0,0,0,0,0,0*5A\r\n" 
+#define STOP_GGA_LENGTH					(uint8_t) 29
 
-#define SET_BAUDRATE_57600						"$PUBX,41,1,0007,0003,57600,0*2B\r\n" /*blocca il programma*/
+#define START_GGA								"$PUBX,40,GGA,0,1,0,0,0,0*5B\r\n"
+#define START_GGA_LENGTH				(uint8_t) 29
+
+#define STOP_GLL  							"$PUBX,40,GLL,0,0,0,0,0,0*5C\r\n" 
+#define STOP_GLL_LENGTH					(uint8_t) 29
+
+#define START_GLL								"$PUBX,40,GLL,0,1,0,0,0,0*5D\r\n" 
+#define START_GLL_LENGTH					(uint8_t) 29
+
+#define STOP_GSA								"$PUBX,40,GSA,0,0,0,0,0,0*4E\r\n"
+#define STOP_GSA_LENGTH					(uint8_t)29
+
+#define START_GSA								"$PUBX,40,GSA,0,1,0,0,0,0*4F\r\n"
+#define START_GSA_LENGTH				(uint8_t)29
+
+#define STOP_GSV								"$PUBX,40,GSV,0,0,0,0,0,0*59\r\n"
+#define STOP_GSV_LENGTH					(uint8_t)29
+
+#define START_GSV								"$PUBX,40,GSV,0,1,0,0,0,0*58\r\n"
+#define START_GSV_LENGTH				(uint8_t)29
+
+#define SET_BAUDRATE_57600			"$PUBX,41,1,0007,0003,57600,0*2B\r\n" /*blocca il programma*/
 #define SET_BAUDRATE_57600_LENGTH			(uint8_t) 33
 
-#define SET_BAUDRATE_38400						"$PUBX,41,1,0007,0003,38400,0*20\r\n" 
+#define SET_BAUDRATE_38400			"$PUBX,41,1,0007,0003,38400,0*20\r\n" 
 #define SET_BAUDRATE_38400_LENGTH			(uint8_t) 33
-												
+
+#define GPS_SET_FIX_RATE_10HZ_LENGTH (uint8_t)14
 
 
 // Message type defines.
@@ -82,14 +98,14 @@ typedef struct latitude
 {
 	uint8_t degrees;
 	uint8_t minutes;
-	uint16_t decimal_minutes;
+	double decimal_minutes;
 }latitude_t;
 
 typedef struct longitude
 {
 	uint16_t degrees;
 	uint8_t minutes;
-	uint16_t decimal_minutes;
+	double decimal_minutes;
 }longitude_t;
 
 typedef struct Course_over_ground
@@ -102,7 +118,7 @@ typedef struct Course_over_ground
 typedef struct speed
 {
 	uint8_t unit;
-	uint8_t decimal;
+	double decimal;
 	
 }speed_t;
 
@@ -229,7 +245,11 @@ uint16_t GPS_str_to_int(uint8_t centinaia, uint8_t decine, uint8_t unita);
 double    GPS_str_to_float(uint8_t decimi, uint8_t centesimi);
 void GPS_clear_buffer(uint8_t *buffer, uint8_t length);
 void GPS_USART2_UART_Init_38400(void);
-void GPS_USART2_UART_Init_57600(void)
+void GPS_USART2_UART_Init_57600(void);
+
+double GPS_minuts_conversion(uint8_t decimi, uint8_t  centesimi, uint8_t millesimi, uint8_t decimillesimi, uint8_t centimillesimi);
+double GPS_speed_decimal_conversion(uint8_t decimi, uint8_t  centesimi, uint8_t millesimi);
+double GPS_speed_decimal_conversion(uint8_t decimi, uint8_t  centesimi, uint8_t millesimi);
 
 
 #endif

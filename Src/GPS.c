@@ -55,10 +55,6 @@ void GPS_parse_data(uint8_t * GPSRawBuffer){
 			NMEA_output.NMEA_GSA_type = GPS_GSA_conversion(GPSRawBuffer); 
 			break;
 		
-		case MESSAGE_TYPE_GSV :
-			NMEA_output.NMEA_GSV_type = GPS_GSV_conversion(GPSRawBuffer); 
-			break;
-		
 		case MESSAGE_TYPE_RMC :
 			NMEA_output.NMEA_RMC_type = GPS_RMC_conversion(GPSRawBuffer); 
 			break;
@@ -84,8 +80,6 @@ uint8_t GPS_get_messageID(uint8_t * buffer){										//questa funzione funziona
 		return MESSAGE_TYPE_GLL;
 	else if (buffer[4] == 'S')
 		return MESSAGE_TYPE_GSA;
-	else if(buffer[5] == 'V')								
-		return MESSAGE_TYPE_GSV;
 	else if(buffer[3] == 'R')
 		return MESSAGE_TYPE_RMC;
 	else if(buffer[3] == 'V')
@@ -120,7 +114,7 @@ NMEA_GGA_type_t GPS_GGA_conversion(uint8_t * buffer){
 				case 1:		//LATITUDE
 					GPSOutputGGA.latitude.degrees = ((uint8_t)GPS_str_to_int(0, buffer[i], buffer[i+1]));
 					GPSOutputGGA.latitude.minutes = ((uint8_t)GPS_str_to_int(0, buffer[i+2], buffer[i+3]));
-					GPSOutputGGA.latitude.decimal_minutes = ((uint16_t)(GPS_str_to_float(buffer[i+5], buffer[i+6])*60));
+					GPSOutputGGA.latitude.decimal_minutes = GPS_minuts_conversion(buffer[i+5], buffer[i+6], buffer[i+7], buffer[i+8], buffer[i+9])*60;
 					i = i +9; //salto gli ultimi 3 decimali
 					break;
 				
@@ -131,7 +125,7 @@ NMEA_GGA_type_t GPS_GGA_conversion(uint8_t * buffer){
 				case 3:		//LONGITUDE
 					GPSOutputGGA.longitude.degrees = GPS_str_to_int(buffer[i], buffer[i+1], buffer[i+2]);
 					GPSOutputGGA.longitude.minutes = ((uint8_t)GPS_str_to_int(0, buffer[i+3], buffer[i+4]));
-					GPSOutputGGA.longitude.decimal_minutes = ((uint16_t)(GPS_str_to_float(buffer[i+6], buffer[i+7])*60));
+					GPSOutputGGA.longitude.decimal_minutes = GPS_minuts_conversion(buffer[i+6],buffer[i+7],buffer[i+8],buffer[i+9],buffer[i+10])*60;
 					i = i+10; //salto gli ulyimi 3 decimali
 					break;
 				
@@ -197,7 +191,7 @@ NMEA_GLL_type_t GPS_GLL_conversion(uint8_t * buffer){
 				case 0:		//LATITUDE
 					GPSOutputGLL.latitude.degrees = ((uint8_t)GPS_str_to_int(0, buffer[i], buffer[i+1]));
 					GPSOutputGLL.latitude.minutes = ((uint8_t)GPS_str_to_int(0, buffer[i+2], buffer[i+3]));
-					GPSOutputGLL.latitude.decimal_minutes = ((uint16_t)(GPS_str_to_float(buffer[i+5], buffer[i+6])*60));
+					GPSOutputGLL.latitude.decimal_minutes = GPS_minuts_conversion(buffer[i+5], buffer[i+6], buffer[i+7], buffer[i+8], buffer[i+9])*60;
 					i = i +9;
 					break;
 				
@@ -208,7 +202,7 @@ NMEA_GLL_type_t GPS_GLL_conversion(uint8_t * buffer){
 				case 2:		//LONGITUDE
 					GPSOutputGLL.longitude.degrees = GPS_str_to_int(buffer[i], buffer[i+1], buffer[i+2]);
 					GPSOutputGLL.longitude.minutes = ((uint8_t)GPS_str_to_int(0, buffer[i+3], buffer[i+4]));
-					GPSOutputGLL.longitude.decimal_minutes = ((uint16_t)(GPS_str_to_float(buffer[i+6], buffer[i+7])*60));
+					GPSOutputGLL.longitude.decimal_minutes = GPS_minuts_conversion(buffer[i+6],buffer[i+7],buffer[i+8],buffer[i+9],buffer[i+10])*60;
 					i = i+10;
 					break;
 				
@@ -291,66 +285,6 @@ NMEA_GSA_type_t GPS_GSA_conversion(uint8_t * buffer){
 	return GPSOutputGSA;
 
 }
-
-NMEA_GSV_type_t GPS_GSV_conversion(uint8_t * buffer){ //in teoria potrei fornire i dati di tutti e 4 i gps, per semplicità in prima scrittura tengo solo un messaggio, che sarà l'ultimo di quelli arrivati. inoltre vado a leggere i dati solo del primo canale
-
-	uint8_t i = 7;													//il primo carattere "utile" dopo l'identificatore di messaggio e la ,
-	uint8_t skipped = 0;
-	NMEA_GSV_type_t GPSOutputGSV;
-	uint8_t NumberOfMessage = buffer[i];
-	i++;
-	while((buffer[i] != '*') && (i < GPS_MAX_LENGTH)){								//fintanto che non arrivo al checksum
-		
-		if (buffer[i] == ','){
-			skipped++;
-		}
-		else{
-			switch(skipped){
-				
-				case 0:		//MESSAGE NUMBER
-					GPSOutputGSV.message_number = buffer[i] - 48;
-					break;
-				
-				case 1:		//SATELLITES IN VIEW
-					if(buffer[i+1]!= ','){					//se ho piu di 10 satelliti in vista
-						GPSOutputGSV.number_of_satellites_in_view = ((uint8_t)GPS_str_to_int(0, buffer[i], buffer[i+1]));
-						i++;
-					}
-					else 
-						GPSOutputGSV.number_of_satellites_in_view = buffer[i] - 48;
-					break;
-				
-				case 2:		//SATELLITE ID NUMBER
-					GPSOutputGSV.satellite_ID = ((uint8_t)GPS_str_to_int(0,buffer[i], buffer[i+1]));
-					i++;
-					break;
-				
-				case 3:		//ELEVATION
-					GPSOutputGSV.satellite_elevation_degrees = ((uint8_t)GPS_str_to_int(0, buffer[i], buffer[i+1]));
-					i++;
-					break;
-				
-				case 4: 	//AZIMUTH
-					GPSOutputGSV.satellite_azimuth = GPS_str_to_int(buffer[i], buffer[i+1], buffer[i+2]);
-					i = i+2;
-					break;
-				
-				case 5:		//SNR
-					GPSOutputGSV.SNR = ((uint8_t)GPS_str_to_int(0, buffer[i], buffer[i+1]));
-					i++;
-					break;
-				
-				default: 
-					buffer[i] = '*';	//forzo la terminazione della conversione
-			}
-		}
-		
-		i++;
- }
-	return GPSOutputGSV;
-}
-
-
 NMEA_RMC_type_t GPS_RMC_conversion(uint8_t * buffer){		
 	
 	uint8_t i = 7;													//il primo carattere "utile" dopo l'identificatore di messaggio e la ,
@@ -381,7 +315,7 @@ NMEA_RMC_type_t GPS_RMC_conversion(uint8_t * buffer){
 				case 2:		//LATITUDE
 					GPSOutputRMC.latitude.degrees = ((uint8_t)GPS_str_to_int(0, buffer[i], buffer[i+1]));
 					GPSOutputRMC.latitude.minutes = ((uint8_t)GPS_str_to_int(0, buffer[i+2], buffer[i+3]));
-					GPSOutputRMC.latitude.decimal_minutes = ((uint16_t)(GPS_str_to_float(buffer[i+5], buffer[i+6])*60));
+					GPSOutputRMC.latitude.decimal_minutes = GPS_minuts_conversion(buffer[i+5], buffer[i+6], buffer[i+7], buffer[i+8], buffer[i+9])*60;
 					i = i +9;
 					break;
 				
@@ -392,7 +326,7 @@ NMEA_RMC_type_t GPS_RMC_conversion(uint8_t * buffer){
 				case 4: 	//LONGITUDE
 					GPSOutputRMC.longitude.degrees = GPS_str_to_int(buffer[i], buffer[i+1], buffer[i+2]);
 					GPSOutputRMC.longitude.minutes = ((uint8_t)GPS_str_to_int(0, buffer[i+3], buffer[i+4]));
-					GPSOutputRMC.longitude.decimal_minutes = ((uint16_t)(GPS_str_to_float(buffer[i+6], buffer[i+7])*60));
+					GPSOutputRMC.longitude.decimal_minutes = GPS_minuts_conversion(buffer[i+6],buffer[i+7],buffer[i+8],buffer[i+9],buffer[i+10])*60;
 					i = i+10;
 					break;
 				
@@ -403,12 +337,12 @@ NMEA_RMC_type_t GPS_RMC_conversion(uint8_t * buffer){
 				case 6:		//SPEED OVER GROUND (KNOTS)
 					if(buffer[i+1] != '.' ){  						//>10 nodi
 						GPSOutputRMC.speed.unit = ((uint8_t)GPS_str_to_int(0, buffer[i+ 1], buffer[i+2]));
-						GPSOutputRMC.speed.decimal = ((uint8_t)GPS_str_to_float(buffer[i+4], buffer[i+5])*100);
+						GPSOutputRMC.speed.decimal = GPS_speed_decimal_conversion(buffer[i+ 4],buffer[i+ 5],buffer[i+ 6])*1000;
 						i = i+ 6; //salto l'ultima cifra decimale
 					}
 					else{
 						GPSOutputRMC.speed.unit = buffer[i] - 48;
-						GPSOutputRMC.speed.decimal = (GPS_str_to_float(buffer[i+2], buffer[i+3])*100);
+						GPSOutputRMC.speed.decimal = GPS_speed_decimal_conversion(buffer[i+ 2],buffer[i+ 3],buffer[i+ 4])*1000;
 						i = i+4;	//salto l'ultima cifra decimale
 					}
 					
@@ -471,12 +405,12 @@ NMEA_VTG_type_t GPS_VTG_conversion(uint8_t * buffer){
 				case 4: 	//SPEED OVER GROUD(KNOTS)
 					if(buffer[i+1] != '.' ){  						//>10 nodi
 						GPSOutputVTG.speed1.unit = ((uint8_t)GPS_str_to_int(0, buffer[i+ 1], buffer[i+2]));
-						GPSOutputVTG.speed1.decimal = ((uint8_t)GPS_str_to_float(buffer[i+4], buffer[i+5])*100);
+						GPSOutputVTG.speed1.decimal = GPS_speed_decimal_conversion(buffer[i+ 4],buffer[i+ 5],buffer[i+ 6])*1000;
 						i = i+ 6; //salto l'ultima cifra decimale
 					}
 					else{
 						GPSOutputVTG.speed1.unit = buffer[i] - 48;
-						GPSOutputVTG.speed1.decimal = (GPS_str_to_float(buffer[i+2], buffer[i+3])*100);
+						GPSOutputVTG.speed1.decimal = GPS_speed_decimal_conversion(buffer[i+ 2],buffer[i+ 3],buffer[i+ 4])*1000;
 						i = i+4;	//salto l'ultima cifra decimale
 					}
 					break;
@@ -488,17 +422,17 @@ NMEA_VTG_type_t GPS_VTG_conversion(uint8_t * buffer){
 				case 6:		//SPEED OVER GROUND(KM/H)
 					if(buffer[i+1] != '.' && buffer[i+2] == '.'){  						//>10 km/h && <100km/h
 						GPSOutputVTG.speed2.unit = ((uint8_t)GPS_str_to_int(0, buffer[i+ 1], buffer[i+2]));
-						GPSOutputVTG.speed2.decimal = ((uint8_t)GPS_str_to_float(buffer[i+4], buffer[i+5])*100);
-						i = i+ 6; //salto l'ultima cifra decimale
+						GPSOutputVTG.speed2.decimal = GPS_speed_decimal_conversion(buffer[i+ 4],buffer[i+ 5],buffer[i+ 6])*1000;
+						i = i+ 6; 
 					}
 					else if(buffer[i + 2] != '.'){															// > 100 km/h
 					GPSOutputVTG.speed2.unit = ((uint8_t)GPS_str_to_int(buffer[i], buffer[i+1], buffer[i+2]));
-					GPSOutputVTG.speed2.decimal = ((uint8_t)GPS_str_to_float(buffer[i+4], buffer[i+5]));
-					i = i +6; //salto l'ultima cifra decimale
+					GPSOutputVTG.speed2.decimal = GPS_speed_decimal_conversion(buffer[i+ 4],buffer[i+ 5],buffer[i+ 6])*1000;
+					i = i +6; 
 					}
 					else{			// < 10km/h
 						GPSOutputVTG.speed2.unit = buffer[i] - 48;
-						GPSOutputVTG.speed2.decimal = (GPS_str_to_float(buffer[i+2],buffer[i+3])*100);
+						GPSOutputVTG.speed2.decimal = GPS_speed_decimal_conversion(buffer[i+ 2],buffer[i+ 3],buffer[i+ 4])*1000;
 						i = i+4;	//salto l'ultima cifra decimale
 					}
 					break;
@@ -544,6 +478,15 @@ double GPS_str_to_float(uint8_t decimi, uint8_t  centesimi){
 	
 }
 
+double GPS_minuts_conversion(uint8_t decimi, uint8_t  centesimi, uint8_t millesimi, uint8_t decimillesimi, uint8_t centimillesimi){
+	double value = 	((double) (decimi -48))/10	+ ((double) (centesimi))/100 + ((double) (millesimi))/1000 	+ ((double) (decimillesimi))/10000 + ((double) (centimillesimi))/100000;
+	return value;
+}
+
+double GPS_speed_decimal_conversion(uint8_t decimi, uint8_t  centesimi, uint8_t millesimi){
+	return ((double) (decimi - 48))/10 + ((double) (centesimi - 48))/100 + ((double) (millesimi))/1000 ;
+}
+
 
 void GPS_get_time(uint8_t *hour, uint8_t *minut, uint8_t *second){  /*da testare*/
 	if (GPS_is_fix_valid() == FIX_VALID){									//se i dati che ho a disposizione non hanno problemi, riempo le variabili passate con dati coerenti
@@ -581,12 +524,22 @@ void GPS_get_date(uint8_t *day, uint8_t *month, uint8_t *year){		//se i dati son
 }
 
 
-void GPS_init(void){		
-	/*decidere quali messaggio escludere dall'invio*/
+void GPS_init(void){
+	uint8_t GPSFixRate10Hz[] = {0xB5, 0x62, /*header*/
+															0x06, 0x08, /*ID*/
+															0x06, 0x00, /*length*/
+															0x64, 0x00, /*measRate*/
+															0x01, 0x00, /*navRate*/
+															0x01, 0x00, /*timeRef*/
+															0x7A, 0x12};/*CK_A, CK_B*/
+	
+	HAL_UART_Transmit(&huart2, (uint8_t *)STOP_GLL, STOP_GLL_LENGTH, 100);													/*blocca i messaggi GLL*/
+	HAL_UART_Transmit(&huart2, (uint8_t *)STOP_GSV, STOP_GSV_LENGTH, 100);													/*blocca i messaggi GSV*/
+	HAL_UART_Transmit(&huart2, (uint8_t *)STOP_GGA, STOP_GGA_LENGTH, 100);													/*blocca i messaggi GGA*/
 	HAL_UART_Transmit(&huart2, (uint8_t *)SET_BAUDRATE_38400, SET_BAUDRATE_38400_LENGTH, 100);			/*setto il baudrate del gps a 38400*/
 	GPS_USART2_UART_Init_38400();																																		/*reinizializzo la uart a 38400*/
 	HAL_Delay(50);																																									/*necessario?*/
-	HAL_UART_Transmit(&huart2,(uint8_t *)GPS_SET_FIX_RATE_10HZ, GPS_SET_FIX_RATE_10HZ_LENGTH, 100); /*SETTO IL FIX RATE A 10HZ*/
+	HAL_UART_Transmit(&huart2,GPSFixRate10Hz, GPS_SET_FIX_RATE_10HZ_LENGTH, 100); 									/*SETTO IL FIX RATE A 10HZ*/
 }
 
 void GPS_clear_buffer(uint8_t *buffer, uint8_t length){
