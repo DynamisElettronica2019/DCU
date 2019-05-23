@@ -124,58 +124,86 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 		
 		case DAU_FR_ID:
 			CAN_ReceivedPacketsCounter[DAU_FR_ID_COUNTER_INDEX]++;
-			intToStringUnsigned(data1, &DATA_BlockBuffer[LINEARE_FR_CSV_INDEX], 5);
-			intToStringUnsigned(data2, &DATA_BlockBuffer[LOAD_CELL_FR_CSV_INDEX], 5);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[BPS_FRONT_CSV_INDEX], 5);
-			intToStringUnsigned(data4, &DATA_BlockBuffer[APPS_CSV_INDEX], 5);
+			fData1 = LINEAR_DataConversion((uint16_t)data1);
+			fData2 = LOAD_CELL_DataConversion((int16_t)data2);
+			fData3 = BPS_DataConversion((uint16_t)data3);
+			fData4 = APPS_DataConversion((uint16_t)data4);
+			decimalToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[LINEARE_FR_CSV_INDEX], 2, 2);
+			intToString((int16_t)fData2, &DATA_BlockBuffer[LOAD_CELL_FR_CSV_INDEX], 4);
+			decimalToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[BPS_FRONT_CSV_INDEX], 2, 2);
+			intToStringUnsigned((uint16_t)fData4, &DATA_BlockBuffer[APPS_CSV_INDEX], 3);
 			break;
 		
 		case DAU_FL_ID:
 			CAN_ReceivedPacketsCounter[DAU_FL_ID_COUNTER_INDEX]++;
-			intToStringUnsigned(data1, &DATA_BlockBuffer[LINEARE_FL_CSV_INDEX], 5);
-			intToStringUnsigned(data2, &DATA_BlockBuffer[LOAD_CELL_FL_CSV_INDEX], 5);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[BPS_REAR_CSV_INDEX], 5);
-			intToStringUnsigned(data4, &DATA_BlockBuffer[STEERING_WHEEL_ANGLE_CSV_INDEX], 5);
+			fData1 = LINEAR_DataConversion((uint16_t)data1);
+			fData2 = LOAD_CELL_DataConversion((int16_t)data2);
+			fData3 = BPS_DataConversion((uint16_t)data3);
+			fData4 = STEERING_WHEEL_ANGLE_DataConversion((int16_t)data4);
+			decimalToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[LINEARE_FL_CSV_INDEX], 2, 2);
+			intToString((int16_t)fData2, &DATA_BlockBuffer[LOAD_CELL_FL_CSV_INDEX], 4);
+			decimalToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[BPS_REAR_CSV_INDEX], 2, 2);
+			decimalToString((int16_t)fData4, &DATA_BlockBuffer[STEERING_WHEEL_ANGLE_CSV_INDEX], 3, 1);
 			break;
 		
 		case DAU_REAR_ID:
 			CAN_ReceivedPacketsCounter[DAU_REAR_ID_COUNTER_INDEX]++;
-			intToStringUnsigned(data1, &DATA_BlockBuffer[LINEARE_RL_CSV_INDEX], 5);
-			intToStringUnsigned(data2, &DATA_BlockBuffer[LOAD_CELL_RL_CSV_INDEX], 5);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[LINEARE_RR_CSV_INDEX], 5);
-			intToStringUnsigned(data4, &DATA_BlockBuffer[LOAD_CELL_RR_CSV_INDEX], 5);
+			fData1 = LINEAR_DataConversion((uint16_t)data1);
+			fData2 = LOAD_CELL_DataConversion((int16_t)data2);
+			fData3 = LINEAR_DataConversion((uint16_t)data3);
+			fData4 = LOAD_CELL_DataConversion((int16_t)data4);
+			decimalToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[LINEARE_RL_CSV_INDEX], 2, 2);
+			intToString((int16_t)fData2, &DATA_BlockBuffer[LOAD_CELL_RL_CSV_INDEX], 4);
+			decimalToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[LINEARE_RR_CSV_INDEX], 2, 2);
+			intToString((int16_t)fData2, &DATA_BlockBuffer[LOAD_CELL_RR_CSV_INDEX], 4);
 			break;
 		
 		case DAU_FL_IR_ID:
 			CAN_ReceivedPacketsCounter[DAU_FL_IR_ID_COUNTER_INDEX]++;
-			intToStringUnsigned(data1, &DATA_BlockBuffer[IR1_FL_CSV_INDEX], 5);
-			intToStringUnsigned(data2, &DATA_BlockBuffer[IR2_FL_CSV_INDEX], 5);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[IR3_FL_CSV_INDEX], 5);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[BRAKE_IR_FL_CSV_SEPARATOR], 5);
+			fData1 = IR_DataConversion((uint16_t)data1);
+			fData2 = IR_DataConversion((uint16_t)data2);
+			fData3 = IR_DataConversion((uint16_t)data3);
+			fData4 = IR_DataConversion((uint16_t)data4);
+			intToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[IR1_FL_CSV_INDEX], 3);
+			intToStringUnsigned((uint16_t)fData2, &DATA_BlockBuffer[IR2_FL_CSV_INDEX], 3);
+			intToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[IR3_FL_CSV_INDEX], 3);
+			intToStringUnsigned((uint16_t)fData4, &DATA_BlockBuffer[BRAKE_IR_FL_CSV_SEPARATOR], 3);
 			break;
 		
 		case DAU_FR_IR_ID:
 			CAN_ReceivedPacketsCounter[DAU_FR_IR_ID_COUNTER_INDEX]++;
-			intToStringUnsigned(data1, &DATA_BlockBuffer[IR1_FR_CSV_INDEX], 5);
-			intToStringUnsigned(data2, &DATA_BlockBuffer[IR2_FR_CSV_INDEX], 5);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[IR3_FR_CSV_INDEX], 5);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[BRAKE_IR_FR_CSV_SEPARATOR], 5);
+			fData1 = IR_DataConversion((uint16_t)data1);
+			fData2 = IR_DataConversion((uint16_t)data2);
+			fData3 = IR_DataConversion((uint16_t)data3);
+			fData4 = IR_DataConversion((uint16_t)data4);
+			intToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[IR1_FR_CSV_INDEX], 3);
+			intToStringUnsigned((uint16_t)fData2, &DATA_BlockBuffer[IR2_FR_CSV_INDEX], 3);
+			intToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[IR3_FR_CSV_INDEX], 3);
+			intToStringUnsigned((uint16_t)fData4, &DATA_BlockBuffer[BRAKE_IR_FR_CSV_SEPARATOR], 3);
 			break;
 		
 		case DAU_REAR_IR_RL_ID:
 			CAN_ReceivedPacketsCounter[DAU_REAR_IR_RL_ID_COUNTER_INDEX]++;
-			intToStringUnsigned(data1, &DATA_BlockBuffer[IR1_RL_CSV_INDEX], 5);
-			intToStringUnsigned(data2, &DATA_BlockBuffer[IR2_RL_CSV_INDEX], 5);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[IR3_RL_CSV_INDEX], 5);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[BRAKE_IR_RL_CSV_SEPARATOR], 5);
+			fData1 = IR_DataConversion((uint16_t)data1);
+			fData2 = IR_DataConversion((uint16_t)data2);
+			fData3 = IR_DataConversion((uint16_t)data3);
+			fData4 = IR_DataConversion((uint16_t)data4);
+			intToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[IR1_RL_CSV_INDEX], 3);
+			intToStringUnsigned((uint16_t)fData2, &DATA_BlockBuffer[IR2_RL_CSV_INDEX], 3);
+			intToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[IR3_RL_CSV_INDEX], 3);
+			intToStringUnsigned((uint16_t)fData4, &DATA_BlockBuffer[BRAKE_IR_RL_CSV_SEPARATOR], 3);
 			break;
 		
 		case DAU_REAR_IR_RR_ID:
 			CAN_ReceivedPacketsCounter[DAU_REAR_IR_RR_ID_COUNTER_INDEX]++;
-			intToStringUnsigned(data1, &DATA_BlockBuffer[IR1_RR_CSV_INDEX], 5);
-			intToStringUnsigned(data2, &DATA_BlockBuffer[IR2_RR_CSV_INDEX], 5);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[IR3_RR_CSV_INDEX], 5);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[BRAKE_IR_RR_CSV_SEPARATOR], 5);
+			fData1 = IR_DataConversion((uint16_t)data1);
+			fData2 = IR_DataConversion((uint16_t)data2);
+			fData3 = IR_DataConversion((uint16_t)data3);
+			fData4 = IR_DataConversion((uint16_t)data4);
+			intToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[IR1_RR_CSV_INDEX], 3);
+			intToStringUnsigned((uint16_t)fData2, &DATA_BlockBuffer[IR2_RR_CSV_INDEX], 3);
+			intToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[IR3_RR_CSV_INDEX], 3);
+			intToStringUnsigned((uint16_t)fData4, &DATA_BlockBuffer[BRAKE_IR_RR_CSV_SEPARATOR], 3);
 			break;
 		
 		/* IMU ID range */

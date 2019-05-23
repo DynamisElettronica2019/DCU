@@ -66,7 +66,66 @@ extern inline float FUEL_LEVEL_DataConversion(uint16_t input)
 	return temp1;
 }
 
-extern inline uint16_t DCU_MainCurrentSenseConversion(uint32_t rawData) {
+extern inline float LOAD_CELL_DataConversion(int16_t input)
+{ 
+	float temp;
+	
+	temp = (float)input / 4095.0f;
+	temp = temp - 0.5f;
+	temp = temp * (4448.0f / (0.002f * 50.4f));
+	return temp;
+}
+
+extern inline float LINEAR_DataConversion(uint16_t input)
+{
+	float temp;
+	
+	temp = (float)input * (50.0f / 4095.0f);
+	temp = temp * 100.0f;
+  return temp;
+}
+
+extern inline float BPS_DataConversion(uint16_t input)
+{
+	float temp;
+	
+	temp = (float)input * (5.0f / 4095.0f);
+	temp = temp - 0.5f;
+	temp = temp * 37.5f * 10.0f;
+	return temp;
+}
+
+extern inline float APPS_DataConversion(uint16_t input)
+{
+	float temp;
+	
+	temp = 1425.0f - (float)input;
+	temp = temp / 4.36f;
+  return temp;
+}
+
+extern inline float STEERING_WHEEL_ANGLE_DataConversion(int16_t input)
+{
+	float temp;
+	
+	temp = (float)input * (5.0f / 4095.0f);
+	temp = temp * 90.0f;
+	temp = temp - 225.0f;
+	return temp;
+}
+
+extern inline float IR_DataConversion(uint16_t input)
+{
+	float temp;
+	
+	temp = (float)input * (5.0f / 4095.0f);
+	temp = temp - 0.4f;
+	temp = temp / 0.03f;
+	return temp;
+}
+
+extern inline uint16_t DCU_MainCurrentSenseConversion(uint32_t rawData)
+{
 	float data;
 	
 	data = (float)rawData * ADC_LSB;
@@ -75,7 +134,8 @@ extern inline uint16_t DCU_MainCurrentSenseConversion(uint32_t rawData) {
 	return (uint16_t)data;
 }
 
-extern inline uint16_t DCU_CurrentSenseConversion(uint32_t rawData) {
+extern inline uint16_t DCU_CurrentSenseConversion(uint32_t rawData)
+{
 	float data;
 	
 	data = (float)rawData * ADC_LSB;
@@ -84,7 +144,8 @@ extern inline uint16_t DCU_CurrentSenseConversion(uint32_t rawData) {
 	return (uint16_t)data;
 }
 
-extern inline uint16_t DCU_XbeeCurrentSenseConversion(uint32_t rawData) {
+extern inline uint16_t DCU_XbeeCurrentSenseConversion(uint32_t rawData)
+{
 	float data;
 	
 	data = (float)rawData * ADC_LSB;
@@ -93,7 +154,8 @@ extern inline uint16_t DCU_XbeeCurrentSenseConversion(uint32_t rawData) {
 	return (uint16_t)data;
 }
 
-extern inline float DCU_3v3SenseConversion(uint32_t rawData) {
+extern inline float DCU_3v3SenseConversion(uint32_t rawData)
+{
 	float data;
 	
 	data = (float)rawData * ADC_LSB;
@@ -101,7 +163,8 @@ extern inline float DCU_3v3SenseConversion(uint32_t rawData) {
 	return data;
 }
 
-extern inline float DCU_5vSenseConversion(uint32_t rawData) {
+extern inline float DCU_5vSenseConversion(uint32_t rawData)
+{
 	float data;
 	
 	data = (float)rawData * ADC_LSB;
@@ -109,7 +172,8 @@ extern inline float DCU_5vSenseConversion(uint32_t rawData) {
 	return data;
 }
 
-extern inline float DCU_12vSenseConversion(uint32_t rawData) {
+extern inline float DCU_12vSenseConversion(uint32_t rawData)
+{
 	float data;
 	
 	data = (float)rawData * ADC_LSB;
@@ -117,7 +181,8 @@ extern inline float DCU_12vSenseConversion(uint32_t rawData) {
 	return data;
 }
 
-extern inline float DCU_TempSenseConversion(uint32_t rawData) {
+extern inline float DCU_TempSenseConversion(uint32_t rawData)
+{
 	float data;
 	
 	data = (float)rawData * ADC_LSB * 1000.0f;
@@ -127,11 +192,13 @@ extern inline float DCU_TempSenseConversion(uint32_t rawData) {
 	return data;
 }
 
-extern inline float DCU_VbatConversion(uint32_t rawData) {
+extern inline float DCU_VbatConversion(uint32_t rawData)
+{
 	return ((float)rawData * ADC_LSB * 4.0f);
 }
 
-extern inline float analogAux1Conversion(uint32_t rawData) {
+extern inline float analogAux1Conversion(uint32_t rawData)
+{
 	float data;
 	
 	data = (float)rawData * ADC_LSB;
@@ -139,7 +206,8 @@ extern inline float analogAux1Conversion(uint32_t rawData) {
 	return data;
 }
 
-extern inline float analogAux2Conversion(uint32_t rawData) {
+extern inline float analogAux2Conversion(uint32_t rawData)
+{
 	float data;
 	
 	data = (float)rawData * ADC_LSB;
@@ -147,7 +215,8 @@ extern inline float analogAux2Conversion(uint32_t rawData) {
 	return data;
 }
 
-extern inline float analogAux3Conversion(uint32_t rawData) {
+extern inline float analogAux3Conversion(uint32_t rawData)
+{
 	float data;
 	
 	data = (float)rawData * ADC_LSB;
