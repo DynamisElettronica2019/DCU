@@ -102,6 +102,8 @@ extern inline void USB_SavingTask(void)
 		uint32ToString(timestamp, &DATA_BlockBuffer[DATA_BlockWriteIndex][TIMESTAMP_CSV_INDEX], 7);
 		DATA_SwapDataPackePointers();
 		f_write(&USBHFile, DATA_BlockBuffer[DATA_BlockReadIndex], BUFFER_BLOCK_LEN, (void *)&bytesWritten);
+		
+		
 		/* Put here the code to manage errors */
 	}
 }

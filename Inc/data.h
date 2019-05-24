@@ -277,6 +277,12 @@
 #define ACQUISITION_OFF_DEBUG_REQUEST 												(uint8_t)'D'
 #define ACQUISITION_IDLE_REQUEST															(uint8_t)'E'
 
+#define SW_ACQUISITION_CAN_REQUEST 														(uint8_t)1
+#define SW_START_ACQUISITION_CAN_REQUEST 											(uint8_t)1
+#define SW_STOP_ACQUISITION_CAN_REQUEST 											(uint8_t)2
+#define EFI_IS_ALIVE_RESET 																		(uint8_t)0
+#define EFI_IS_ALIVE_SET 																			(uint8_t)1
+
 #define STATE_ON 																							(uint8_t)'1'
 #define STATE_OFF																							(uint8_t)'0'
 #define STATE_USB_READY_INDEX 															  (uint8_t)0
@@ -284,8 +290,6 @@
 #define STATE_uSD_READY_INDEX 																(uint8_t)4
 #define STATE_ACQUISITION_ON_INDEX 														(uint8_t)6
 #define STATE_TELEMETRY_ON_INDEX  														(uint8_t)8
-#define EFI_IS_ALIVE_RESET 																		(uint8_t)0
-#define EFI_IS_ALIVE_SET 																			(uint8_t)1
 
 extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData);
 extern inline void startAcquisitionStateMachine(uint8_t startAcquisitionEvent);

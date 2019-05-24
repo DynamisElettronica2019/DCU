@@ -27,6 +27,9 @@ extern osMessageQId startAcquisitionEventHandle;
 
 extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 {	
+	uint8_t startAquisitionEvent = ACQUISITION_IDLE_REQUEST;
+	BaseType_t startAcquisition_xHigherPriorityTaskWoken = pdFALSE;
+	
 	/* Get the four 16 bit data from the 8 bit CAN messages */
 	data1 = (unpackedData->packetData[0] << 8) | unpackedData->packetData[1]; 		/* First data in the packet */
 	data2 = (unpackedData->packetData[2] << 8) | unpackedData->packetData[3]; 		/* Second data in the packet */
@@ -114,12 +117,26 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 		case EFI_LOIL_EXHAUST_ID:
 			DATA_SetEfiIsAlive();
 			CAN_ReceivedPacketsCounter[EFI_LOIL_EXHAUST_ID_COUNTER_INDEX]++;
-			fData1 = FUEL_LEVEL_DataConversion(data1) * 100.0f;			/* Taking into account the division by 100 */
+			fData1 = FUEL_LEVEL_DataConversion(data1) * 100.0f;						/* Taking into account the division by 100 */
 			fData2 = EXHAUST_TEMPERATURE_DataConversion(data2);
 			fData3 = EXHAUST_TEMPERATURE_DataConversion(data3);
 			decimalToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[DATA_BlockWriteIndex][L_FUEL_CSV_INDEX], 2, 2);
 			intToStringUnsigned((uint16_t)fData2, &DATA_BlockBuffer[DATA_BlockWriteIndex][T_SCARICO_1_CSV_INDEX], 3);
 			intToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[DATA_BlockWriteIndex][T_SCARICO_2_CSV_INDEX], 3);
+			break;
+		
+		/* SW ID range */
+		case SW_ACQUISITION_DCU_ID:
+			if(data1 == SW_ACQUISITION_CAN_REQUEST) {
+				if(data2 == SW_START_ACQUISITION_CAN_REQUEST) {
+					startAquisitionEvent = ACQUISITION_ON_TELEMETRY_REQUEST;		/* Start acquisition */
+					xQueueSendFromISR(startAcquisitionEventHandle, &startAquisitionEvent, &startAcquisition_xHigherPriorityTaskWoken);
+				}
+				else if(data2 == SW_STOP_ACQUISITION_CAN_REQUEST) {
+					startAquisitionEvent = ACQUISITION_OFF_TELEMETRY_REQUEST;		/* Stop acquisition */
+					xQueueSendFromISR(startAcquisitionEventHandle, &startAquisitionEvent, &startAcquisition_xHigherPriorityTaskWoken);
+				}
+			}
 			break;
 		
 		/* DAU ID range */
