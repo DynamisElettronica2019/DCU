@@ -85,10 +85,8 @@ extern void USB_InitStart(void)
 
 extern inline void USB_SavingRequest(void)
 {
-	if(saveUsbSemaphoreHandle != NULL) {
-		xSemaphoreGiveFromISR(saveUsbSemaphoreHandle, &USB_xHigherPriorityTaskWoken);
-		portYIELD_FROM_ISR(USB_xHigherPriorityTaskWoken);
-	}
+	xSemaphoreGiveFromISR(saveUsbSemaphoreHandle, &USB_xHigherPriorityTaskWoken);
+	portYIELD_FROM_ISR(USB_xHigherPriorityTaskWoken);
 }
 
 extern inline void USB_SavingTask(void)

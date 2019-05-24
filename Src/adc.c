@@ -424,7 +424,8 @@ extern inline void ADC_ReadDataAux(void)
 	ADC_BufferConvertedAux[ANALOG_AUX_3_POSITION] = analogAux3Conversion(ADC2_BufferRaw[ANALOG_AUX_3_RAW_POSITION]);
 }
 
-extern void ADC_BuffersInit(void) {
+extern void ADC_BuffersInit(void)
+{
 	for (uint8_t i = 0; i < ADC1_NUMBER_OF_CHANNELS; i++) {
 		ADC2_BufferRaw [i] = 0;
 		ADC_BufferConvertedDebug [i] = 0.0;
@@ -436,21 +437,18 @@ extern void ADC_BuffersInit(void) {
 	}
 }
 
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
 	if(hadc->Instance == ADC1) {
-		if(adc1SemaphoreHandle != NULL) {																									/* Check on system start if semaphore is already created */
-			HAL_ADC_Stop_DMA(hadc);																													/* Stop ADC1 conversion */
-			xSemaphoreGiveFromISR(adc1SemaphoreHandle, &ADC1_xHigherPriorityTaskWoken); 		/* Give semaphore to task when DMA is clear */
-			portYIELD_FROM_ISR(ADC1_xHigherPriorityTaskWoken);															/* Do context-switch if needed */
-		}
+		HAL_ADC_Stop_DMA(hadc);																													/* Stop ADC1 conversion */
+		xSemaphoreGiveFromISR(adc1SemaphoreHandle, &ADC1_xHigherPriorityTaskWoken); 		/* Give semaphore to task when DMA is clear */
+		portYIELD_FROM_ISR(ADC1_xHigherPriorityTaskWoken);															/* Do context-switch if needed */
 	}
 	
-	if(hadc->Instance == ADC2) {
-		if(adc2SemaphoreHandle != NULL) {																									/* Check on system start if semaphore is already created */
-			HAL_ADC_Stop_DMA(hadc);																													/* Stop ADC2 conversion */
-			xSemaphoreGiveFromISR(adc2SemaphoreHandle, &ADC2_xHigherPriorityTaskWoken); 		/* Give semaphore to task when DMA is clear */
-			portYIELD_FROM_ISR(ADC2_xHigherPriorityTaskWoken);															/* Do context-switch if needed */
-		}
+	if(hadc->Instance == ADC2) {																							/* Check on system start if semaphore is already created */
+		HAL_ADC_Stop_DMA(hadc);																													/* Stop ADC2 conversion */
+		xSemaphoreGiveFromISR(adc2SemaphoreHandle, &ADC2_xHigherPriorityTaskWoken); 		/* Give semaphore to task when DMA is clear */
+		portYIELD_FROM_ISR(ADC2_xHigherPriorityTaskWoken);															/* Do context-switch if needed */
 	}
 }
 

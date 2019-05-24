@@ -150,10 +150,8 @@ extern void CAN_Start(void)
 
 extern inline void CAN_SendPackets(void)
 {
-	if(CAN_SendSemaphoreHandle != NULL) {
-		xSemaphoreGiveFromISR(CAN_SendSemaphoreHandle, &CAN_SendxHigherPriorityTaskWoken);
-		portYIELD_FROM_ISR(CAN_SendxHigherPriorityTaskWoken);
-	}
+	xSemaphoreGiveFromISR(CAN_SendSemaphoreHandle, &CAN_SendxHigherPriorityTaskWoken);
+	portYIELD_FROM_ISR(CAN_SendxHigherPriorityTaskWoken);
 }
 
 extern inline void CAN_SendDebugPackets(void)

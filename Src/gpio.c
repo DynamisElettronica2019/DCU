@@ -120,21 +120,16 @@ void MX_GPIO_Init(void)
 extern inline void GPIO_UsbOvercurrentISR(void)
 {
 	if(HAL_GPIO_ReadPin(USB_OVERCURRENT_GPIO_Port, USB_OVERCURRENT_Pin) == GPIO_PIN_RESET) {
-		if(USB_OvercurrentSemaphoreHandle != NULL) {																														/* Check on system start if semaphore is already created */
-			xSemaphoreGiveFromISR(USB_OvercurrentSemaphoreHandle, &GPIO_OvercurrentxHigherPriorityTaskWoken); 		/* Give semaphore to task when interrupt is called */
-			portYIELD_FROM_ISR(GPIO_OvercurrentxHigherPriorityTaskWoken);																					/* Do context-switch if needed */
-		}
+		xSemaphoreGiveFromISR(USB_OvercurrentSemaphoreHandle, &GPIO_OvercurrentxHigherPriorityTaskWoken); 		/* Give semaphore to task when interrupt is called */
+		portYIELD_FROM_ISR(GPIO_OvercurrentxHigherPriorityTaskWoken);																					/* Do context-switch if needed */
 	}
 }
-
 
 extern inline void GPIO_AutogearSwitchISR(void)
 {
 	if(HAL_GPIO_ReadPin(AUTOGEAR_SWTICH_MCU_GPIO_Port, AUTOGEAR_SWTICH_MCU_Pin) == GPIO_PIN_RESET) {
-		if(autogearSemaphoreHandle != NULL) {																																		/* Check on system start if semaphore is already created */
-			xSemaphoreGiveFromISR(autogearSemaphoreHandle, &GPIO_AutogearxHigherPriorityTaskWoken); 							/* Give semaphore to task when interrupt is called */
-			portYIELD_FROM_ISR(GPIO_AutogearxHigherPriorityTaskWoken);																						/* Do context-switch if needed */
-		}
+		xSemaphoreGiveFromISR(autogearSemaphoreHandle, &GPIO_AutogearxHigherPriorityTaskWoken); 							/* Give semaphore to task when interrupt is called */
+		portYIELD_FROM_ISR(GPIO_AutogearxHigherPriorityTaskWoken);																						/* Do context-switch if needed */
 	}
 }
 

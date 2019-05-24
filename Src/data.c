@@ -406,10 +406,8 @@ extern inline void startAcquisitionStateMachine(uint8_t startAcquisitionEvent)
 
 extern inline void DATA_CheckEfiIsAlive(void)
 {
-	if(automaticStartAcquisitionSemaphoreHandle != NULL) { 																												/* Check on system start if semaphore is already created */
-		xSemaphoreGiveFromISR(automaticStartAcquisitionSemaphoreHandle, &EFI_IsAlive_xHigherPriorityTaskWoken); 		/* Give semaphore to task when DMA is clear */
-		portYIELD_FROM_ISR(EFI_IsAlive_xHigherPriorityTaskWoken); 																									/* Do context-switch if needed */
-	}
+	xSemaphoreGiveFromISR(automaticStartAcquisitionSemaphoreHandle, &EFI_IsAlive_xHigherPriorityTaskWoken); 		/* Give semaphore to task when DMA is clear */
+	portYIELD_FROM_ISR(EFI_IsAlive_xHigherPriorityTaskWoken); 																									/* Do context-switch if needed */
 }
 
 extern inline void DATA_AutomaticStartAcquisitionManager(void)
