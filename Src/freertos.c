@@ -139,15 +139,11 @@ void aliveTask(void const * argument)
   MX_USB_HOST_Init();
 
   /* USER CODE BEGIN aliveTask */
-		extern uint8_t hour, minuts, second, day, month, year, fix;
 
   /* Infinite loop */
   for(;;)
   {
 		HAL_GPIO_TogglePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin);
-		fix = GPS_is_fix_valid();
-		GPS_get_date(&day, &month, &year);
-		GPS_get_time(&hour, &minuts, &second);
     osDelay(250);
   }
   /* USER CODE END aliveTask */

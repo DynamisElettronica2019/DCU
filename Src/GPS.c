@@ -6,7 +6,6 @@
 
 NMEA_output_types_t NMEA_output;	/*global variable where conversion result are stored*/
 
-uint8_t hour, minuts, second, day, month, year, fix = 0;
 
 uint8_t GPSFirstChar;							
 uint8_t GPSParsingChar = '$';
