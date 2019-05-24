@@ -9,8 +9,9 @@
 #define NUMBER_OF_RECEIVED_PACKETS														(uint8_t)25
 #define NUMBER_OF_ACQUIRED_CHANNELS														(uint8_t)91
 #define BUFFER_STATE_LEN 																			(uint8_t)9
-#define BUFFER_BLOCK_LEN 																			(uint16_t)582
 #define BUFFER_BLOCKS_NUMBER																	(uint8_t)2
+#define BUFFER_BLOCK_LEN 																			(uint16_t)582
+#define CLOSE_FILE_INTERVAL																		(uint32_t)60000
 
 /* Packet position in CAN data packet counter vector */
 #define EFI_HALL_WHEEL_ID_COUNTER_INDEX 											(uint8_t)0

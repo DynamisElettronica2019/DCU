@@ -50,6 +50,7 @@ extern inline void USB_OpenFile(void);
 extern inline void USB_CloseFile(void);
 extern inline void USB_EventHandler(uint8_t USB_Event);
 extern inline void USB_OvercurrentEvent(void);
+static inline void USB_CloseAndOpenFile(void);
 static inline void USB_WriteLen(uint8_t *buffer);
 /* USER CODE END INCLUDE */
 

@@ -3,7 +3,7 @@
 <title>Static Call Graph - [DCU_DP11\DCU_DP11.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image DCU_DP11\DCU_DP11.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Fri May 24 21:02:29 2019
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Fri May 24 21:49:09 2019
 <BR><P>
 <H3>Maximum Stack Usage =        680 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -810,11 +810,13 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memset
 </UL>
 <BR>[Called By]<UL><LI><a href="#[7b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
+<LI><a href="#[206]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask
 <LI><a href="#[1f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_CloseFile
 </UL>
 
 <P><STRONG><a name="[1f7]"></a>DATA_ResetAcquisitionState</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, data.o(i.DATA_ResetAcquisitionState))
-<BR><BR>[Called By]<UL><LI><a href="#[1f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_CloseFile
+<BR><BR>[Called By]<UL><LI><a href="#[206]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask
+<LI><a href="#[1f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_CloseFile
 </UL>
 
 <P><STRONG><a name="[17d]"></a>DATA_ResetEfiIsAlive</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, data.o(i.DATA_ResetEfiIsAlive))
@@ -830,7 +832,8 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[202]"></a>DATA_SetAcquisitionState</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, data.o(i.DATA_SetAcquisitionState))
-<BR><BR>[Called By]<UL><LI><a href="#[1fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_OpenFile
+<BR><BR>[Called By]<UL><LI><a href="#[206]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask
+<LI><a href="#[1fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_OpenFile
 </UL>
 
 <P><STRONG><a name="[1b7]"></a>DATA_SetTelemetryState</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, data.o(i.DATA_SetTelemetryState))
@@ -1466,6 +1469,7 @@ Global Symbols
 <LI><a href="#[7b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 <LI><a href="#[1b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SystemClock_Config
 <LI><a href="#[f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Error_Handler
+<LI><a href="#[206]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask
 <LI><a href="#[19d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_DriverVbusHS
 <LI><a href="#[1fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_OpenFile
 <LI><a href="#[1f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_CloseFile
@@ -3131,7 +3135,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> usbh_diskio.o(.constdata)
 </UL>
-<P><STRONG><a name="[1f4]"></a>USB_CloseFile</STRONG> (Thumb, 60 bytes, Stack size 8 bytes, usb_host.o(i.USB_CloseFile))
+<P><STRONG><a name="[1f4]"></a>USB_CloseFile</STRONG> (Thumb, 56 bytes, Stack size 8 bytes, usb_host.o(i.USB_CloseFile))
 <BR><BR>[Stack]<UL><LI>Max Depth = 192<LI>Call Chain = USB_CloseFile &rArr; f_close &rArr; f_sync &rArr; validate &rArr; ff_rel_grant &rArr; osSemaphoreRelease &rArr; xQueueGenericSend &rArr; xTaskResumeAll
 </UL>
 <BR>[Calls]<UL><LI><a href="#[c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_GetAcquisitionState
@@ -3289,15 +3293,21 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[177]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_PeriodElapsedCallback
 </UL>
 
-<P><STRONG><a name="[206]"></a>USB_SavingTask</STRONG> (Thumb, 84 bytes, Stack size 16 bytes, usb_host.o(i.USB_SavingTask))
-<BR><BR>[Stack]<UL><LI>Max Depth = 200<LI>Call Chain = USB_SavingTask &rArr; f_write &rArr; validate &rArr; ff_rel_grant &rArr; osSemaphoreRelease &rArr; xQueueGenericSend &rArr; xTaskResumeAll
+<P><STRONG><a name="[206]"></a>USB_SavingTask</STRONG> (Thumb, 160 bytes, Stack size 16 bytes, usb_host.o(i.USB_SavingTask))
+<BR><BR>[Stack]<UL><LI>Max Depth = 416<LI>Call Chain = USB_SavingTask &rArr; f_open &rArr; dir_find &rArr; dir_next &rArr; create_chain &rArr; put_fat &rArr; move_window &rArr; disk_write
 </UL>
 <BR>[Calls]<UL><LI><a href="#[c4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_GetAcquisitionState
+<LI><a href="#[f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
+<LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_PacketReset
 <LI><a href="#[209]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uint32ToString
 <LI><a href="#[208]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;incrementDataTimestamp
 <LI><a href="#[207]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getDataTimestamp
 <LI><a href="#[201]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;f_write
+<LI><a href="#[1ff]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;f_open
+<LI><a href="#[1f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;f_close
 <LI><a href="#[f1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_SwapDataPackePointers
+<LI><a href="#[202]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_SetAcquisitionState
+<LI><a href="#[1f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_ResetAcquisitionState
 </UL>
 <BR>[Called By]<UL><LI><a href="#[9e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;saveUsbTask
 </UL>
@@ -3473,7 +3483,8 @@ Global Symbols
 <LI><a href="#[215]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;f_sync
 <LI><a href="#[216]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;validate
 </UL>
-<BR>[Called By]<UL><LI><a href="#[1f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_CloseFile
+<BR>[Called By]<UL><LI><a href="#[206]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask
+<LI><a href="#[1f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_CloseFile
 </UL>
 
 <P><STRONG><a name="[1a0]"></a>f_mount</STRONG> (Thumb, 204 bytes, Stack size 40 bytes, ff.o(i.f_mount))
@@ -3505,7 +3516,8 @@ Global Symbols
 <LI><a href="#[20e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dir_find
 <LI><a href="#[21e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;disk_read
 </UL>
-<BR>[Called By]<UL><LI><a href="#[1fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_OpenFile
+<BR>[Called By]<UL><LI><a href="#[206]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask
+<LI><a href="#[1fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_OpenFile
 </UL>
 
 <P><STRONG><a name="[215]"></a>f_sync</STRONG> (Thumb, 462 bytes, Stack size 32 bytes, ff.o(i.f_sync))
@@ -3783,7 +3795,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[9e]"></a>saveUsbTask</STRONG> (Thumb, 22 bytes, Stack size 0 bytes, freertos.o(i.saveUsbTask))
-<BR><BR>[Stack]<UL><LI>Max Depth = 200<LI>Call Chain = saveUsbTask &rArr; USB_SavingTask &rArr; f_write &rArr; validate &rArr; ff_rel_grant &rArr; osSemaphoreRelease &rArr; xQueueGenericSend &rArr; xTaskResumeAll
+<BR><BR>[Stack]<UL><LI>Max Depth = 416<LI>Call Chain = saveUsbTask &rArr; USB_SavingTask &rArr; f_open &rArr; dir_find &rArr; dir_next &rArr; create_chain &rArr; put_fat &rArr; move_window &rArr; disk_write
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
 <LI><a href="#[206]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask

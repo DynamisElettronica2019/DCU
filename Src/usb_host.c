@@ -38,8 +38,7 @@
 /* Private variables ---------------------------------------------------------*/
 uint32_t len;
 UINT bytesWritten;
-FRESULT openResult;
-FRESULT closeResult;
+TCHAR USB_Filename[] = "DynamisPRC_USB_test.csv";
 BaseType_t USB_xHigherPriorityTaskWoken = pdFALSE;
 extern uint8_t DATA_BlockWriteIndex;
 extern uint8_t DATA_BlockReadIndex;
@@ -102,9 +101,11 @@ extern inline void USB_SavingTask(void)
 		uint32ToString(timestamp, &DATA_BlockBuffer[DATA_BlockWriteIndex][TIMESTAMP_CSV_INDEX], 7);
 		DATA_SwapDataPackePointers();
 		f_write(&USBHFile, DATA_BlockBuffer[DATA_BlockReadIndex], BUFFER_BLOCK_LEN, (void *)&bytesWritten);
-		
-		
 		/* Put here the code to manage errors */
+		
+		if((timestamp % CLOSE_FILE_INTERVAL) == 0) {
+			USB_CloseAndOpenFile();
+		}
 	}
 }
 
@@ -112,9 +113,8 @@ extern inline void USB_OpenFile(void)
 {		
 	if((DATA_GetAcquisitionState() == STATE_OFF) && (DATA_GetUsbReadyState() == STATE_ON)){
 		/* Put here getFilename function */
-		openResult = f_open(&USBHFile, "DynamisPRC_USB_test.csv", FA_CREATE_ALWAYS | FA_WRITE);
-	
-		if(openResult == FR_OK) {
+
+		if(f_open(&USBHFile, USB_Filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
 			USB_WriteLen(fileHeader);
 			USB_WriteLen(channelNameHeader);
 			HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
@@ -128,9 +128,8 @@ extern inline void USB_OpenFile(void)
 extern inline void USB_CloseFile(void)
 {
 	if((DATA_GetAcquisitionState() == STATE_ON) && (DATA_GetUsbReadyState() == STATE_ON)) {
-		closeResult = f_close(&USBHFile);
 		
-		if(closeResult == FR_OK) {
+		if(f_close(&USBHFile) == FR_OK) {
 			HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
 			DATA_ResetAcquisitionState();			/* Update of the status packet */
 			DATA_PacketReset();								/* Reset the data saving buffer */
@@ -172,6 +171,26 @@ extern inline void USB_OvercurrentEvent(void)
 {
 	if(HAL_GPIO_ReadPin(USB_OVERCURRENT_GPIO_Port, USB_OVERCURRENT_Pin) == GPIO_PIN_RESET) {
 			/* Put here the code to handling autogear event */
+	}
+}
+
+static inline void USB_CloseAndOpenFile(void)
+{	
+	if(f_close(&USBHFile) == FR_OK) {
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
+		DATA_ResetAcquisitionState();		/* Update of the status packet */
+	}
+	else {
+		/* Put here the code to manage errors */
+	}
+		
+	if(f_open(&USBHFile, USB_Filename, FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
+		DATA_SetAcquisitionState();		/* Update of the status packet */
+	}
+	else {
+		DATA_PacketReset();		/* Reset the data saving buffer */
+		/* Put here the code to manage errors */
 	}
 }
 
