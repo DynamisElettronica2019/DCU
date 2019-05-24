@@ -9,7 +9,7 @@
 #define NUMBER_OF_RECEIVED_PACKETS														(uint8_t)25
 #define NUMBER_OF_ACQUIRED_CHANNELS														(uint8_t)91
 #define BUFFER_STATE_LEN 																			(uint8_t)9
-#define BUFFER_BLOCK_LEN 																			(uint16_t)550
+#define BUFFER_BLOCK_LEN 																			(uint16_t)582
 
 /* Packet position in CAN data packet counter vector */
 #define EFI_HALL_WHEEL_ID_COUNTER_INDEX 											(uint8_t)0
@@ -105,44 +105,50 @@
 #define IMU1_HEADING_CSV_INDEX 																(uint16_t)316
 #define IMU1_ACC_Z_CSV_INDEX 																	(uint16_t)324
 #define IMU1_GYR_Y_CSV_INDEX 																	(uint16_t)332
-#define IMU2_ACC_X_CSV_INDEX 																	(uint16_t)339
-#define IMU2_ACC_Y_CSV_INDEX 																	(uint16_t)347
-#define IMU2_GYR_X_CSV_INDEX 																	(uint16_t)355
-#define IMU2_GYR_Z_CSV_INDEX 																	(uint16_t)362
-#define IMU2_HEADING_CSV_INDEX 																(uint16_t)369
-#define IMU2_ACC_Z_CSV_INDEX 																	(uint16_t)377
-#define IMU2_GYR_Y_CSV_INDEX 																	(uint16_t)385
-#define IMU_DCU_ACC_X_CSV_INDEX 															(uint16_t)392
-#define IMU_DCU_ACC_Y_CSV_INDEX 															(uint16_t)400
-#define IMU_DCU_GYR_X_CSV_INDEX 															(uint16_t)408
-#define IMU_DCU_GYR_Z_CSV_INDEX 															(uint16_t)415
-#define IMU_DCU_HEADING_CSV_INDEX 														(uint16_t)423
-#define IMU_DCU_ACC_Z_CSV_INDEX 															(uint16_t)431
-#define IMU_DCU_GYR_Y_CSV_INDEX 															(uint16_t)438
-#define DAU_FR_TEMP_CSV_INDEX 																(uint16_t)445
-#define DAU_FR_CURRENT_CSV_INDEX 															(uint16_t)448
-#define DAU_FL_TEMP_CSV_INDEX 																(uint16_t)452
-#define DAU_FL_CURRENT_CSV_INDEX 															(uint16_t)455
-#define DAU_REAR_TEMP_CSV_INDEX 															(uint16_t)459
-#define DAU_REAR_CURRENT_CSV_INDEX 														(uint16_t)462
-#define SW_TEMP_CSV_INDEX 																		(uint16_t)466
-#define SW_CURRENT_CSV_INDEX 																	(uint16_t)469
-#define GCU_TEMP_CSV_INDEX 																		(uint16_t)474
-#define GCU_CURR_CSV_INDEX 																		(uint16_t)477
-#define H2O_PUMP_CURRENT_CSV_INDEX 														(uint16_t)481
-#define FUEL_PUMP_CURRENT_CSV_INDEX 													(uint16_t)487
-#define GEARMOTOR_CURRENT_CSV_INDEX 													(uint16_t)493
-#define CLUTCH_CURRENT_CSV_INDEX 															(uint16_t)499
-#define FAN_SX_CURRENT_CSV_INDEX 															(uint16_t)505
-#define FAN_DX_CURRENT_CSV_INDEX 															(uint16_t)511
-#define DCU_TEMP_CSV_INDEX 																		(uint16_t)517
-#define DCU_CURRENT_CSV_INDEX 																(uint16_t)520
-#define XBEE_CURRENT_CSV_INDEX 																(uint16_t)525
-#define DUC_3V3_CURRENT_CSV_INDEX 														(uint16_t)529
-#define DCU_12V_VOLTAGE_CSV_INDEX 														(uint16_t)533
-#define DCU_5V_VOLTAGE_CSV_INDEX 															(uint16_t)539
-#define DCU_3V3_VOLTAGE_CSV_INDEX 														(uint16_t)544
-#define END_ROW_CSV_INDEX 																		(uint16_t)549
+#define IMU1_SENSORS_CALIBRATION_CSV_INDEX										(uint16_t)339
+#define IMU2_ACC_X_CSV_INDEX 																	(uint16_t)343
+#define IMU2_ACC_Y_CSV_INDEX 																	(uint16_t)351
+#define IMU2_GYR_X_CSV_INDEX 																	(uint16_t)359
+#define IMU2_GYR_Z_CSV_INDEX 																	(uint16_t)366
+#define IMU2_HEADING_CSV_INDEX 																(uint16_t)373
+#define IMU2_ACC_Z_CSV_INDEX 																	(uint16_t)381
+#define IMU2_GYR_Y_CSV_INDEX 																	(uint16_t)389
+#define IMU2_SENSORS_CALIBRATION_CSV_INDEX 										(uint16_t)396
+#define IMU_DCU_ACC_X_CSV_INDEX 															(uint16_t)400
+#define IMU_DCU_ACC_Y_CSV_INDEX 															(uint16_t)408
+#define IMU_DCU_GYR_X_CSV_INDEX 															(uint16_t)416
+#define IMU_DCU_GYR_Z_CSV_INDEX 															(uint16_t)423
+#define IMU_DCU_HEADING_CSV_INDEX 														(uint16_t)431
+#define IMU_DCU_ACC_Z_CSV_INDEX 															(uint16_t)439
+#define IMU_DCU_GYR_Y_CSV_INDEX 															(uint16_t)446
+#define IMU_DCU_SENSORS_CALIBRATION_CSV_INDEX									(uint16_t)353
+#define GPS_LATITUDE_MINUTES_CSV_INDEX												(uint16_t)457	
+#define GPS_LONGITUDE_MINUTES_CSV_INDEX 											(uint16_t)463
+#define GPS_SPEED_CSV_INDEX	 																	(uint16_t)469
+#define DAU_FR_TEMP_CSV_INDEX 																(uint16_t)477
+#define DAU_FR_CURRENT_CSV_INDEX 															(uint16_t)480
+#define DAU_FL_TEMP_CSV_INDEX 																(uint16_t)484
+#define DAU_FL_CURRENT_CSV_INDEX 															(uint16_t)487
+#define DAU_REAR_TEMP_CSV_INDEX 															(uint16_t)491
+#define DAU_REAR_CURRENT_CSV_INDEX 														(uint16_t)494
+#define SW_TEMP_CSV_INDEX 																		(uint16_t)498
+#define SW_CURRENT_CSV_INDEX 																	(uint16_t)501
+#define GCU_TEMP_CSV_INDEX 																		(uint16_t)506
+#define GCU_CURR_CSV_INDEX 																		(uint16_t)509
+#define H2O_PUMP_CURRENT_CSV_INDEX 														(uint16_t)513
+#define FUEL_PUMP_CURRENT_CSV_INDEX 													(uint16_t)519
+#define GEARMOTOR_CURRENT_CSV_INDEX 													(uint16_t)525
+#define CLUTCH_CURRENT_CSV_INDEX 															(uint16_t)531
+#define FAN_SX_CURRENT_CSV_INDEX 															(uint16_t)537
+#define FAN_DX_CURRENT_CSV_INDEX 															(uint16_t)543
+#define DCU_TEMP_CSV_INDEX 																		(uint16_t)549
+#define DCU_CURRENT_CSV_INDEX 																(uint16_t)552
+#define XBEE_CURRENT_CSV_INDEX 																(uint16_t)557
+#define DUC_3V3_CURRENT_CSV_INDEX 														(uint16_t)561
+#define DCU_12V_VOLTAGE_CSV_INDEX 														(uint16_t)565
+#define DCU_5V_VOLTAGE_CSV_INDEX 															(uint16_t)571
+#define DCU_3V3_VOLTAGE_CSV_INDEX 														(uint16_t)576
+#define END_ROW_CSV_INDEX 																		(uint16_t)581
 
 /* Data separator position in CSV file */
 #define HALL_EFFECT_FR_CSV_SEPARATOR													(HALL_EFFECT_FR_CSV_INDEX - 1)
@@ -210,6 +216,7 @@
 #define IMU1_HEADING_CSV_SEPARATOR 														(IMU1_HEADING_CSV_INDEX - 1)
 #define IMU1_ACC_Z_CSV_SEPARATOR 															(IMU1_ACC_Z_CSV_INDEX - 1)
 #define IMU1_GYR_Y_CSV_SEPARATOR 															(IMU1_GYR_Y_CSV_INDEX - 1)
+#define IMU1_SENSORS_CALIBRATION_CSV_SEPARATOR								(IMU1_SENSORS_CALIBRATION_CSV_INDEX - 1)
 #define IMU2_ACC_X_CSV_SEPARATOR 															(IMU2_ACC_X_CSV_INDEX - 1)
 #define IMU2_ACC_Y_CSV_SEPARATOR 															(IMU2_ACC_Y_CSV_INDEX - 1)
 #define IMU2_GYR_X_CSV_SEPARATOR 															(IMU2_GYR_X_CSV_INDEX - 1)
@@ -217,6 +224,7 @@
 #define IMU2_HEADING_CSV_SEPARATOR 														(IMU2_HEADING_CSV_INDEX - 1)
 #define IMU2_ACC_Z_CSV_SEPARATOR 															(IMU2_ACC_Z_CSV_INDEX - 1)
 #define IMU2_GYR_Y_CSV_SEPARATOR 															(IMU2_GYR_Y_CSV_INDEX - 1)
+#define IMU2_SENSORS_CALIBRATION_CSV_SEPARATOR 								(IMU2_SENSORS_CALIBRATION_CSV_INDEX - 1)
 #define IMU_DCU_ACC_X_CSV_SEPARATOR 													(IMU_DCU_ACC_X_CSV_INDEX - 1)
 #define IMU_DCU_ACC_Y_CSV_SEPARATOR 													(IMU_DCU_ACC_Y_CSV_INDEX - 1)
 #define IMU_DCU_GYR_X_CSV_SEPARATOR 													(IMU_DCU_GYR_X_CSV_INDEX - 1)
@@ -224,6 +232,10 @@
 #define IMU_DCU_HEADING_CSV_SEPARATOR 												(IMU_DCU_HEADING_CSV_INDEX - 1)
 #define IMU_DCU_ACC_Z_CSV_SEPARATOR 													(IMU_DCU_ACC_Z_CSV_INDEX - 1)
 #define IMU_DCU_GYR_Y_CSV_SEPARATOR 													(IMU_DCU_GYR_Y_CSV_INDEX - 1)
+#define IMU_DCU_SENSORS_CALIBRATION_CSV_SEPARATOR 						(IMU_DCU_SENSORS_CALIBRATION_CSV_INDEX - 1)
+#define GPS_LATITUDE_MINUTES_CSV_SEPARATOR 										(GPS_LATITUDE_MINUTES_CSV_INDEX - 1)
+#define GPS_LONGITUDE_MINUTES_CSV_SEPARATOR  									(GPS_LONGITUDE_MINUTES_CSV_INDEX - 1)
+#define GPS_SPEED_CSV_SEPARATOR  															(GPS_SPEED_CSV_INDEX - 1)
 #define DAU_FR_TEMP_CSV_SEPARATOR 														(DAU_FR_TEMP_CSV_INDEX - 1)
 #define DAU_FR_CURRENT_CSV_SEPARATOR 													(DAU_FR_CURRENT_CSV_INDEX - 1)
 #define DAU_FL_TEMP_CSV_SEPARATOR 														(DAU_FL_TEMP_CSV_INDEX - 1)
