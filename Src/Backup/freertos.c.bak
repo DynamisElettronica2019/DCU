@@ -67,7 +67,7 @@ osSemaphoreId GPSSetSemHandle;
 /* USER CODE END FunctionPrototypes */
 
 void aliveTask(void const * argument);
-void GPSunboxingFunc(void const * argument);
+void GPSUnboxingFunc(void const * argument);
 void GPSSettingFunc(void const * argument);
 
 extern void MX_FATFS_Init(void);
@@ -116,11 +116,11 @@ void MX_FREERTOS_Init(void) {
   aliveHandle = osThreadCreate(osThread(alive), NULL);
 
   /* definition and creation of GPSUnboxingTask */
-  osThreadDef(GPSUnboxingTask, GPSunboxingFunc, osPriorityIdle, 0, 128);
+  osThreadDef(GPSUnboxingTask, GPSUnboxingFunc, osPriorityNormal, 0, 512);
   GPSUnboxingTaskHandle = osThreadCreate(osThread(GPSUnboxingTask), NULL);
 
   /* definition and creation of GPSSettingTask */
-  osThreadDef(GPSSettingTask, GPSSettingFunc, osPriorityIdle, 0, 128);
+  osThreadDef(GPSSettingTask, GPSSettingFunc, osPriorityNormal, 0, 512);
   GPSSettingTaskHandle = osThreadCreate(osThread(GPSSettingTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -148,30 +148,30 @@ void aliveTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+		HAL_GPIO_TogglePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin);
+    osDelay(250);
   }
   /* USER CODE END aliveTask */
 }
 
-/* USER CODE BEGIN Header_GPSunboxingFunc */
+/* USER CODE BEGIN Header_GPSUnboxingFunc */
 /**
 * @brief Function implementing the GPSUnboxingTask thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_GPSunboxingFunc */
-void GPSunboxingFunc(void const * argument)
+/* USER CODE END Header_GPSUnboxingFunc */
+void GPSUnboxingFunc(void const * argument)
 {
-  /* USER CODE BEGIN GPSunboxingFunc */
-	HAL_UART_Receive_DMA(&huart2,&GPSFirstChar, 1);    		//comincio a ricevere un carattere alla volta, fino a quando mi arriva il primo $.
+  /* USER CODE BEGIN GPSUnboxingFunc */
+		HAL_UART_Receive_DMA(&huart2,&GPSFirstChar, 1);
   /* Infinite loop */
   for(;;)
   {
-		xSemaphoreTake(GPSUnboxSemHandle, portMAX_DELAY);		//quando ho finito di riempire il buffer, sblocco la task
-		GPS_parse_data(GPSRawBuffer);												//e faccio le conversioni
-    osDelay(1);
+		xSemaphoreTake(GPSUnboxSemHandle, portMAX_DELAY);
+		GPS_parse_data(GPSRawBuffer);
   }
-  /* USER CODE END GPSunboxingFunc */
+  /* USER CODE END GPSUnboxingFunc */
 }
 
 /* USER CODE BEGIN Header_GPSSettingFunc */

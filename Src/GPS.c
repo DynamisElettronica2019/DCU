@@ -2,46 +2,46 @@
 #include "usart.h"
 #include "cmsis_os.h"
 
-//user variables
+/*global variables*/
 
-NMEA_output_types_t NMEA_output;	//dove salvo i risultati della conversione
-uint8_t GPSMessageID;							//globale solo per comodità di debug per adesso
+NMEA_output_types_t NMEA_output;	/*global variable where conversion result are stored*/
 
-uint8_t GPSFirstChar;
+uint8_t hour, minuts, second, day, month, year, fix = 0;
+
+uint8_t GPSFirstChar;							
 uint8_t GPSParsingChar = '$';
 uint8_t i = 0;
-uint8_t GPSRawBuffer [GPS_MAX_LENGTH];
+uint8_t GPSRawBuffer [GPS_MAX_LENGTH];	/*global buffer where raw nmea message are stored*/
 
 extern osSemaphoreId GPSUnboxSemHandle;
-extern osSemaphoreId GPSSetSemHandle;
 BaseType_t xGPSHigherPriorityTaskWoken;
 
 
-void GPS_Rx_Cplt(void){
-		if (GPSFirstChar == '$'){								//se ho trovato il carattere iniziale della stringa
+void GPS_Rx_Cplt(void){											/*uart interrupt callback function*/
+		if (GPSFirstChar == '$'){								/*if initial string charater has been found*/
 			
-			GPSRawBuffer[i] = GPSParsingChar;			//lo salvo
+			GPSRawBuffer[i] = GPSParsingChar;			/*the char is saved as first element */
 			i++;
 			
-			HAL_UART_Receive_DMA(&huart2,&GPSParsingChar, 1);		//e comincio a leggere i caratteri successivi
+			HAL_UART_Receive_DMA(&huart2,&GPSParsingChar, 1);		/*then it starts reciving the successive chars*/
 	}
-	 if (GPSParsingChar == '\n'){								//se sono arrivato alla fine del messaggio
-			GPSRawBuffer[i] = '\n';									//salvo l'ultimo carattere
+	 if (GPSParsingChar == '\n'){								/*if last char has been saved*/
+			GPSRawBuffer[i] = '\n';									/*it stores the last char*/
 			i = 0;
-			GPSParsingChar = '$';										//riinizializzo le variabili che mi servono
-			xSemaphoreGiveFromISR(GPSUnboxSemHandle,&xGPSHigherPriorityTaskWoken );			//chiamo la task di spacchettamento
+			GPSParsingChar = '$';										/*reinitialised variables needed*/
+			xSemaphoreGiveFromISR(GPSUnboxSemHandle,&xGPSHigherPriorityTaskWoken );			/*calls the unboxing task*/
 			portYIELD_FROM_ISR(xGPSHigherPriorityTaskWoken);
 	}
-	 if ((GPSFirstChar != '$') && (GPSParsingChar != '\n')){			//se non ho ancora trovato il carattere iniziale continuo a cercarlo
+	 if ((GPSFirstChar != '$') && (GPSParsingChar != '\n')){			/*if last char has not arrived yet, keep searching for it*/
 		 HAL_UART_Receive_DMA(&huart2,&GPSFirstChar, 1);
 	 }
 		
 }
-void GPS_parse_data(uint8_t * GPSRawBuffer){
+void GPS_data_conversion(uint8_t * GPSRawBuffer){
 	
-	GPSMessageID = GPS_get_messageID(GPSRawBuffer);		//capisco che tipo di messaggio ho ricevuto
+	uint8_t GPSMessageID = GPS_get_messageID(GPSRawBuffer);		/*gest message type, needed for conversion*/
 	
-	switch (GPSMessageID){											// in base al messaggio che mi è arrivato faccio la conversione del pacchetto
+	switch (GPSMessageID){											/*based on message type recived, converts the raw nmea buffer*/
 		
 		case MESSAGE_TYPE_GGA :
 			NMEA_output.NMEA_GGA_type = GPS_GGA_conversion(GPSRawBuffer); 
@@ -67,12 +67,12 @@ void GPS_parse_data(uint8_t * GPSRawBuffer){
 			/**/
 			break;
 		
-		default :						//non dovrei mai arrivare qui in ogni caso
+		default :						/*should never arrive here, otherswise an error has occured*/
 			break;
 	}
-	HAL_UART_Receive_DMA(&huart2,&GPSFirstChar, 1);			//finita la conversionie, ricomincio a cercare il carattere iniziale
+	HAL_UART_Receive_DMA(&huart2,&GPSFirstChar, 1);			/*at the end of the conversion, restar searching for first char $*/
 }
-uint8_t GPS_get_messageID(uint8_t * buffer){										//questa funzione funziona solo se in buffer i caratteri identificatori del messaggio sono contenuti nei primo 5 elementi
+uint8_t GPS_get_messageID(uint8_t * buffer){										
 
 	if (buffer[4] == 'G')
 		return MESSAGE_TYPE_GGA;
@@ -91,31 +91,31 @@ uint8_t GPS_get_messageID(uint8_t * buffer){										//questa funzione funziona
 
 NMEA_GGA_type_t GPS_GGA_conversion(uint8_t * buffer){
 		
-	uint8_t i = 7;													//il primo carattere "utile" dopo l'identificatore di messaggio e la ,
-	uint8_t skipped = 0;										//serve per tenere conto di quante volte ho saltato
+	uint8_t i = 7;													/*jump to first interesting char, after message type and ','*/
+	uint8_t skipped = 0;										/*this variables keeps track of how many filed it has skipped over*/
 	
 	NMEA_GGA_type_t GPSOutputGGA;
-	while((buffer[i] != '*') && (i < GPS_MAX_LENGTH)){								//fintanto che non arrivo al checksum
+	while((buffer[i] != '*') && (i < GPS_MAX_LENGTH)){								/*until it reached checksum char or it has gone over buffer length*/
 		
 		if (buffer[i] == ','){
 			skipped++;
 		}
 	  else{
-			switch(skipped){
+			switch(skipped){			/*based on the filed it is evaluating, act a defined type of conversion*/
 				
 				case 0:		//UTC TIME
-					GPSOutputGGA.UTC_time.hours = ((uint8_t)GPS_str_to_int(0, buffer[i], buffer[i+1])) + 2;		/*riverifica che effettivamente vengano mandati cosi i valori*/
+					GPSOutputGGA.UTC_time.hours = ((uint8_t)GPS_str_to_int(0, buffer[i], buffer[i+1])) + 2;		
 					GPSOutputGGA.UTC_time.minutes = ((uint8_t)GPS_str_to_int(0, buffer[i+2], buffer[i+3]));
 					GPSOutputGGA.UTC_time.seconds = ((uint8_t)GPS_str_to_int(0, buffer[i+4], buffer[i+5]));
-					GPSOutputGGA.UTC_time.decimal_seconds = ((uint8_t)GPS_str_to_int(0, buffer[i+7], buffer[i+8])); //salto il punto
-					i = i+ 8;		//Non incremento di 9 perchè alla fine dell'else c'è gia un incremento
+					GPSOutputGGA.UTC_time.decimal_seconds = ((uint8_t)GPS_str_to_int(0, buffer[i+7], buffer[i+8])); /*skip the point*/
+					i = i+ 8;		
 					break;
 				
 				case 1:		//LATITUDE
 					GPSOutputGGA.latitude.degrees = ((uint8_t)GPS_str_to_int(0, buffer[i], buffer[i+1]));
 					GPSOutputGGA.latitude.minutes = ((uint8_t)GPS_str_to_int(0, buffer[i+2], buffer[i+3]));
 					GPSOutputGGA.latitude.decimal_minutes = GPS_minuts_conversion(buffer[i+5], buffer[i+6], buffer[i+7], buffer[i+8], buffer[i+9])*60;
-					i = i +9; //salto gli ultimi 3 decimali
+					i = i +9; 
 					break;
 				
 				case 2:		//N_S
@@ -126,7 +126,7 @@ NMEA_GGA_type_t GPS_GGA_conversion(uint8_t * buffer){
 					GPSOutputGGA.longitude.degrees = GPS_str_to_int(buffer[i], buffer[i+1], buffer[i+2]);
 					GPSOutputGGA.longitude.minutes = ((uint8_t)GPS_str_to_int(0, buffer[i+3], buffer[i+4]));
 					GPSOutputGGA.longitude.decimal_minutes = GPS_minuts_conversion(buffer[i+6],buffer[i+7],buffer[i+8],buffer[i+9],buffer[i+10])*60;
-					i = i+10; //salto gli ulyimi 3 decimali
+					i = i+10; 
 					break;
 				
 				case 4: 	//E_W
@@ -138,7 +138,7 @@ NMEA_GGA_type_t GPS_GGA_conversion(uint8_t * buffer){
 					break;
 				
 				case 6:		//SATELITTES USED
-					if (buffer[i+1] != ','){											//se ho piu di 9 satelliti in vista
+					if (buffer[i+1] != ','){											/*if more than 9 satellities are in view*/
 						GPSOutputGGA.number_satellites_used = ((uint8_t)GPS_str_to_int(0, buffer[i], buffer[i+1])); 
 						i++;
 					}
@@ -147,18 +147,18 @@ NMEA_GGA_type_t GPS_GGA_conversion(uint8_t * buffer){
 					break;
 				
 				case 7:		//HDOP
-					GPSOutputGGA.HDOP = GPS_str_to_float(buffer[i+2],buffer[i+3]);		//salto lo zero e il punto
+					GPSOutputGGA.HDOP = (buffer[i]-48) + GPS_str_to_float(buffer[i+2],buffer[i+3]);		
 					i = i+3;
 					break;
 				
 				case 8:		//MLS ALTITUDE
-					if(buffer[i + 2] == '.'){		//se sono sotto i 100 metri di altitudine
+					if(buffer[i + 2] == '.'){		/*under 100 MLS*/
 						GPSOutputGGA.MSL_Altitude = ((uint8_t)GPS_str_to_int(0, buffer[i], buffer[i+1]));
-						i = i +3; 								//salto anche il punto e la prima cifra decimale
+						i = i +3; 								/*skip point and last decimal*/
 					}
-					else if(buffer[i + 3] == '.'){	//se sono tra i 100 e i 1000 metri di altitudine
+					else if(buffer[i + 3] == '.'){	/*beteween 100 and 1000 MLS*/
 						GPSOutputGGA.MSL_Altitude = ((uint8_t)GPS_str_to_int(buffer[i], buffer[i+1], buffer[i+2]));
-						i = i +4;									//salto anche il punto e la prima cifra decimale
+						i = i +4;									/*skip point and last decimal*/
 					}
 					break;
 				
@@ -166,8 +166,8 @@ NMEA_GGA_type_t GPS_GGA_conversion(uint8_t * buffer){
 					GPSOutputGGA.Unit = buffer[i];
 					break;
 				
-				default:  //se si vogliono leggere anche altre parti del messaggio basta continuare a implementare questo switch case. per velocizzare il tempo di spacchettamento tengo solo i dati necessari per adesso
-					buffer[i] = '*';	//se entro nel default forzo la terminazione della conversione
+				default:  
+					buffer[i] = '*';	/*if it gest here, force the end of conversion*/
 			}
 		}
 		
@@ -176,11 +176,11 @@ NMEA_GGA_type_t GPS_GGA_conversion(uint8_t * buffer){
 	return GPSOutputGGA;
 }
 NMEA_GLL_type_t GPS_GLL_conversion(uint8_t * buffer){
-	uint8_t i = 7;													//il primo carattere "utile" dopo l'identificatore di messaggio e la ,
-	uint8_t skipped = 0;										//serve per tenere conto di quante volte ho saltato
+	uint8_t i = 7;													
+	uint8_t skipped = 0;										
 	
 	NMEA_GLL_type_t GPSOutputGLL;
-	while((buffer[i] != '*') && (i < GPS_MAX_LENGTH)){								//fintanto che non arrivo al checksum
+	while((buffer[i] != '*') && (i < GPS_MAX_LENGTH)){								
 		
 		if (buffer[i] == ','){
 			skipped++;
@@ -215,7 +215,7 @@ NMEA_GLL_type_t GPS_GLL_conversion(uint8_t * buffer){
 					GPSOutputGLL.UTC_time.minutes = ((uint8_t)GPS_str_to_int(0, buffer[i+2], buffer[i+3]));
 					GPSOutputGLL.UTC_time.seconds = ((uint8_t)GPS_str_to_int(0, buffer[i+4], buffer[i+5]));
 					GPSOutputGLL.UTC_time.decimal_seconds = ((uint8_t)GPS_str_to_int(0, buffer[i+7], buffer[i+8])); //salto il punto
-					i = i+ 8;		//Non incremento di 9 perchè alla fine dell'else c'è gia un incremento
+					i = i+ 8;		
 					break;
 				
 				case 5:		//STATUS
@@ -227,21 +227,20 @@ NMEA_GLL_type_t GPS_GLL_conversion(uint8_t * buffer){
 					break;
 				
 				default: 
-					buffer[i] = '*';	//forzo la terminazione della conversione
+					buffer[i] = '*';	
 			}
 		}
-		
 		i++;
 	}
 	return GPSOutputGLL;
 }
 NMEA_GSA_type_t GPS_GSA_conversion(uint8_t * buffer){
 	
-	uint8_t i = 7;													//il primo carattere "utile" dopo l'identificatore di messaggio e la ,
-	uint8_t skipped = 0;										//serve per tenere conto di quante volte ho saltato
+	uint8_t i = 7;													
+	uint8_t skipped = 0;										
 
 	NMEA_GSA_type_t GPSOutputGSA;
-	while((buffer[i] != '*') && (i < GPS_MAX_LENGTH)){								//fintanto che non arrivo al checksum
+	while((buffer[i] != '*') && (i < GPS_MAX_LENGTH)){						
 		
 		if (buffer[i] == ','){
 			skipped++;
@@ -258,7 +257,7 @@ NMEA_GSA_type_t GPS_GSA_conversion(uint8_t * buffer){
 					break;
 				
 				case 2:		//SATELLITE ON CHANNEL 1
-					if (buffer[i+2] == ','){		//se ho piu di 9 satelliti sul primo canale
+					if (buffer[i+2] == ','){		/*if more than 9 satellites are on view on channel 1*/
 						GPSOutputGSA.satellites_used_ch1 = ((uint8_t)GPS_str_to_int(0, buffer[i], buffer[i+1]));
 						i++;
 					}
@@ -267,7 +266,7 @@ NMEA_GSA_type_t GPS_GSA_conversion(uint8_t * buffer){
 					break;
 				
 				case 3:		//SATELLITE ON CHANNEL 2
-					if (buffer[i+2] == ','){		//se ho piu di 9 satelliti sul secondo canale
+					if (buffer[i+2] == ','){		/*if more than 9 satellites are on view on channel 2*/
 						GPSOutputGSA.satellites_used_ch2 = ((uint8_t)GPS_str_to_int(0, buffer[i], buffer[i+1]));
 						i++;
 					}
@@ -276,7 +275,7 @@ NMEA_GSA_type_t GPS_GSA_conversion(uint8_t * buffer){
 					break;
 				
 				default: 
-					buffer[i] = '*';	//se si vogliono leggere anche altre parti del messaggio basta continuare a implementare questo switch case. per velocizzare il tempo di spacchettamento tengo solo i dati necessari per adesso
+					buffer[i] = '*';	
 			}
 		}
 		
@@ -287,11 +286,11 @@ NMEA_GSA_type_t GPS_GSA_conversion(uint8_t * buffer){
 }
 NMEA_RMC_type_t GPS_RMC_conversion(uint8_t * buffer){		
 	
-	uint8_t i = 7;													//il primo carattere "utile" dopo l'identificatore di messaggio e la ,
+	uint8_t i = 7;													
 	uint8_t skipped = 0;
 	NMEA_RMC_type_t GPSOutputRMC;
 	
-	while((buffer[i] != '*') && (i < GPS_MAX_LENGTH)){								//fintanto che non arrivo al checksum
+	while((buffer[i] != '*') && (i < GPS_MAX_LENGTH)){								
 		
 		if (buffer[i] == ','){
 			skipped++;
@@ -300,11 +299,11 @@ NMEA_RMC_type_t GPS_RMC_conversion(uint8_t * buffer){
 			switch(skipped){
 				
 				case 0:		//UTC TIME
-					GPSOutputRMC.UTC_time.hours = ((uint8_t)GPS_str_to_int(0, buffer[i], buffer[i+1])) + 2;		/*riverifica che effettivamente vengano mandati cosi i valori*/
+					GPSOutputRMC.UTC_time.hours = ((uint8_t)GPS_str_to_int(0, buffer[i], buffer[i+1])) + 2;		
 					GPSOutputRMC.UTC_time.minutes = ((uint8_t)GPS_str_to_int(0, buffer[i+2], buffer[i+3]));
 					GPSOutputRMC.UTC_time.seconds = ((uint8_t)GPS_str_to_int(0, buffer[i+4], buffer[i+5]));
-					GPSOutputRMC.UTC_time.decimal_seconds = ((uint8_t)GPS_str_to_int(0, buffer[i+7], buffer[i+8])); //salto il punto
-					i = i+ 8;		//Non incremento di 9 perchè alla fine dell'else c'è gia un incremento
+					GPSOutputRMC.UTC_time.decimal_seconds = ((uint8_t)GPS_str_to_int(0, buffer[i+7], buffer[i+8])); 
+					i = i+ 8;		
 					
 					break;
 				
@@ -335,21 +334,21 @@ NMEA_RMC_type_t GPS_RMC_conversion(uint8_t * buffer){
 					break;
 				
 				case 6:		//SPEED OVER GROUND (KNOTS)
-					if(buffer[i+1] != '.' ){  						//>10 nodi
+					if(buffer[i+1] != '.' ){  						/*speed greater than 9 knots*/
 						GPSOutputRMC.speed.unit = ((uint8_t)GPS_str_to_int(0, buffer[i+ 1], buffer[i+2]));
 						GPSOutputRMC.speed.decimal = GPS_speed_decimal_conversion(buffer[i+ 4],buffer[i+ 5],buffer[i+ 6])*1000;
-						i = i+ 6; //salto l'ultima cifra decimale
+						i = i+ 6; 
 					}
 					else{
 						GPSOutputRMC.speed.unit = buffer[i] - 48;
 						GPSOutputRMC.speed.decimal = GPS_speed_decimal_conversion(buffer[i+ 2],buffer[i+ 3],buffer[i+ 4])*1000;
-						i = i+4;	//salto l'ultima cifra decimale
+						i = i+4;	
 					}
 					
 					break;
 				
 				case 7:		//COURSE OVER GROUND 
-					/*campo vuoto per il momento*/
+					/*empty filed*/
 					break;
 				
 				case 8:		//DATE
@@ -360,7 +359,7 @@ NMEA_RMC_type_t GPS_RMC_conversion(uint8_t * buffer){
 					break;
 				
 				default: 
-					buffer[i] = '*';	//forzo la terminazione della conversione
+					buffer[i] = '*';	
 			}
 		}
 		
@@ -371,11 +370,11 @@ NMEA_RMC_type_t GPS_RMC_conversion(uint8_t * buffer){
 
 NMEA_VTG_type_t GPS_VTG_conversion(uint8_t * buffer){
 	
-	uint8_t i = 7;													//il primo carattere "utile" dopo l'identificatore di messaggio e la ,
-	uint8_t skipped = 0;										//serve per tenere conto di quante volte ho saltato
+	uint8_t i = 7;													
+	uint8_t skipped = 0;										
 
 	NMEA_VTG_type_t GPSOutputVTG;
-	while((buffer[i] != '*') && (i < GPS_MAX_LENGTH)){								//fintanto che non arrivo al checksum o ho superato la lunghezza massima del buffer
+	while((buffer[i] != '*') && (i < GPS_MAX_LENGTH)){								
 		
 		if (buffer[i] == ','){
 			skipped++;
@@ -394,24 +393,23 @@ NMEA_VTG_type_t GPS_VTG_conversion(uint8_t * buffer){
 					break;
 				
 				case 2:		//COURSE OVER GROUND MAGNETIC
-					i = i + 5;
-					//campo vuoto
+					/*empty filed*/
 					break;
 				
 				case 3:		//REFERENCE
-					//campo vuoto
+					/*empty filed*/
 					break;
 				
 				case 4: 	//SPEED OVER GROUD(KNOTS)
-					if(buffer[i+1] != '.' ){  						//>10 nodi
+					if(buffer[i+1] != '.' ){  						/*speed greater than 9 knot*/
 						GPSOutputVTG.speed1.unit = ((uint8_t)GPS_str_to_int(0, buffer[i+ 1], buffer[i+2]));
 						GPSOutputVTG.speed1.decimal = GPS_speed_decimal_conversion(buffer[i+ 4],buffer[i+ 5],buffer[i+ 6])*1000;
-						i = i+ 6; //salto l'ultima cifra decimale
+						i = i+ 6; 
 					}
 					else{
 						GPSOutputVTG.speed1.unit = buffer[i] - 48;
 						GPSOutputVTG.speed1.decimal = GPS_speed_decimal_conversion(buffer[i+ 2],buffer[i+ 3],buffer[i+ 4])*1000;
-						i = i+4;	//salto l'ultima cifra decimale
+						i = i+4;	
 					}
 					break;
 				
@@ -420,20 +418,20 @@ NMEA_VTG_type_t GPS_VTG_conversion(uint8_t * buffer){
 					break;
 				
 				case 6:		//SPEED OVER GROUND(KM/H)
-					if(buffer[i+1] != '.' && buffer[i+2] == '.'){  						//>10 km/h && <100km/h
+					if(buffer[i+1] != '.' && buffer[i+2] == '.'){  						/*speed between 10 and 100 km/h*/
 						GPSOutputVTG.speed2.unit = ((uint8_t)GPS_str_to_int(0, buffer[i+ 1], buffer[i+2]));
 						GPSOutputVTG.speed2.decimal = GPS_speed_decimal_conversion(buffer[i+ 4],buffer[i+ 5],buffer[i+ 6])*1000;
 						i = i+ 6; 
 					}
-					else if(buffer[i + 2] != '.'){															// > 100 km/h
+					else if(buffer[i + 2] != '.' && buffer[i+1] != '.'){															/*speed greater than 100 km/h*/
 					GPSOutputVTG.speed2.unit = ((uint8_t)GPS_str_to_int(buffer[i], buffer[i+1], buffer[i+2]));
 					GPSOutputVTG.speed2.decimal = GPS_speed_decimal_conversion(buffer[i+ 4],buffer[i+ 5],buffer[i+ 6])*1000;
 					i = i +6; 
 					}
-					else{			// < 10km/h
+					else{			/*speed under 10 km/h*/
 						GPSOutputVTG.speed2.unit = buffer[i] - 48;
 						GPSOutputVTG.speed2.decimal = GPS_speed_decimal_conversion(buffer[i+ 2],buffer[i+ 3],buffer[i+ 4])*1000;
-						i = i+4;	//salto l'ultima cifra decimale
+						i = i+4;	
 					}
 					break;
 				
@@ -446,7 +444,7 @@ NMEA_VTG_type_t GPS_VTG_conversion(uint8_t * buffer){
 					break;
 				
 				default: 
-					buffer[i] = '*';	//forzo la teminazione della conversione
+					buffer[i] = '*';	
 			}
 		}
 		
@@ -460,12 +458,12 @@ NMEA_VTG_type_t GPS_VTG_conversion(uint8_t * buffer){
 uint16_t GPS_str_to_int(uint8_t centinaia, uint8_t decine, uint8_t unita){
 	
 	if (centinaia != 0){
-		centinaia = centinaia -48;		/*converto da carattere a numero*/
+		centinaia = centinaia -48;		/*conversion from char to uint*/
 		decine  = decine -48;
 		unita = unita - 48;
 		return centinaia*100 + decine*10 + unita;
 	}
-	else if (centinaia == 0){		//non si presenta mai il caso decine = 0 per come uso io questa funzione
+	else if (centinaia == 0){		/*as I use this function, it will never happen decine = 0*/
 		decine  = decine -48;
 		unita = unita - 48;
 		return decine*10 + unita;
@@ -474,51 +472,65 @@ uint16_t GPS_str_to_int(uint8_t centinaia, uint8_t decine, uint8_t unita){
 
 double GPS_str_to_float(uint8_t decimi, uint8_t  centesimi){
 	
-	return ((double)((decimi -48)*10 + (centesimi -48)))/100;
+	decimi = decimi -48;			/*conversion from char to uint*/
+	centesimi = centesimi -48;
+	
+	return ((double)((decimi)*10 + (centesimi)))/100;
 	
 }
 
 double GPS_minuts_conversion(uint8_t decimi, uint8_t  centesimi, uint8_t millesimi, uint8_t decimillesimi, uint8_t centimillesimi){
-	double value = 	((double) (decimi -48))/10	+ ((double) (centesimi))/100 + ((double) (millesimi))/1000 	+ ((double) (decimillesimi))/10000 + ((double) (centimillesimi))/100000;
-	return value;
+	decimi = decimi -48;							/*cenversion from char to uint*/
+	centesimi = centesimi -48;
+	millesimi = millesimi -48;
+	decimillesimi = decimillesimi -48;
+	centimillesimi = centimillesimi -48;
+	
+	return	((double)decimi)/10+((double)centesimi)/100+((double)millesimi)/1000+((double)decimillesimi)/10000 + ((double)centimillesimi)/100000;
+	
 }
 
 double GPS_speed_decimal_conversion(uint8_t decimi, uint8_t  centesimi, uint8_t millesimi){
-	return ((double) (decimi - 48))/10 + ((double) (centesimi - 48))/100 + ((double) (millesimi))/1000 ;
+	
+	decimi = decimi -48;				/*conversion from char to uint*/
+	centesimi = centesimi -48;
+	millesimi = millesimi -48;
+	
+	return ((double)decimi)/10 + ((double)centesimi)/100 + ((double)millesimi)/1000 ;
 }
 
 
-void GPS_get_time(uint8_t *hour, uint8_t *minut, uint8_t *second){  /*da testare*/
-	if (GPS_is_fix_valid() == FIX_VALID){									//se i dati che ho a disposizione non hanno problemi, riempo le variabili passate con dati coerenti
+void GPS_get_time(uint8_t *hour, uint8_t *minut, uint8_t *second){  
+	if (GPS_is_fix_valid() == FIX_VALID){									/*if data converted are valid, stores them in variables given*/
 		*hour = NMEA_output.NMEA_RMC_type.UTC_time.hours;
 		*minut = NMEA_output.NMEA_RMC_type.UTC_time.minutes;
 		*second = NMEA_output.NMEA_RMC_type.UTC_time.seconds;
 	}
-	else{																		//altrimenti gli riempo con dati non coerenti
+	else{																									/*otherwise it stores uncoherent data*/
 		*hour = 255;
 		*minut = 255;
 		*second = 255;
 	}
 }
 
-uint8_t GPS_is_fix_valid(void){		//ritorna FIX_VALID  se i dati presenti nella variabile globale sono efettivamente coerenti, altrimenti ritorna FIX_NOT_VALID
-	if (NMEA_output.NMEA_RMC_type.RMC_status == 'A'){
+uint8_t GPS_is_fix_valid(void){		
+	if (NMEA_output.NMEA_RMC_type.RMC_status == 'A'){  /*returns FIX_VALID if stored data are valid*/
 			return FIX_VALID;
 	}
 	return FIX_NOT_VALID;		/*da testare*/
 }
 
 
-void GPS_get_date(uint8_t *day, uint8_t *month, uint8_t *year){		//se i dati sono validi, restituisco effettivamente i dati giusti
-	if (GPS_is_fix_valid() == FIX_VALID){
+void GPS_get_date(uint8_t *day, uint8_t *month, uint8_t *year){		
+	if (GPS_is_fix_valid() == FIX_VALID){												/*if stored data are coherent, stores them in given variables*/
 		*day = NMEA_output.NMEA_RMC_type.UTC_date.day;
 		*month = NMEA_output.NMEA_RMC_type.UTC_date.month;
 		*year = NMEA_output.NMEA_RMC_type.UTC_date.year;
 	}
-	else{														//altrimenti gli riempo con dati non coerenti
+	else{																												/*otherwise it stores uncoherent data*/
 		*day = 255;
 		*month = 255;
-		*year = 255;		/*da testare*/
+		*year = 255;		
 	}
 }
 
@@ -540,18 +552,7 @@ void GPS_init(void){
 	HAL_Delay(50);																																									/*necessario?*/
 	HAL_UART_Transmit(&huart2,GPSFixRate10Hz, GPS_SET_FIX_RATE_10HZ_LENGTH, 100); 									/*SETTO IL FIX RATE A 10HZ*/
 }
-
-void GPS_clear_buffer(uint8_t *buffer, uint8_t length){
-
-	uint8_t i = 0;
-	while((buffer[i] != '\r') && (buffer[i] != '\n') && (i < GPS_MAX_LENGTH)){
-		buffer[i] = 0;
-		i++;
-	}
-
-}
-
-void GPS_USART2_UART_Init_38400(void){			//reinizializza la uart2 a 38400
+void GPS_USART2_UART_Init_38400(void){			/*initialize uart at 38400 baudrate*/
 	
 	huart2.Instance = USART2;
   huart2.Init.BaudRate = 38400;
@@ -571,7 +572,7 @@ void GPS_USART2_UART_Init_38400(void){			//reinizializza la uart2 a 38400
   }
 	
 }
-void GPS_USART2_UART_Init_57600(void){			//reinizializza la uart2 a 57600
+void GPS_USART2_UART_Init_57600(void){			/*initialize uart at 57600 baudrate*/
 	
 	huart2.Instance = USART2;
   huart2.Init.BaudRate = 57600;

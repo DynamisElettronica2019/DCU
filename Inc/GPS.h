@@ -3,13 +3,11 @@
 
 #include "stdint.h"
 
+/*messsage used to change gps setting*/
 
-// NMEA command defines
+#define STOP_GLL  							"$PUBX,40,GLL,0,0,0,0,0,0*5C\r\n"  
+#define STOP_GLL_LENGTH					(uint8_t) 29
 
-#define STOP_GLL  										"$PUBX,40,GLL,0,0,0,0,0,0*5C\r\n"  
-#define STOP_GLL_LENGTH								(uint8_t) 29
-
-/*scrivere start e stop di tutti gli altri messagi*/
 
 #define STOP_GGA								"$PUBX,40,GGA,0,0,0,0,0,0*5A\r\n" 
 #define STOP_GGA_LENGTH					(uint8_t) 29
@@ -35,16 +33,16 @@
 #define START_GSV								"$PUBX,40,GSV,0,1,0,0,0,0*58\r\n"
 #define START_GSV_LENGTH				(uint8_t)29
 
-#define SET_BAUDRATE_57600			"$PUBX,41,1,0007,0003,57600,0*2B\r\n" /*blocca il programma*/
-#define SET_BAUDRATE_57600_LENGTH			(uint8_t) 33
+#define SET_BAUDRATE_57600							"$PUBX,41,1,0007,0003,57600,0*2B\r\n" /*blocca il programma*/
+#define SET_BAUDRATE_57600_LENGTH				(uint8_t) 33
 
-#define SET_BAUDRATE_38400			"$PUBX,41,1,0007,0003,38400,0*20\r\n" 
-#define SET_BAUDRATE_38400_LENGTH			(uint8_t) 33
+#define SET_BAUDRATE_38400							"$PUBX,41,1,0007,0003,38400,0*20\r\n" 
+#define SET_BAUDRATE_38400_LENGTH				(uint8_t) 33
 
-#define GPS_SET_FIX_RATE_10HZ_LENGTH (uint8_t)14
+#define GPS_SET_FIX_RATE_10HZ_LENGTH 		(uint8_t)14
 
 
-// Message type defines.
+/*message type defines*/
 #define MESSAGE_TYPE_GGA								((uint8_t)1)
 #define MESSAGE_TYPE_GLL								((uint8_t)2)
 #define MESSAGE_TYPE_GSA 								((uint8_t)3)
@@ -53,32 +51,15 @@
 #define MESSAGE_TYPE_VTG								((uint8_t)6)
 #define MESSAGE_TYPE_UNKNOWN						((uint8_t) 255)
 
-#define GGA_MAX_LENGTH 									((uint8_t)38) //che poi in realtà mi interesa anche la lunghezza minima
-#define GLL_MAX_LENGTH									((uint8_t)24)
-#define GSA_MAX_LENGTH									((uint8_t)39)
-#define GSV_MAX_LENGTH  								((uint8_t)36)
-#define RMC_MAX_LENGTH									
-#define VTG_MAX_LENGTH
-
-#define GPS_MIN_LENGTH									((uint8_t)13)	//il messaggio piu breve che possa ricevere è un GLL senza dati con sole ,
-																											//questo numero è molto importante per la velocità del programma, maggiore questa dimensione minore il polling per cercare la fine del messaggio
-#define GPS_MAX_LENGTH									((uint8_t)83) //ricontrollare questo valore
-
-// latitude_direction values.
-#define DIRECTION_NORTH 									((char)'N')
-#define DIRECTION_SOUTH 									((char)'S')
-
-// longitude_direction values.
-#define DIRECTION_EAST 									((char)'E')
-#define DIRECTION_WEST 									((char)'W')
-
-//#define FALSE 													((uint8_t)1)
-//#define TRUE														((uint8_t)0)
+/*maximum length of nmea message being outputted*/
+#define GPS_MAX_LENGTH									((uint8_t)83)
 
 #define FIX_VALID												((uint8_t)0)
 #define FIX_NOT_VALID										((uint8_t)1)
 
 
+
+/*user typedef*/
 typedef struct UTC_time
 {
 	uint8_t hours;
@@ -123,7 +104,7 @@ typedef struct speed
 }speed_t;
 
 
-/*$GPGGA,065500.00,2447.65027,N,12100.78318,E,2,12,0.91,69.8,M,16.3,M,,*65*/
+
 typedef struct NMEA_GGA_type
 {
 	UTC_time_t UTC_time;
@@ -144,7 +125,7 @@ typedef struct NMEA_GGA_type
 }NMEA_GGA_type_t;
 
 
-/*$GPGLL,2447.65027,N,12100.78318,E,065500.00,A,D*6E*/
+
 typedef struct NMEA_GLL_type
 {
 	latitude_t latitude;
@@ -188,17 +169,6 @@ typedef struct NMEA_RMC_type
 	uint8_t checksum;
 }NMEA_RMC_type_t;
 
-typedef struct NMEA_GSV_type
-{
-	char message_number;
-	uint8_t number_of_satellites_in_view;
-	uint8_t satellite_ID;
-	uint8_t satellite_elevation_degrees;
-	uint16_t satellite_azimuth;
-	uint8_t SNR;
-	
-}NMEA_GSV_type_t;
-
 typedef struct NMEA_VTG_type
 {
 	Course_over_ground_t Course_over_ground;
@@ -218,16 +188,16 @@ typedef struct NMEA_output_types
 	NMEA_GLL_type_t NMEA_GLL_type;
 	NMEA_VTG_type_t NMEA_VTG_type;
 	NMEA_RMC_type_t NMEA_RMC_type;
-	NMEA_GSV_type_t NMEA_GSV_type;
 	NMEA_GSA_type_t NMEA_GSA_type;
 }NMEA_output_types_t;
 
 
 
-//user functions
+
+/*user functions*/
 
 void GPS_Rx_Cplt(void);
-void GPS_parse_data(uint8_t * buffer);
+void GPS_data_conversion(uint8_t * buffer);
 uint8_t GPS_get_messageID(uint8_t * buffer);
 void GPS_init(void);
 void GPS_get_time(uint8_t *hour, uint8_t *minut, uint8_t *second);
@@ -237,20 +207,17 @@ uint8_t GPS_is_fix_valid(void);
 NMEA_GGA_type_t GPS_GGA_conversion(uint8_t * buffer);
 NMEA_GLL_type_t GPS_GLL_conversion(uint8_t * buffer);
 NMEA_GSA_type_t GPS_GSA_conversion(uint8_t * buffer); 
-NMEA_GSV_type_t GPS_GSV_conversion(uint8_t * buffer);
 NMEA_RMC_type_t GPS_RMC_conversion(uint8_t * buffer);
 NMEA_VTG_type_t GPS_VTG_conversion(uint8_t * buffer);
 
-uint16_t GPS_str_to_int(uint8_t centinaia, uint8_t decine, uint8_t unita);
-double    GPS_str_to_float(uint8_t decimi, uint8_t centesimi);
-void GPS_clear_buffer(uint8_t *buffer, uint8_t length);
+
 void GPS_USART2_UART_Init_38400(void);
 void GPS_USART2_UART_Init_57600(void);
 
 double GPS_minuts_conversion(uint8_t decimi, uint8_t  centesimi, uint8_t millesimi, uint8_t decimillesimi, uint8_t centimillesimi);
 double GPS_speed_decimal_conversion(uint8_t decimi, uint8_t  centesimi, uint8_t millesimi);
-double GPS_speed_decimal_conversion(uint8_t decimi, uint8_t  centesimi, uint8_t millesimi);
-
+uint16_t GPS_str_to_int(uint8_t centinaia, uint8_t decine, uint8_t unita);
+double   GPS_str_to_float(uint8_t decimi, uint8_t centesimi);
 
 #endif
 

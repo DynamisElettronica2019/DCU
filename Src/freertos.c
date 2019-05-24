@@ -57,7 +57,6 @@ extern uint8_t GPSFirstChar;
 /* USER CODE END Variables */
 osThreadId aliveHandle;
 osThreadId GPSUnboxingTaskHandle;
-osThreadId GPSSettingTaskHandle;
 osSemaphoreId GPSUnboxSemHandle;
 osSemaphoreId GPSSetSemHandle;
 
@@ -68,7 +67,6 @@ osSemaphoreId GPSSetSemHandle;
 
 void aliveTask(void const * argument);
 void GPSUnboxingFunc(void const * argument);
-void GPSSettingFunc(void const * argument);
 
 extern void MX_FATFS_Init(void);
 extern void MX_USB_HOST_Init(void);
@@ -119,10 +117,6 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(GPSUnboxingTask, GPSUnboxingFunc, osPriorityNormal, 0, 512);
   GPSUnboxingTaskHandle = osThreadCreate(osThread(GPSUnboxingTask), NULL);
 
-  /* definition and creation of GPSSettingTask */
-  osThreadDef(GPSSettingTask, GPSSettingFunc, osPriorityNormal, 0, 512);
-  GPSSettingTaskHandle = osThreadCreate(osThread(GPSSettingTask), NULL);
-
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -145,10 +139,15 @@ void aliveTask(void const * argument)
   MX_USB_HOST_Init();
 
   /* USER CODE BEGIN aliveTask */
+		extern uint8_t hour, minuts, second, day, month, year, fix;
+
   /* Infinite loop */
   for(;;)
   {
 		HAL_GPIO_TogglePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin);
+		fix = GPS_is_fix_valid();
+		GPS_get_date(&day, &month, &year);
+		GPS_get_time(&hour, &minuts, &second);
     osDelay(250);
   }
   /* USER CODE END aliveTask */
@@ -164,36 +163,14 @@ void aliveTask(void const * argument)
 void GPSUnboxingFunc(void const * argument)
 {
   /* USER CODE BEGIN GPSUnboxingFunc */
-		HAL_UART_Receive_DMA(&huart2,&GPSFirstChar, 1);
+		HAL_UART_Receive_DMA(&huart2,&GPSFirstChar, 1);		/*first time program is executed, uart reception is started by this command*/
   /* Infinite loop */
   for(;;)
   {
-		xSemaphoreTake(GPSUnboxSemHandle, portMAX_DELAY);
-		GPS_parse_data(GPSRawBuffer);
+		xSemaphoreTake(GPSUnboxSemHandle, portMAX_DELAY);	/*if buffer has been filled entirly*/
+		GPS_data_conversion(GPSRawBuffer);											/*call conversion function*/
   }
   /* USER CODE END GPSUnboxingFunc */
-}
-
-/* USER CODE BEGIN Header_GPSSettingFunc */
-/**
-* @brief Function implementing the GPSSettingTask thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_GPSSettingFunc */
-void GPSSettingFunc(void const * argument)
-{
-  /* USER CODE BEGIN GPSSettingFunc */
-  /* Infinite loop */
-  for(;;)
-  {
-		xSemaphoreTake(GPSSetSemHandle, portMAX_DELAY);	//se non è stato dato semaforo, la task va in blocked state
-		
-		/*switch che implementa il setting del GPS*/
-		
-    osDelay(1);
-  }
-  /* USER CODE END GPSSettingFunc */
 }
 
 /* Private application code --------------------------------------------------*/
