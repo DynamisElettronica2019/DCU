@@ -41,7 +41,9 @@ UINT bytesWritten;
 FRESULT openResult;
 FRESULT closeResult;
 BaseType_t USB_xHigherPriorityTaskWoken = pdFALSE;
-extern uint8_t DATA_BlockBuffer [BUFFER_BLOCK_LEN];
+extern uint8_t DATA_BlockWriteIndex;
+extern uint8_t DATA_BlockReadIndex;
+extern uint8_t DATA_BlockBuffer [BUFFER_BLOCKS_NUMBER][BUFFER_BLOCK_LEN];
 extern osSemaphoreId saveUsbSemaphoreHandle;
 extern osMessageQId usbEventQueueHandle;
 extern osMessageQId startAcquisitionEventHandle;
@@ -97,8 +99,9 @@ extern inline void USB_SavingTask(void)
 	if(DATA_GetAcquisitionState() == STATE_ON) {
 		timestamp = getDataTimestamp();			/* Get data timestamp private variable */
 		incrementDataTimestamp();						/* Incremente data timestamp private variable by 10 ms */
-		uint32ToString(timestamp, &DATA_BlockBuffer[TIMESTAMP_CSV_INDEX], 7);
-		f_write(&USBHFile, DATA_BlockBuffer, BUFFER_BLOCK_LEN, (void *)&bytesWritten);
+		uint32ToString(timestamp, &DATA_BlockBuffer[DATA_BlockWriteIndex][TIMESTAMP_CSV_INDEX], 7);
+		DATA_SwapDataPackePointers();
+		f_write(&USBHFile, DATA_BlockBuffer[DATA_BlockReadIndex], BUFFER_BLOCK_LEN, (void *)&bytesWritten);
 		/* Put here the code to manage errors */
 	}
 }

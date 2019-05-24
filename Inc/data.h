@@ -10,6 +10,7 @@
 #define NUMBER_OF_ACQUIRED_CHANNELS														(uint8_t)91
 #define BUFFER_STATE_LEN 																			(uint8_t)9
 #define BUFFER_BLOCK_LEN 																			(uint16_t)582
+#define BUFFER_BLOCKS_NUMBER																	(uint8_t)2
 
 /* Packet position in CAN data packet counter vector */
 #define EFI_HALL_WHEEL_ID_COUNTER_INDEX 											(uint8_t)0
@@ -290,6 +291,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData);
 extern inline void startAcquisitionStateMachine(uint8_t startAcquisitionEvent);
 extern inline void DATA_CheckEfiIsAlive(void);
 extern inline void DATA_AutomaticStartAcquisitionManager(void);
+extern inline void DATA_SwapDataPackePointers(void);
 extern inline void DATA_SetEfiIsAlive(void);
 extern inline void DATA_ResetEfiIsAlive(void);
 extern inline uint8_t DATA_GetUsbReadyState(void);

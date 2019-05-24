@@ -55,13 +55,13 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-extern uint8_t DATA_BlockBuffer [BUFFER_BLOCK_LEN];
+extern uint8_t DATA_BlockBuffer [BUFFER_BLOCKS_NUMBER][BUFFER_BLOCK_LEN];
 extern uint8_t DATA_StateBuffer [BUFFER_STATE_LEN];
 extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
-extern BaseType_t xGPSHigherPriorityTaskWoken;
 extern uint8_t GPSRawBuffer [GPS_MAX_LENGTH];
 extern uint8_t GPSFirstChar;
-
+extern uint8_t DATA_BlockReadIndex;
+extern BaseType_t xGPSHigherPriorityTaskWoken;
 /* USER CODE END Variables */
 osThreadId aliveHandle;
 osThreadId adc1ConversionHandle;
@@ -498,16 +498,16 @@ void SendDataFunc(void const * argument)
 {
   /* USER CODE BEGIN SendDataFunc */
 	uint8_t usartLockFlag;
-	uint8_t secondTxModeFlag = SECOND_HALF_TX_FLAG; 																			/* Setting flag identifier to put later into the queue */
+	uint8_t secondTxModeFlag = SECOND_HALF_TX_FLAG; 						/* Setting flag identifier to put later into the queue */
 	uint8_t strToSend[BUFFER_BLOCK_LEN/2+10];
 	uint16_t strToSenLen;
   
 	/* Infinite loop */
   for(;;) {
-    xSemaphoreTake(sendDataSemaphoreHandle, portMAX_DELAY); 														/* Unlock when timer callback is called */
+    xSemaphoreTake(sendDataSemaphoreHandle, portMAX_DELAY); 	/* Unlock when timer callback is called */
 
 		if(DATA_GetTelemetryState() == STATE_ON) {
-      strToSenLen = encodeString(DATA_BlockBuffer, strToSend, HALF_DATA_INDEX, DATA_MESSAGE_ID);              /* Get the encoded string */
+      strToSenLen = encodeString(DATA_BlockBuffer[DATA_BlockReadIndex], strToSend, HALF_DATA_INDEX, DATA_MESSAGE_ID);  /* Get the encoded string */
       xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);              /* Lock if DMA is in use */
       xQueueSend(Usart1TxModeQueueHandle, (void *)&secondTxModeFlag, (TickType_t)0);    /* Add flag to queue */
       HAL_UART_Transmit_DMA(&huart1, strToSend, strToSenLen - 1);                       /* Transmit first half of data message */
@@ -583,7 +583,7 @@ void SendFollowingDataFunc(void const * argument)
   for(;;) {
     xSemaphoreTake(sendFollowingDataSemaphoreHandle, portMAX_DELAY); 											    /* Unlock when first part tx is completed, unlocked from tx complete callback */
 		xQueueSend(Usart1TxModeQueueHandle, (void *)&normalTxModeFlag, (TickType_t)0); 				    /* Add flag to queue */
-		strToSenLen = encodeString(DATA_BlockBuffer + HALF_DATA_INDEX, strToSend, HALF_DATA_INDEX, SECOND_DATA_MESSAGE_ID); 		/* Get the encoded string */
+		strToSenLen = encodeString(DATA_BlockBuffer[DATA_BlockReadIndex] + HALF_DATA_INDEX, strToSend, HALF_DATA_INDEX, SECOND_DATA_MESSAGE_ID); 		/* Get the encoded string */
 		HAL_UART_Transmit_DMA(&huart1, strToSend + 1, strToSenLen); 														  /* Transmit first half of data message */
   }
   /* USER CODE END SendFollowingDataFunc */
