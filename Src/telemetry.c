@@ -7,7 +7,6 @@ uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
 uint8_t setRtcReceivedBuffer [BUFFER_RTC_SET_LEN];
 uint8_t commandAckMsg [COMMAND_ACK_MSG_LEN] = ACK_MSG;
 uint8_t tempBuffer [50];
-uint8_t errorLetter = CMD_READ_ERR_ID;
 uint8_t usartLockFlag;
 _Bool setRtcComing = 0;
 BaseType_t UART1_StateSendxHigherPriorityTaskWoken = pdFALSE;
@@ -34,6 +33,7 @@ extern inline void TELEMETRY_DataSendTimCallback(void)
 extern inline void TELEMETRY_Receive(void)
 {
 	uint8_t startAquisitionEvent = ACQUISITION_IDLE_REQUEST;
+	uint8_t errorLetter = CMD_READ_ERR_ID;
 	BaseType_t startAcquisition_xHigherPriorityTaskWoken = pdFALSE;
 	
 	if(setRtcComing == 1) { 																															/* If you are waiting for set rtc parameter */

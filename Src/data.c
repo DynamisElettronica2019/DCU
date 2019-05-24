@@ -1,5 +1,6 @@
 #include "data.h"
 #include "usb_host.h"
+#include "telemetry.h"
 #include "id_can.h"
 #include "data_conversion.h"
 #include "string_utility.h"
@@ -23,11 +24,13 @@ BaseType_t EFI_IsAlive_xHigherPriorityTaskWoken = pdFALSE;
 extern uint32_t CAN_ReceivedPacketsCounter [NUMBER_OF_ACQUIRED_CHANNELS];
 extern osSemaphoreId automaticStartAcquisitionSemaphoreHandle;
 extern osMessageQId startAcquisitionEventHandle;
+extern osMessageQId ErrorQueueHandle;
 
 
 extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 {	
 	uint8_t startAquisitionEvent = ACQUISITION_IDLE_REQUEST;
+	uint8_t errorLetter = CAN_ID_NOT_FOUND;
 	BaseType_t startAcquisition_xHigherPriorityTaskWoken = pdFALSE;
 	
 	/* Get the four 16 bit data from the 8 bit CAN messages */
@@ -240,6 +243,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			decimalToString((int16_t)data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][IMU1_HEADING_CSV_INDEX], 3, 2);			/* Taking into account the division by 100 */
 			decimalToString((int16_t)data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][IMU1_ACC_Z_CSV_INDEX], 3, 2);				/* Taking into account the division by 100 */
 			decimalToString((int16_t)data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][IMU1_GYR_Y_CSV_INDEX], 3, 1);				/* Taking into account the division by 10 */
+			intToStringUnsigned((uint16_t)data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][IMU1_SENSORS_CALIBRATION_CSV_INDEX], 3);
 			break;
 		
 		case IMU2_DATA_1_ID:
@@ -255,6 +259,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			decimalToString((int16_t)data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][IMU2_HEADING_CSV_INDEX], 3, 2);			/* Taking into account the division by 100 */
 			decimalToString((int16_t)data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][IMU2_ACC_Z_CSV_INDEX], 3, 2);				/* Taking into account the division by 100 */
 			decimalToString((int16_t)data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][IMU2_GYR_Y_CSV_INDEX], 3,1);				/* Taking into account the division by 10 */
+			intToStringUnsigned((uint16_t)data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][IMU2_SENSORS_CALIBRATION_CSV_INDEX], 3);
 			break;
 		
 		/* Debug ID range */
@@ -298,11 +303,17 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			intToStringUnsigned(data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][FAN_SX_CURRENT_CSV_INDEX], 5);
 			intToStringUnsigned(data4, &DATA_BlockBuffer[DATA_BlockWriteIndex][FAN_DX_CURRENT_CSV_INDEX], 5);
 			break;
+		
+		default:
+			xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
+			break;
 	}
 }
 
 extern inline void startAcquisitionStateMachine(uint8_t startAcquisitionEvent)
 {
+	uint8_t errorLetter = STATE_MACHINE_ERROR;
+	
 	/* NOTE: Events are coded using chars NOT numbers! */
 	switch(acquisitionState) {
 		case ACQUISITION_OFF_STATE:
@@ -398,10 +409,15 @@ extern inline void startAcquisitionStateMachine(uint8_t startAcquisitionEvent)
 		
 		default:
 			/* Should be never go there, but anyway reset the state machine */
-			/* Put here error managing code */
+			xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
 			acquisitionState = ACQUISITION_OFF_STATE;
 			break;
 	}
+}
+
+extern inline void DATA_ResetAcquisitionStateMachine(void)
+{
+	acquisitionState = ACQUISITION_OFF_STATE;
 }
 
 extern inline void DATA_CheckEfiIsAlive(void)

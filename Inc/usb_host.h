@@ -52,6 +52,7 @@ extern inline void USB_EventHandler(uint8_t USB_Event);
 extern inline void USB_OvercurrentEvent(void);
 static inline void USB_CloseAndOpenFile(void);
 static inline void USB_WriteLen(uint8_t *buffer);
+static inline void USB_GetFilename(void);
 /* USER CODE END INCLUDE */
 
 /** @addtogroup USBH_OTG_DRIVER

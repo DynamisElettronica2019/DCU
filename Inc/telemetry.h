@@ -25,6 +25,23 @@
 #define GIVE_RTC_DATE_ID            	(uint8_t)'H'
 #define SET_RTC_ID                  	(uint8_t)'R'
 #define CMD_READ_ERR_ID          			(uint8_t)'B'
+
+#define CAN_ID_NOT_FOUND							(uint8_t)'A'
+#define STATE_MACHINE_ERROR						(uint8_t)'B'
+#define USB_INIT_ERROR								(uint8_t)'D'
+#define USB_OPEN_FILE_ERROR						(uint8_t)'E'
+#define USB_CLOSE_FILE_ERROR					(uint8_t)'F'
+#define USB_WRITE_FILE_ERROR					(uint8_t)'G'
+#define USB_MOUNT_ERROR								(uint8_t)'H'
+#define USB_UNMOUNT_ERROR							(uint8_t)'I'
+#define USB_FATFS_INIT_ERROR					(uint8_t)'L'
+#define USB_FATFS_DEINIT_ERROR				(uint8_t)'M'
+#define USB_FATFS_LINK_ERROR					(uint8_t)'N'
+#define USB_FATFS_UNLINK_ERROR				(uint8_t)'O'
+#define USB_OVERCURRENT_ERROR					(uint8_t)'P'
+#define CAN_START_ERROR 							(uint8_t)'Q'
+#define CAN_FILTER_CONFIG_ERROR 			(uint8_t)'R'
+#define CAN_TX_ERROR 									(uint8_t)'S'
 #define UART1_CLEAR_FLAG							(uint8_t)'C'
 
 /* Encoding defines */

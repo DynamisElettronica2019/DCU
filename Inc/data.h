@@ -294,6 +294,7 @@
 
 extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData);
 extern inline void startAcquisitionStateMachine(uint8_t startAcquisitionEvent);
+extern inline void DATA_ResetAcquisitionStateMachine(void);
 extern inline void DATA_CheckEfiIsAlive(void);
 extern inline void DATA_AutomaticStartAcquisitionManager(void);
 extern inline void DATA_SwapDataPackePointers(void);

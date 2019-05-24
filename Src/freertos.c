@@ -722,14 +722,20 @@ void sendDebugDataTask(void const * argument)
 void CAN_SendManagerTask(void const * argument)
 {
   /* USER CODE BEGIN CAN_SendManagerTask */
-	CAN_TxPacket_t CAN_TxPacket;
+	uint8_t errorLetter = CAN_TX_ERROR;
 	uint32_t packetMailbox;
+	CAN_TxPacket_t CAN_TxPacket;
+	HAL_StatusTypeDef CAN_SendError;
 	
   /* Infinite loop */
   for(;;) {
-		xSemaphoreTake(CAN_SendDataSemaphoreCounterHandle, portMAX_DELAY);																		/* Decrement CAN counting semapgore */
-		xQueueReceive(CAN_SendDataQueueHandle, &CAN_TxPacket, portMAX_DELAY);																	/* Wait to transmit a packet */
-		HAL_CAN_AddTxMessage(&hcan1, &CAN_TxPacket.packetHeader, CAN_TxPacket.packetData, &packetMailbox);		/* Send CAN message */
+		xSemaphoreTake(CAN_SendDataSemaphoreCounterHandle, portMAX_DELAY);				/* Decrement CAN counting semapgore */
+		xQueueReceive(CAN_SendDataQueueHandle, &CAN_TxPacket, portMAX_DELAY);			/* Wait to transmit a packet */
+		CAN_SendError = HAL_CAN_AddTxMessage(&hcan1, &CAN_TxPacket.packetHeader, CAN_TxPacket.packetData, &packetMailbox);		/* Send CAN message */
+		
+		if(CAN_SendError != HAL_OK) {
+			xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 			/* Add error to queue */
+		}
   }
   /* USER CODE END CAN_SendManagerTask */
 }

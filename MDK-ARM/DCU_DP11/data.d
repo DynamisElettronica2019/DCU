@@ -59,6 +59,7 @@ dcu_dp11\data.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h
 dcu_dp11\data.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 dcu_dp11\data.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 dcu_dp11\data.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
+dcu_dp11\data.o: ../Inc/telemetry.h
 dcu_dp11\data.o: ../Inc/id_can.h
 dcu_dp11\data.o: ../Inc/data_conversion.h
 dcu_dp11\data.o: ../Inc/string_utility.h

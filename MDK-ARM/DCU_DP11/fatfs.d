@@ -80,3 +80,6 @@ dcu_dp11\fatfs.o: ../Middlewares/Third_Party/FatFs/src/ff_gen_drv.h
 dcu_dp11\fatfs.o: ../Middlewares/Third_Party/FatFs/src/diskio.h
 dcu_dp11\fatfs.o: ../Inc/sd_diskio.h
 dcu_dp11\fatfs.o: ../Inc/usbh_diskio.h
+dcu_dp11\fatfs.o: ../Inc/telemetry.h
+dcu_dp11\fatfs.o: ../Inc/data.h
+dcu_dp11\fatfs.o: ../Inc/can.h
