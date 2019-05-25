@@ -37,19 +37,14 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-uint8_t fatFsResult;
 uint32_t len;
 UINT bytesWritten;
-FRESULT mountResult;
 FRESULT openResult;
 FRESULT closeResult;
 FRESULT writeResult;
-USBH_StatusTypeDef USB_InitError;
 BaseType_t USB_xHigherPriorityTaskWoken = pdFALSE;
 TCHAR USB_Filename[25];
-extern uint8_t DATA_BlockWriteIndex;
-extern uint8_t DATA_BlockReadIndex;
-extern uint8_t DATA_BlockBuffer [BUFFER_BLOCKS_NUMBER][BUFFER_BLOCK_LEN];
+extern uint8_t DATA_BlockBuffer [BUFFER_BLOCK_LEN];
 extern osSemaphoreId saveUsbSemaphoreHandle;
 extern osMessageQId usbEventQueueHandle;
 extern osMessageQId ErrorQueueHandle;
@@ -82,17 +77,12 @@ static void USBH_UserProcess(USBH_HandleTypeDef *phost, uint8_t id);
 /* USER CODE BEGIN 1 */
 
 extern void USB_InitStart(void)
-{
-	uint8_t errorLetter = USB_INIT_ERROR;
-	
-	USB_InitError = USBH_Init(&hUsbHostHS, USBH_UserProcess, HOST_HS);			/* Init Host Library */
-	USB_InitError = USBH_RegisterClass(&hUsbHostHS, USBH_MSC_CLASS); 				/* Add Supported Class */
-	USB_InitError = USBH_Start(&hUsbHostHS);																/* Start Host Process */
-	MX_DriverVbusHS(VBUS_ENABLE);																						/* Enable USB Vbus power */
-	
-	if(USB_InitError != USBH_OK) {
-		xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
-	}
+{	
+	USBH_Init(&hUsbHostHS, USBH_UserProcess, HOST_HS);		/* Init Host Library */
+	USBH_RegisterClass(&hUsbHostHS, USBH_MSC_CLASS); 			/* Add Supported Class */
+	USBH_Start(&hUsbHostHS);															/* Start Host Process */
+	MX_DriverVbusHS(VBUS_ENABLE);													/* Enable USB Vbus power */
+	HAL_Delay(100);																				/* Delay for Vbus stabilization */
 }
 
 extern inline void USB_SavingRequest(void)
@@ -109,17 +99,17 @@ extern inline void USB_SavingTask(void)
 	if(DATA_GetAcquisitionState() == STATE_ON) {
 		timestamp = getDataTimestamp();			/* Get data timestamp private variable */
 		incrementDataTimestamp();						/* Incremente data timestamp private variable by 10 ms */
-		uint32ToString(timestamp, &DATA_BlockBuffer[DATA_BlockWriteIndex][TIMESTAMP_CSV_INDEX], 7);
-		DATA_SwapDataPackePointers();
-		writeResult = f_write(&USBHFile, DATA_BlockBuffer[DATA_BlockReadIndex], BUFFER_BLOCK_LEN, (void *)&bytesWritten);
+		uint32ToString(timestamp, &DATA_BlockBuffer[TIMESTAMP_CSV_INDEX], 7);
+		//DATA_SwapDataPackePointers();
+		writeResult = f_write(&USBHFile, DATA_BlockBuffer, BUFFER_BLOCK_LEN, (void *)&bytesWritten);
 		
 		if(writeResult != FR_OK) {
 			xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
 		}
 		
-		if((timestamp % CLOSE_FILE_INTERVAL) == 0) {
+		/*if((timestamp % CLOSE_FILE_INTERVAL) == 0) {
 			USB_CloseAndOpenFile();
-		}
+		}*/
 	}
 }
 
@@ -163,43 +153,23 @@ extern inline void USB_CloseFile(void)
 }
 
 extern inline void USB_EventHandler(uint8_t USB_Event)
-{
-	uint8_t errorLetter;
-	
+{	
 	switch(USB_Event) {
 		case DISCONNECTION_EVENT:
-			mountResult = f_mount(NULL, (TCHAR const *)"", 1);
+			f_mount(NULL, (TCHAR const *)"", 1);
 			DATA_ResetAcquisitionStateMachine();
-			fatFsResult = FATFS_UnLinkDriver(USBHPath);
-			DATA_ResetUsbReadyState();																		/* Update of the status packet */
-			
-			if(mountResult != FR_OK) {
-				errorLetter = USB_UNMOUNT_ERROR;
-				xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
-			}
-			
-			if(fatFsResult != 0) {
-				errorLetter = USB_FATFS_UNLINK_ERROR;
-				xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
-			}
+			FATFS_UnLinkDriver(USBHPath);
+			DATA_ResetUsbReadyState();			/* Update of the status packet */
 			break;
 
-		case CONNECTED_EVENT:
-			fatFsResult = FATFS_LinkDriver(&USBH_Driver, USBHPath);
-		
-			if(fatFsResult == 0) {
-				mountResult = f_mount(&USBHFatFS, (TCHAR const *)USBHPath, 1);
-				DATA_SetUsbReadyState();					/* Update of the status packet */
-				
-				if(mountResult != FR_OK) {
-					errorLetter = USB_MOUNT_ERROR;
-					xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
+			case CONNECTED_EVENT:
+				if(FATFS_LinkDriver(&USBH_Driver, USBHPath) == 0) {
+					f_mount(&USBHFatFS, (TCHAR const *)USBHPath, 1);
+					DATA_SetUsbReadyState();		/* Update of the status packet */
 				}
-			}
-			else {
-				errorLetter = USB_FATFS_LINK_ERROR;
-				xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
-			}
+				break;
+			
+		default:
 			break;
 	}
 }
@@ -302,8 +272,7 @@ static void USBH_UserProcess  (USBH_HandleTypeDef *phost, uint8_t id)
 	uint8_t temp;
 	BaseType_t usbEvent = pdFALSE;
 	
-	switch(id)
-  {
+	switch(id) {
     case HOST_USER_SELECT_CONFIGURATION:
       break;
       

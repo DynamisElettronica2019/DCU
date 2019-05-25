@@ -23,6 +23,7 @@
 #include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */     
 #include "gpio.h"
@@ -54,12 +55,11 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-extern uint8_t DATA_BlockBuffer [BUFFER_BLOCKS_NUMBER][BUFFER_BLOCK_LEN];
+extern uint8_t DATA_BlockBuffer [BUFFER_BLOCK_LEN];
 extern uint8_t DATA_StateBuffer [BUFFER_STATE_LEN];
 extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
 extern uint8_t GPSRawBuffer [GPS_MAX_LENGTH];
 extern uint8_t GPSFirstChar;
-extern uint8_t DATA_BlockReadIndex;
 extern BaseType_t xGPSHigherPriorityTaskWoken;
 /* USER CODE END Variables */
 osThreadId aliveHandle;
@@ -203,10 +203,10 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
   xSemaphoreTake(saveUsbSemaphoreHandle, portMAX_DELAY);                			/* Start with the task locked */
-  xSemaphoreTake(sendStateSemaphoreHandle, portMAX_DELAY);              			/* Start with the task locked */
-  xSemaphoreTake(sendDataSemaphoreHandle, portMAX_DELAY);               			/* Start with the task locked */
-  xSemaphoreTake(receiveCommandSemaphoreHandle, portMAX_DELAY);         			/* Start with the task locked */
-  xSemaphoreTake(sendFollowingDataSemaphoreHandle, portMAX_DELAY);      			/* Start with the task locked */
+	xSemaphoreTake(sendStateSemaphoreHandle, portMAX_DELAY); 										/* Start with the task locked */
+	xSemaphoreTake(sendDataSemaphoreHandle, portMAX_DELAY); 										/* Start with the task locked */
+	xSemaphoreTake(receiveCommandSemaphoreHandle, portMAX_DELAY); 							/* Start with the task locked */
+	xSemaphoreTake(sendFollowingDataSemaphoreHandle, portMAX_DELAY); 						/* Start with the task locked */
   xSemaphoreTake(adc1SemaphoreHandle, portMAX_DELAY);                  			 	/* Start with the task locked */
   xSemaphoreTake(adc2SemaphoreHandle, portMAX_DELAY);                   			/* Start with the task locked */
   xSemaphoreTake(autogearSemaphoreHandle, portMAX_DELAY);               			/* Start with the task locked */
@@ -259,7 +259,6 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
-	
 	/* Start the transmit process */
 	uint8_t usart1LockFlag = UART1_CLEAR_FLAG;
 	xQueueSend(Usart1LockQueueHandle, &usart1LockFlag, 0);
@@ -279,31 +278,31 @@ void MX_FREERTOS_Init(void) {
   adc2ConversionHandle = osThreadCreate(osThread(adc2Conversion), NULL);
 
   /* definition and creation of digitalAuxManager */
-  osThreadDef(digitalAuxManager, digitalAuxManagerTask, osPriorityIdle, 0, 128);
+  osThreadDef(digitalAuxManager, digitalAuxManagerTask, osPriorityLow, 0, 128);
   digitalAuxManagerHandle = osThreadCreate(osThread(digitalAuxManager), NULL);
 
   /* definition and creation of autogearManager */
-  osThreadDef(autogearManager, autogearManagerTask, osPriorityLow, 0, 128);
+  osThreadDef(autogearManager, autogearManagerTask, osPriorityBelowNormal, 0, 128);
   autogearManagerHandle = osThreadCreate(osThread(autogearManager), NULL);
 
   /* definition and creation of USB_OvercurrentManager */
-  osThreadDef(USB_OvercurrentManager, USB_OvercurrentManagerTask, osPriorityLow, 0, 128);
+  osThreadDef(USB_OvercurrentManager, USB_OvercurrentManagerTask, osPriorityBelowNormal, 0, 128);
   USB_OvercurrentManagerHandle = osThreadCreate(osThread(USB_OvercurrentManager), NULL);
 
   /* definition and creation of SendStates */
-  osThreadDef(SendStates, SendStatesFunc, osPriorityBelowNormal, 0, 128);
+  osThreadDef(SendStates, SendStatesFunc, osPriorityNormal, 0, 128);
   SendStatesHandle = osThreadCreate(osThread(SendStates), NULL);
 
   /* definition and creation of SendData */
-  osThreadDef(SendData, SendDataFunc, osPriorityBelowNormal, 0, 128);
+  osThreadDef(SendData, SendDataFunc, osPriorityNormal, 0, 128);
   SendDataHandle = osThreadCreate(osThread(SendData), NULL);
 
   /* definition and creation of ReceiveTelem */
-  osThreadDef(ReceiveTelem, ReceiveTelemFunc, osPriorityNormal, 0, 128);
+  osThreadDef(ReceiveTelem, ReceiveTelemFunc, osPriorityAboveNormal, 0, 128);
   ReceiveTelemHandle = osThreadCreate(osThread(ReceiveTelem), NULL);
 
   /* definition and creation of SendError */
-  osThreadDef(SendError, SendErrorFunc, osPriorityNormal, 0, 128);
+  osThreadDef(SendError, SendErrorFunc, osPriorityAboveNormal, 0, 128);
   SendErrorHandle = osThreadCreate(osThread(SendError), NULL);
 
   /* definition and creation of SendFollowingData */
@@ -311,7 +310,7 @@ void MX_FREERTOS_Init(void) {
   SendFollowingDataHandle = osThreadCreate(osThread(SendFollowingData), NULL);
 
   /* definition and creation of saveUsb */
-  osThreadDef(saveUsb, saveUsbTask, osPriorityRealtime, 0, 512);
+  osThreadDef(saveUsb, saveUsbTask, osPriorityHigh, 0, 512);
   saveUsbHandle = osThreadCreate(osThread(saveUsb), NULL);
 
   /* definition and creation of usbManager */
@@ -319,7 +318,7 @@ void MX_FREERTOS_Init(void) {
   usbManagerHandle = osThreadCreate(osThread(usbManager), NULL);
 
   /* definition and creation of startAcquisitionStateMachine */
-  osThreadDef(startAcquisitionStateMachine, startAcquisitionStateMachineTask, osPriorityNormal, 0, 128);
+  osThreadDef(startAcquisitionStateMachine, startAcquisitionStateMachineTask, osPriorityBelowNormal, 0, 128);
   startAcquisitionStateMachineHandle = osThreadCreate(osThread(startAcquisitionStateMachine), NULL);
 
   /* definition and creation of canFifo0Unpack */
@@ -331,7 +330,7 @@ void MX_FREERTOS_Init(void) {
   canFifo1UnpackHandle = osThreadCreate(osThread(canFifo1Unpack), NULL);
 
   /* definition and creation of sendDebugData */
-  osThreadDef(sendDebugData, sendDebugDataTask, osPriorityBelowNormal, 0, 512);
+  osThreadDef(sendDebugData, sendDebugDataTask, osPriorityLow, 0, 512);
   sendDebugDataHandle = osThreadCreate(osThread(sendDebugData), NULL);
 
   /* definition and creation of CAN_SendManager */
@@ -407,8 +406,8 @@ void adc2ConversionTask(void const * argument)
   for(;;) {
 		xSemaphoreTake(adc2SemaphoreHandle, portMAX_DELAY); 		/* Unlock when DMA callback is called */
 		ADC_ReadDataAux();																			/* Aux channels parsing and conversion */
-  /* USER CODE END adc2ConversionTask */
 	}
+  /* USER CODE END adc2ConversionTask */
 }
 
 /* USER CODE BEGIN Header_digitalAuxManagerTask */
@@ -486,14 +485,14 @@ void SendStatesFunc(void const * argument)
   uint8_t usartLockFlag;
 	uint8_t strToSend[BUFFER_STATE_LEN/2+5];
 	uint16_t strToSenLen;
-
+	
 	/* Infinite loop */
   for(;;) {
-    xSemaphoreTake(sendStateSemaphoreHandle, portMAX_DELAY); 		 /* Unlock when timer callback is called */
+    xSemaphoreTake(sendStateSemaphoreHandle, portMAX_DELAY); 														/* Unlock when timer callback is called */
 		strToSenLen = encodeString(DATA_StateBuffer, strToSend, BUFFER_STATE_LEN, STATE_MESSAGE_ID); 		/* Get the encoded string */		
-		xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);							/* Lock if DMA is in use */
-		xQueueSend(Usart1TxModeQueueHandle, (void *)&normalTxModeFlag, (TickType_t)0); 		/* Add flag to queue */
-		HAL_UART_Transmit_DMA(&huart1, strToSend, strToSenLen); 													/* Transmit state message */
+		xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);								/* Lock if DMA is in use */
+		xQueueSend(Usart1TxModeQueueHandle, (void *)&normalTxModeFlag, (TickType_t)0); 			/* Add flag to queue */
+		HAL_UART_Transmit_DMA(&huart1, strToSend, strToSenLen); 														/* Transmit state message */
   }
   /* USER CODE END SendStatesFunc */
 }
@@ -518,7 +517,7 @@ void SendDataFunc(void const * argument)
     xSemaphoreTake(sendDataSemaphoreHandle, portMAX_DELAY); 	/* Unlock when timer callback is called */
 
 		if(DATA_GetTelemetryState() == STATE_ON) {
-      strToSenLen = encodeString(DATA_BlockBuffer[DATA_BlockReadIndex], strToSend, HALF_DATA_INDEX, DATA_MESSAGE_ID);  /* Get the encoded string */
+      strToSenLen = encodeString(DATA_BlockBuffer, strToSend, HALF_DATA_INDEX, DATA_MESSAGE_ID);  /* Get the encoded string */
       xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);              /* Lock if DMA is in use */
       xQueueSend(Usart1TxModeQueueHandle, (void *)&secondTxModeFlag, (TickType_t)0);    /* Add flag to queue */
       HAL_UART_Transmit_DMA(&huart1, strToSend, strToSenLen - 1);                       /* Transmit first half of data message */
@@ -594,7 +593,7 @@ void SendFollowingDataFunc(void const * argument)
   for(;;) {
     xSemaphoreTake(sendFollowingDataSemaphoreHandle, portMAX_DELAY); 											    /* Unlock when first part tx is completed, unlocked from tx complete callback */
 		xQueueSend(Usart1TxModeQueueHandle, (void *)&normalTxModeFlag, (TickType_t)0); 				    /* Add flag to queue */
-		strToSenLen = encodeString(DATA_BlockBuffer[DATA_BlockReadIndex] + HALF_DATA_INDEX, strToSend, HALF_DATA_INDEX, SECOND_DATA_MESSAGE_ID); 		/* Get the encoded string */
+		strToSenLen = encodeString(DATA_BlockBuffer + HALF_DATA_INDEX, strToSend, HALF_DATA_INDEX, SECOND_DATA_MESSAGE_ID); 		/* Get the encoded string */
 		HAL_UART_Transmit_DMA(&huart1, strToSend + 1, strToSenLen); 														  /* Transmit first half of data message */
   }
   /* USER CODE END SendFollowingDataFunc */
@@ -628,12 +627,12 @@ void saveUsbTask(void const * argument)
 void usbManagerTask(void const * argument)
 {
   /* USER CODE BEGIN usbManageTask */
-	uint8_t USB_Event;
+	osEvent USB_Event;
 	
   /* Infinite loop */
-  for(;;) {	
-		xQueueReceive(usbEventQueueHandle, &USB_Event, portMAX_DELAY);		/* Wait for and event */
-		USB_EventHandler(USB_Event); 																			/* Manage USB insertion evets */
+  for(;;) {
+		USB_Event = osMessageGet(usbEventQueueHandle, osWaitForever); 		/* Wait for and event */
+		USB_EventHandler(USB_Event.value.v); 															/* Manage USB insertion evets */
 	}
   /* USER CODE END usbManageTask */
 }

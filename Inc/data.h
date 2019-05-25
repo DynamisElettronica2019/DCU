@@ -9,7 +9,6 @@
 #define NUMBER_OF_RECEIVED_PACKETS														(uint8_t)25
 #define NUMBER_OF_ACQUIRED_CHANNELS														(uint8_t)91
 #define BUFFER_STATE_LEN 																			(uint8_t)9
-#define BUFFER_BLOCKS_NUMBER																	(uint8_t)2
 #define BUFFER_BLOCK_LEN 																			(uint16_t)582
 #define CLOSE_FILE_INTERVAL																		(uint32_t)60000
 
@@ -116,13 +115,13 @@
 #define IMU2_ACC_Z_CSV_INDEX 																	(uint16_t)381
 #define IMU2_GYR_Y_CSV_INDEX 																	(uint16_t)389
 #define IMU2_SENSORS_CALIBRATION_CSV_INDEX 										(uint16_t)396
-#define IMU_DCU_ACC_X_CSV_INDEX 															(uint16_t)400
-#define IMU_DCU_ACC_Y_CSV_INDEX 															(uint16_t)408
-#define IMU_DCU_GYR_X_CSV_INDEX 															(uint16_t)416
-#define IMU_DCU_GYR_Z_CSV_INDEX 															(uint16_t)423
-#define IMU_DCU_HEADING_CSV_INDEX 														(uint16_t)431
-#define IMU_DCU_ACC_Z_CSV_INDEX 															(uint16_t)439
-#define IMU_DCU_GYR_Y_CSV_INDEX 															(uint16_t)446
+#define IMU_DCU_HEADING_CSV_INDEX 														(uint16_t)400
+#define IMU_DCU_ACC_Z_CSV_INDEX 															(uint16_t)408
+#define IMU_DCU_GYR_Y_CSV_INDEX 															(uint16_t)416
+#define IMU_DCU_ACC_X_CSV_INDEX 															(uint16_t)423
+#define IMU_DCU_ACC_Y_CSV_INDEX 															(uint16_t)431
+#define IMU_DCU_GYR_X_CSV_INDEX 															(uint16_t)439
+#define IMU_DCU_GYR_Z_CSV_INDEX 															(uint16_t)446
 #define IMU_DCU_SENSORS_CALIBRATION_CSV_INDEX									(uint16_t)353
 #define GPS_LATITUDE_MINUTES_CSV_INDEX												(uint16_t)457	
 #define GPS_LONGITUDE_MINUTES_CSV_INDEX 											(uint16_t)463
@@ -299,7 +298,7 @@ extern inline void startAcquisitionStateMachine(uint8_t startAcquisitionEvent);
 extern inline void DATA_ResetAcquisitionStateMachine(void);
 extern inline void DATA_CheckEfiIsAlive(void);
 extern inline void DATA_AutomaticStartAcquisitionManager(void);
-extern inline void DATA_SwapDataPackePointers(void);
+//extern inline void DATA_SwapDataPackePointers(void);
 extern inline void DATA_SetEfiIsAlive(void);
 extern inline void DATA_ResetEfiIsAlive(void);
 extern inline uint8_t DATA_GetUsbReadyState(void);

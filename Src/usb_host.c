@@ -44,9 +44,7 @@ FRESULT closeResult;
 FRESULT writeResult;
 BaseType_t USB_xHigherPriorityTaskWoken = pdFALSE;
 TCHAR USB_Filename[25];
-extern uint8_t DATA_BlockWriteIndex;
-extern uint8_t DATA_BlockReadIndex;
-extern uint8_t DATA_BlockBuffer [BUFFER_BLOCKS_NUMBER][BUFFER_BLOCK_LEN];
+extern uint8_t DATA_BlockBuffer [BUFFER_BLOCK_LEN];
 extern osSemaphoreId saveUsbSemaphoreHandle;
 extern osMessageQId usbEventQueueHandle;
 extern osMessageQId ErrorQueueHandle;
@@ -97,23 +95,21 @@ extern inline void USB_SavingTask(void)
 {
 	uint32_t timestamp;
 	uint8_t errorLetter = USB_WRITE_FILE_ERROR;
-	uint8_t *pSavingBupper;
 	
 	if(DATA_GetAcquisitionState() == STATE_ON) {
 		timestamp = getDataTimestamp();			/* Get data timestamp private variable */
 		incrementDataTimestamp();						/* Incremente data timestamp private variable by 10 ms */
-		uint32ToString(timestamp, &DATA_BlockBuffer[DATA_BlockWriteIndex][TIMESTAMP_CSV_INDEX], 7);
+		uint32ToString(timestamp, &DATA_BlockBuffer[TIMESTAMP_CSV_INDEX], 7);
 		//DATA_SwapDataPackePointers();
-		pSavingBupper = DATA_BlockBuffer[0];
-		writeResult = f_write(&USBHFile, pSavingBupper, BUFFER_BLOCK_LEN, (void *)&bytesWritten);
+		writeResult = f_write(&USBHFile, DATA_BlockBuffer, BUFFER_BLOCK_LEN, (void *)&bytesWritten);
 		
 		if(writeResult != FR_OK) {
 			xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
 		}
 		
-		if((timestamp % CLOSE_FILE_INTERVAL) == 0) {
+		/*if((timestamp % CLOSE_FILE_INTERVAL) == 0) {
 			USB_CloseAndOpenFile();
-		}
+		}*/
 	}
 }
 
@@ -163,15 +159,15 @@ extern inline void USB_EventHandler(uint8_t USB_Event)
 			f_mount(NULL, (TCHAR const *)"", 1);
 			DATA_ResetAcquisitionStateMachine();
 			FATFS_UnLinkDriver(USBHPath);
-			DATA_ResetUsbReadyState();		/* Update of the status packet */
+			DATA_ResetUsbReadyState();			/* Update of the status packet */
 			break;
 
-		case CONNECTED_EVENT:
-			if(FATFS_LinkDriver(&USBH_Driver, USBHPath) == 0) {
-				f_mount(&USBHFatFS, (TCHAR const *)USBHPath, 1);
-				DATA_SetUsbReadyState();		/* Update of the status packet */
-			}
-			break;
+			case CONNECTED_EVENT:
+				if(FATFS_LinkDriver(&USBH_Driver, USBHPath) == 0) {
+					f_mount(&USBHFatFS, (TCHAR const *)USBHPath, 1);
+					DATA_SetUsbReadyState();		/* Update of the status packet */
+				}
+				break;
 			
 		default:
 			break;
@@ -276,8 +272,7 @@ static void USBH_UserProcess  (USBH_HandleTypeDef *phost, uint8_t id)
 	uint8_t temp;
 	BaseType_t usbEvent = pdFALSE;
 	
-	switch(id)
-  {
+	switch(id) {
     case HOST_USER_SELECT_CONFIGURATION:
       break;
       

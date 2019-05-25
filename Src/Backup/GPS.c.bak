@@ -1,4 +1,6 @@
 #include "GPS.h"
+#include "cmsis_os.h"
+#include "usart.h"
 
 /*global variables*/
 NMEA_output_types_t NMEA_output;	/*global variable where conversion result are stored*/
@@ -452,18 +454,21 @@ NMEA_VTG_type_t GPS_VTG_conversion(uint8_t * buffer){
 
 
 uint16_t GPS_str_to_int(uint8_t centinaia, uint8_t decine, uint8_t unita){
+	uint16_t result;
 	
 	if (centinaia != 0){
 		centinaia = centinaia -48;		/*conversion from char to uint*/
 		decine  = decine -48;
 		unita = unita - 48;
-		return centinaia*100 + decine*10 + unita;
+		result = centinaia*100 + decine*10 + unita;
 	}
 	else if (centinaia == 0){		/*as I use this function, it will never happen decine = 0*/
 		decine  = decine -48;
 		unita = unita - 48;
-		return decine*10 + unita;
+		result = decine*10 + unita;
 	}
+	
+	return result;
 }
 
 double GPS_str_to_float(uint8_t decimi, uint8_t  centesimi){
