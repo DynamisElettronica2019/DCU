@@ -21,7 +21,8 @@
 #include "rtc.h"
 
 /* USER CODE BEGIN 0 */
-
+RTC_DateTypeDef date;
+RTC_TimeTypeDef time;
 /* USER CODE END 0 */
 
 RTC_HandleTypeDef hrtc;
@@ -120,56 +121,44 @@ extern void rtcPeripheralInit(void)
 	if (HAL_RTC_Init(&hrtc) != HAL_OK) {
     Error_Handler();
   }
-	
-	return;
 }
 
 extern void resetRtcTime(void)
-{
-	RTC_TimeTypeDef time;
-	
+{	
 	time.Hours = 0x00;
   time.Minutes = 0x00;
   time.Seconds = 0x00;
   time.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
   time.StoreOperation = RTC_STOREOPERATION_RESET;
   HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BCD);
-	return;
 }
 
 extern void resetRtcDate(void)
 {
-	RTC_DateTypeDef date;
-	
 	date.WeekDay = RTC_WEEKDAY_MONDAY;
   date.Month = RTC_MONTH_JANUARY;
   date.Date = 0x01;
   date.Year = 0x00;
   HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BCD);
-	return;
 }
 
-extern inline void setRtcTime(uint8_t hours, uint8_t minutes, uint8_t seconds) {
-	RTC_TimeTypeDef time;
-	
+extern inline void setRtcTime(uint8_t hours, uint8_t minutes, uint8_t seconds)
+{
 	time.Hours = hours;
   time.Minutes = minutes;
   time.Seconds = seconds;
   time.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
   time.StoreOperation = RTC_STOREOPERATION_RESET;
   HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BIN);
-	return;
 }
 
-extern inline void setRtcDate(uint8_t weekday, uint8_t month, uint8_t dateNumber, uint8_t year) {
-	RTC_DateTypeDef date;
-	
+extern inline void setRtcDate(uint8_t weekday, uint8_t month, uint8_t dateNumber, uint8_t year)
+{
 	date.WeekDay = weekday;
   date.Month = month;
   date.Date = dateNumber;
   date.Year = year;
   HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
-	return;
 }
 
 /* USER CODE END 1 */

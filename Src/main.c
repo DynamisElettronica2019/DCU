@@ -250,7 +250,7 @@ static inline void USER_SystemInit(void)
 	resetRtcDate();																																/* RTC date values reset */
 	resetActualTimestamp();	
 	
-	GPS_init();																																		/* GPS init */
+	GPS_Init();																																		/* GPS init */
 	USB_InitStart();																															/* USB peripheral config and start */
 	MX_FATFS_Init();																															/* FatFS init */
 	DATA_SetTelemetryState();																											/* Start telemetry as default */

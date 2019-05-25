@@ -28,7 +28,7 @@ uint8_t GPS_FixRate10Hz[] = {0xB5, 0x62, 	/*header*/
 														 0x7A, 0x12};	/*CK_A, CK_B*/
 
 
-extern void GPS_init(void)
+extern void GPS_Init(void)
 {
 	HAL_UART_Transmit(&huart2, (uint8_t *)STOP_GLL, STOP_GLL_LENGTH, 100);											 	/* Not send GLL messages */
 	HAL_UART_Transmit(&huart2, (uint8_t *)STOP_GSV, STOP_GSV_LENGTH, 100);												/* Not send GSV messages */
@@ -325,7 +325,7 @@ static inline void GPS_RMC_conversion(uint8_t * buffer)
 					GPS_OutputRMC.latitude.minutes = (uint8_t)GPS_StrToInt(0, buffer[i+2], buffer[i+3]);
 					GPS_OutputRMC.latitude.decimal_minutes = GPS_minuts_conversion(buffer[i+5], buffer[i+6], buffer[i+7], buffer[i+8], buffer[i+9]) * 60;
 					GPS_LatitudeTemp = (GPS_OutputRMC.latitude.decimal_minutes / 60.0f) * 100000.0f;
-					intToStringUnsigned(((uint16_t)GPS_LatitudeTemp), &DATA_BlockBuffer[GPS_LATITUDE_MINUTES_CSV_INDEX], 5);
+					intToStringUnsigned((uint16_t)GPS_LatitudeTemp, &DATA_BlockBuffer[GPS_LATITUDE_MINUTES_CSV_INDEX], 5);
 					i = i + 9;
 					break;
 				
@@ -438,6 +438,7 @@ static inline void GPS_VTG_conversion(uint8_t * buffer)
 						i = i+4;	
 					}
 					
+					/* Saving into CSV data buffer */
 					intToStringUnsigned((uint16_t)GPS_OutputVTG.speed2.unit, &DATA_BlockBuffer[GPS_SPEED_CSV_INDEX], 3);
 					DATA_BlockBuffer[GPS_SPEED_CSV_INDEX + 3] = '.';
 					intToStringUnsigned((uint16_t)GPS_OutputVTG.speed2.decimal, &DATA_BlockBuffer[GPS_SPEED_CSV_INDEX + 4], 3);

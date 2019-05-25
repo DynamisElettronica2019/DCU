@@ -196,27 +196,21 @@ static inline void USB_CloseAndOpenFile(void)
 {
 	uint8_t errorLetter;
 	
-	closeResult = f_close(&USBHFile);
-	
-	if(closeResult == FR_OK) {
-		HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
-		DATA_ResetAcquisitionState();		/* Update of the status packet */
-	}
-	else {
+	if(f_close(&USBHFile) != FR_OK) {
+		DATA_ResetAcquisitionState();			/* Update of the status packet */
+			DATA_PacketReset();							/* Reset the data saving buffer */
 		errorLetter = USB_CLOSE_FILE_ERROR;
+		HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
 		xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
-	}
-		
-	openResult = f_open(&USBHFile, USB_Filename, FA_CREATE_ALWAYS | FA_WRITE);
-	
-	if(openResult == FR_OK) {
-		HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
-		DATA_SetAcquisitionState();		/* Update of the status packet */
 	}
 	else {
-		DATA_PacketReset();		/* Reset the data saving buffer */
-		errorLetter = USB_OPEN_FILE_ERROR;
-		xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
+		if(f_open(&USBHFile, USB_Filename, FA_CREATE_ALWAYS | FA_WRITE) != FR_OK) {
+			DATA_ResetAcquisitionState();		/* Update of the status packet */
+			DATA_PacketReset();							/* Reset the data saving buffer */
+			errorLetter = USB_OPEN_FILE_ERROR;
+			HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
+			xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
+		}
 	}
 }
 
