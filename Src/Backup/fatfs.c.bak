@@ -28,7 +28,10 @@ FATFS USBHFatFS;    /* File system object for USBH logical drive */
 FIL USBHFile;       /* File object for USBH */
 
 /* USER CODE BEGIN Variables */
+#include "telemetry.h"
 
+extern FRESULT mountResult;
+extern osMessageQId ErrorQueueHandle;
 /* USER CODE END Variables */    
 
 void MX_FATFS_Init(void) 
@@ -39,9 +42,20 @@ void MX_FATFS_Init(void)
   retUSBH = FATFS_LinkDriver(&USBH_Driver, USBHPath);
 
   /* USER CODE BEGIN Init */
+	uint8_t errorLetter;
+	
   /* additional user code for init */
 	if(retUSBH == FR_OK) {
-		f_mount(&USBHFatFS, (TCHAR const *)USBHPath, 1);
+		mountResult = f_mount(&USBHFatFS, (TCHAR const *)USBHPath, 1);
+		
+		if(mountResult != FR_OK) {
+			errorLetter = USB_MOUNT_ERROR;
+			xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
+		}
+	}
+	else {
+		errorLetter = USB_FATFS_LINK_ERROR;
+		xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 			/* Add error to queue */
 	}
   /* USER CODE END Init */
 }

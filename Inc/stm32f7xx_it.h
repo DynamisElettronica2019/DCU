@@ -58,7 +58,6 @@ void ADC_IRQHandler(void);
 void CAN1_TX_IRQHandler(void);
 void CAN1_RX0_IRQHandler(void);
 void CAN1_RX1_IRQHandler(void);
-void CAN1_SCE_IRQHandler(void);
 void EXTI9_5_IRQHandler(void);
 void TIM1_UP_TIM10_IRQHandler(void);
 void USART1_IRQHandler(void);
@@ -78,7 +77,6 @@ void OTG_HS_EP1_OUT_IRQHandler(void);
 void OTG_HS_EP1_IN_IRQHandler(void);
 void OTG_HS_IRQHandler(void);
 void I2C4_EV_IRQHandler(void);
-void I2C4_ER_IRQHandler(void);
 /* USER CODE BEGIN EFP */
 
 /* USER CODE END EFP */

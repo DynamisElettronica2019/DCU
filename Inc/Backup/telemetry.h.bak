@@ -17,6 +17,7 @@
 #define NORMAL_MODE_TX_FLAG         	(uint8_t)'N'
 #define MESSAGE_INIT_ID             	(uint8_t)'['
 #define MESSAGE_END_ID              	(uint8_t)']'
+#define SET_TELEM_ID              		(uint8_t)'A'
 #define RESET_TELEM_ID              	(uint8_t)'M'
 #define START_ACQ_ID                	(uint8_t)'B'
 #define STOP_ACQ_ID                 	(uint8_t)'V'
@@ -24,6 +25,23 @@
 #define GIVE_RTC_DATE_ID            	(uint8_t)'H'
 #define SET_RTC_ID                  	(uint8_t)'R'
 #define CMD_READ_ERR_ID          			(uint8_t)'B'
+
+#define CAN_ID_NOT_FOUND							(uint8_t)'A'
+#define STATE_MACHINE_ERROR						(uint8_t)'B'
+#define USB_INIT_ERROR								(uint8_t)'D'
+#define USB_OPEN_FILE_ERROR						(uint8_t)'E'
+#define USB_CLOSE_FILE_ERROR					(uint8_t)'F'
+#define USB_WRITE_FILE_ERROR					(uint8_t)'G'
+#define USB_MOUNT_ERROR								(uint8_t)'H'
+#define USB_UNMOUNT_ERROR							(uint8_t)'I'
+#define USB_FATFS_INIT_ERROR					(uint8_t)'L'
+#define USB_FATFS_DEINIT_ERROR				(uint8_t)'M'
+#define USB_FATFS_LINK_ERROR					(uint8_t)'N'
+#define USB_FATFS_UNLINK_ERROR				(uint8_t)'O'
+#define USB_OVERCURRENT_ERROR					(uint8_t)'P'
+#define CAN_START_ERROR 							(uint8_t)'Q'
+#define CAN_FILTER_CONFIG_ERROR 			(uint8_t)'R'
+#define CAN_TX_ERROR 									(uint8_t)'S'
 #define UART1_CLEAR_FLAG							(uint8_t)'C'
 
 /* Encoding defines */
@@ -42,12 +60,18 @@
 #define ENCODE_OPEN_SQUARE           0x5
 #define ENCODE_CLOSE_SQUARE          0x6
 #define ENCODE_BLANK                 0x7
+#define ENCODE_MINUS                 0xE
+
+#define DATA_MESSAGE_ID							 (uint8_t)'1'
+#define SECOND_DATA_MESSAGE_ID			 (uint8_t)'N'
+#define STATE_MESSAGE_ID						 (uint8_t)'2'
+#define COMMAND_MESSAGE_ID					 (uint8_t)'3'
+#define ERROR_MESSAGE_ID						 (uint8_t)'4'
 
 extern inline void TELEMETRY_StateSendTimCallback(void);
 extern inline void TELEMETRY_DataSendTimCallback(void);
 extern inline void TELEMETRY_Receive(void);
-
-uint16_t encodeString(uint8_t* string, uint8_t* outString, uint16_t len);
+uint16_t encodeString(uint8_t* string, uint8_t* outString, uint16_t len, uint8_t messageType);
 uint8_t setUpperNibble(uint8_t editByte, uint8_t nibble);
 uint8_t setLowerNibble(uint8_t editByte, uint8_t nibble);
 

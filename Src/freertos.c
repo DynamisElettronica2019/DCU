@@ -203,6 +203,18 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
+  xSemaphoreTake(saveUsbSemaphoreHandle, portMAX_DELAY);                			/* Start with the task locked */
+  xSemaphoreTake(sendStateSemaphoreHandle, portMAX_DELAY);              			/* Start with the task locked */
+  xSemaphoreTake(sendDataSemaphoreHandle, portMAX_DELAY);               			/* Start with the task locked */
+  xSemaphoreTake(receiveCommandSemaphoreHandle, portMAX_DELAY);         			/* Start with the task locked */
+  xSemaphoreTake(sendFollowingDataSemaphoreHandle, portMAX_DELAY);      			/* Start with the task locked */
+  xSemaphoreTake(adc1SemaphoreHandle, portMAX_DELAY);                  			 	/* Start with the task locked */
+  xSemaphoreTake(adc2SemaphoreHandle, portMAX_DELAY);                   			/* Start with the task locked */
+  xSemaphoreTake(autogearSemaphoreHandle, portMAX_DELAY);               			/* Start with the task locked */
+  xSemaphoreTake(USB_OvercurrentSemaphoreHandle, portMAX_DELAY);        			/* Start with the task locked */
+  xSemaphoreTake(CAN_SendSemaphoreHandle, portMAX_DELAY);               			/* Start with the task locked */
+  xSemaphoreTake(automaticStartAcquisitionSemaphoreHandle, portMAX_DELAY);    /* Start with the task locked */
+  xSemaphoreTake(GPSUnboxSemHandle, portMAX_DELAY);                           /* Start with the task locked */
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -248,6 +260,7 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+	
 	/* Start the transmit process */
 	uint8_t usart1LockFlag = UART1_CLEAR_FLAG;
 	xQueueSend(Usart1LockQueueHandle, &usart1LockFlag, 0);
@@ -267,7 +280,7 @@ void MX_FREERTOS_Init(void) {
   adc2ConversionHandle = osThreadCreate(osThread(adc2Conversion), NULL);
 
   /* definition and creation of digitalAuxManager */
-  osThreadDef(digitalAuxManager, digitalAuxManagerTask, osPriorityLow, 0, 128);
+  osThreadDef(digitalAuxManager, digitalAuxManagerTask, osPriorityIdle, 0, 128);
   digitalAuxManagerHandle = osThreadCreate(osThread(digitalAuxManager), NULL);
 
   /* definition and creation of autogearManager */
@@ -295,7 +308,7 @@ void MX_FREERTOS_Init(void) {
   SendErrorHandle = osThreadCreate(osThread(SendError), NULL);
 
   /* definition and creation of SendFollowingData */
-  osThreadDef(SendFollowingData, SendFollowingDataFunc, osPriorityBelowNormal, 0, 128);
+  osThreadDef(SendFollowingData, SendFollowingDataFunc, osPriorityNormal, 0, 128);
   SendFollowingDataHandle = osThreadCreate(osThread(SendFollowingData), NULL);
 
   /* definition and creation of saveUsb */
@@ -303,11 +316,11 @@ void MX_FREERTOS_Init(void) {
   saveUsbHandle = osThreadCreate(osThread(saveUsb), NULL);
 
   /* definition and creation of usbManager */
-  osThreadDef(usbManager, usbManagerTask, osPriorityNormal, 0, 512);
+  osThreadDef(usbManager, usbManagerTask, osPriorityLow, 0, 512);
   usbManagerHandle = osThreadCreate(osThread(usbManager), NULL);
 
   /* definition and creation of startAcquisitionStateMachine */
-  osThreadDef(startAcquisitionStateMachine, startAcquisitionStateMachineTask, osPriorityBelowNormal, 0, 128);
+  osThreadDef(startAcquisitionStateMachine, startAcquisitionStateMachineTask, osPriorityNormal, 0, 128);
   startAcquisitionStateMachineHandle = osThreadCreate(osThread(startAcquisitionStateMachine), NULL);
 
   /* definition and creation of canFifo0Unpack */
@@ -349,6 +362,7 @@ void MX_FREERTOS_Init(void) {
 /* USER CODE END Header_aliveTask */
 void aliveTask(void const * argument)
 {
+
   /* USER CODE BEGIN aliveTask */
 	HAL_TIM_Base_Start_IT(&htim5); 				/* Start timer 5 in interrupt mode */
 	HAL_TIM_Base_Start_IT(&htim6); 				/* Start timer 6 in interrupt mode */
@@ -376,7 +390,6 @@ void adc1ConversionTask(void const * argument)
   for(;;) {
 		xSemaphoreTake(adc1SemaphoreHandle, portMAX_DELAY); 		/* Unlock when DMA callback is called */
 		ADC_ReadDataDebug();																		/* Debug channels parsing and conversion */
-		/* Put here the CSV buffer conversion functions */
   }
   /* USER CODE END adc1ConversionTask */
 }
@@ -395,9 +408,8 @@ void adc2ConversionTask(void const * argument)
   for(;;) {
 		xSemaphoreTake(adc2SemaphoreHandle, portMAX_DELAY); 		/* Unlock when DMA callback is called */
 		ADC_ReadDataAux();																			/* Aux channels parsing and conversion */
-		/* Put here the CSV buffer conversion functions */
-  }
   /* USER CODE END adc2ConversionTask */
+	}
 }
 
 /* USER CODE BEGIN Header_digitalAuxManagerTask */
@@ -471,18 +483,18 @@ void USB_OvercurrentManagerTask(void const * argument)
 void SendStatesFunc(void const * argument)
 {
   /* USER CODE BEGIN SendStatesFunc */
-	uint8_t normalTxModeFlag = NORMAL_MODE_TX_FLAG;  																			/* Setting flag identifier to put later into the queue */
+	uint8_t normalTxModeFlag = NORMAL_MODE_TX_FLAG;  		/* Setting flag identifier to put later into the queue */
   uint8_t usartLockFlag;
 	uint8_t strToSend[BUFFER_STATE_LEN/2+5];
 	uint16_t strToSenLen;
 
 	/* Infinite loop */
   for(;;) {
-    xSemaphoreTake(sendStateSemaphoreHandle, portMAX_DELAY); 														/* Unlock when timer callback is called */
-		strToSenLen = encodeString(DATA_StateBuffer, strToSend, BUFFER_STATE_LEN, STATE_MESSAGE_ID); 					/* Get the encoded string */		
-		xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);								/* Lock if DMA is in use */
-		xQueueSend(Usart1TxModeQueueHandle, (void *)&normalTxModeFlag, (TickType_t)0); 			/* Add flag to queue */
-		HAL_UART_Transmit_DMA(&huart1, strToSend, strToSenLen); 														/* Transmit state message */
+    xSemaphoreTake(sendStateSemaphoreHandle, portMAX_DELAY); 		 /* Unlock when timer callback is called */
+		strToSenLen = encodeString(DATA_StateBuffer, strToSend, BUFFER_STATE_LEN, STATE_MESSAGE_ID); 		/* Get the encoded string */		
+		xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);							/* Lock if DMA is in use */
+		xQueueSend(Usart1TxModeQueueHandle, (void *)&normalTxModeFlag, (TickType_t)0); 		/* Add flag to queue */
+		HAL_UART_Transmit_DMA(&huart1, strToSend, strToSenLen); 													/* Transmit state message */
   }
   /* USER CODE END SendStatesFunc */
 }
@@ -498,7 +510,7 @@ void SendDataFunc(void const * argument)
 {
   /* USER CODE BEGIN SendDataFunc */
 	uint8_t usartLockFlag;
-	uint8_t secondTxModeFlag = SECOND_HALF_TX_FLAG; 						/* Setting flag identifier to put later into the queue */
+	uint8_t secondTxModeFlag = SECOND_HALF_TX_FLAG; 		/* Setting flag identifier to put later into the queue */
 	uint8_t strToSend[BUFFER_BLOCK_LEN/2+10];
 	uint16_t strToSenLen;
   
@@ -773,7 +785,7 @@ void GPSUnboxingFunc(void const * argument)
 	/* Infinite loop */
   for(;;) {
 		xSemaphoreTake(GPSUnboxSemHandle, portMAX_DELAY);
-		GPS_parse_data(GPSRawBuffer);
+		GPS_data_conversion(GPSRawBuffer);
   }
   /* USER CODE END GPSUnboxingFunc */
 }
