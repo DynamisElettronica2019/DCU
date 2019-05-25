@@ -55,11 +55,11 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
+extern uint8_t GPS_FirstChar;
 extern uint8_t DATA_BlockBuffer [BUFFER_BLOCK_LEN];
 extern uint8_t DATA_StateBuffer [BUFFER_STATE_LEN];
 extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
-extern uint8_t GPSRawBuffer [GPS_MAX_LENGTH];
-extern uint8_t GPSFirstChar;
+extern uint8_t GPS_RawBuffer [GPS_MAX_LENGTH];
 extern BaseType_t xGPSHigherPriorityTaskWoken;
 /* USER CODE END Variables */
 osThreadId aliveHandle;
@@ -778,12 +778,12 @@ void automaticStartAcquisitionMonitoringTask(void const * argument)
 void GPSUnboxingFunc(void const * argument)
 {
   /* USER CODE BEGIN GPSUnboxingFunc */
-	HAL_UART_Receive_DMA(&huart2,&GPSFirstChar, 1);
+	HAL_UART_Receive_DMA(&huart2, &GPS_FirstChar, 1);
   
 	/* Infinite loop */
   for(;;) {
 		xSemaphoreTake(GPSUnboxSemHandle, portMAX_DELAY);
-		GPS_data_conversion(GPSRawBuffer);
+		GPS_DataConversion(GPS_RawBuffer);
   }
   /* USER CODE END GPSUnboxingFunc */
 }

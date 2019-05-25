@@ -60,11 +60,6 @@
 
 /* USER CODE BEGIN PV */
 
-time_t RTC_Time;
-date_t RTC_Date;
-time_t GPS_Time;
-date_t GPS_Date;
-
 extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
 /* USER CODE END PV */
 
@@ -230,7 +225,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		UART1_RxCallback();
 	}
 	else if(huart->Instance == USART2) {
-		GPS_Rx_Cplt();
+		GPS_RxCallback();
 	}
 }
 
@@ -290,15 +285,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		ADC_SamplingFunction(); 							/* ADC sampling: debug and aux channels*/
 		GPIO_AuxSamplingFunction(); 					/* GPIO aux sampling */
 		
-		/* RTC and GPS timestamp reading, only for debug purposes */
 		setTimestampTimeFormRtc();
 		setTimestampDateFormRtc();
 		setTimestampTimeFormGps();
 		setTimestampDateFormGps();
-		getTimestampTimeFormRtc(&RTC_Time);
-		getTimestampDateFormRtc(&RTC_Date);
-		getTimestampTimeFormGps(&GPS_Time);
-		getTimestampDateFormGps(&GPS_Date);
 	}
 
 	/* Timer 6: 10 Hz */

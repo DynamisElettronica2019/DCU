@@ -42,6 +42,7 @@
 #define CAN_START_ERROR 							(uint8_t)'Q'
 #define CAN_FILTER_CONFIG_ERROR 			(uint8_t)'R'
 #define CAN_TX_ERROR 									(uint8_t)'S'
+#define GPS_NMEA_UNKNOW_ERROR 				(uint8_t)'Q'
 #define UART1_CLEAR_FLAG							(uint8_t)'C'
 
 /* Encoding defines */

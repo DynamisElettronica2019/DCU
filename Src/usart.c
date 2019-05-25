@@ -22,14 +22,21 @@
 
 /* USER CODE BEGIN 0 */
 #include "cmsis_os.h"
+#include "gps.h"
 #include "telemetry.h"
 
 uint8_t queueUartTransmitFlag; 								/* Receive from queue and store into this variable */
 uint8_t usart1LockFlag = UART1_CLEAR_FLAG;		/* Set item to send to queue */
 BaseType_t UART1_TxHigherPriorityTaskWoken = pdFALSE;
 BaseType_t UART1_RxHigherPriorityTaskWoken = pdFALSE;
+BaseType_t GPS_xHigherPriorityTaskWoken = pdFALSE;
+extern uint8_t GPS_ParsingChar;
+extern uint8_t GPS_FirstChar;
+extern uint8_t i;
+extern uint8_t GPS_RawBuffer [GPS_MAX_LENGTH];
 extern osSemaphoreId sendFollowingDataSemaphoreHandle;
 extern osSemaphoreId receiveCommandSemaphoreHandle;
+extern osSemaphoreId GPSUnboxSemHandle;
 extern osMessageQId Usart1LockQueueHandle;
 extern osMessageQId Usart1TxModeQueueHandle;
 /* USER CODE END 0 */
@@ -303,6 +310,47 @@ extern inline void UART1_RxCallback(void)
 {
 	xSemaphoreGiveFromISR(receiveCommandSemaphoreHandle, &UART1_RxHigherPriorityTaskWoken); 		/* Give semaphore to task when DMA is clear */
 	portYIELD_FROM_ISR(UART1_RxHigherPriorityTaskWoken); 																				/* Do context-switch if needed */
+}
+
+extern inline void GPS_RxCallback(void)
+{
+	/*if initial string charater has been found*/
+	if(GPS_FirstChar == '$') {								
+		GPS_RawBuffer[i] = GPS_ParsingChar;		/* The char is saved as first element */
+		i++;
+		HAL_UART_Receive_DMA(&huart2, &GPS_ParsingChar, 1);		/* Start reciving successive chars */
+	}
+	
+	/* If last char of the message has been saved */
+	else if(GPS_ParsingChar == '\n') {								
+		GPS_RawBuffer[i] = '\n';		/* Store the last char*/
+		GPS_ParsingChar = '$';			/* Reinit variable */
+		i = 0;
+		xSemaphoreGiveFromISR(GPSUnboxSemHandle, &GPS_xHigherPriorityTaskWoken);		/* Unlock the unboxing task*/
+		portYIELD_FROM_ISR(GPS_xHigherPriorityTaskWoken);
+	}
+	
+	/* If last char of the message has not arrived yet, keep searching for it */
+	else {			
+	 HAL_UART_Receive_DMA(&huart2, &GPS_FirstChar, 1);
+	}
+}
+
+extern void USART2_Init_38400(void)
+{	
+	huart2.Instance = USART2;
+  huart2.Init.BaudRate = 38400;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart2.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart2.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_RXOVERRUNDISABLE_INIT|UART_ADVFEATURE_DMADISABLEONERROR_INIT;
+  huart2.AdvancedInit.OverrunDisable = UART_ADVFEATURE_OVERRUN_DISABLE;
+  huart2.AdvancedInit.DMADisableonRxError = UART_ADVFEATURE_DMA_DISABLEONRXERROR;
+	HAL_UART_Init(&huart2);
 }
 
 /* USER CODE END 1 */

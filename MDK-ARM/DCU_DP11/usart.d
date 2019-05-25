@@ -57,6 +57,7 @@ dcu_dp11\usart.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h
 dcu_dp11\usart.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 dcu_dp11\usart.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 dcu_dp11\usart.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
+dcu_dp11\usart.o: ../Inc/gps.h
 dcu_dp11\usart.o: ../Inc/telemetry.h
 dcu_dp11\usart.o: ../Inc/data.h
 dcu_dp11\usart.o: ../Inc/can.h
