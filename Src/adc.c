@@ -444,7 +444,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 		portYIELD_FROM_ISR(ADC1_xHigherPriorityTaskWoken);															/* Do context-switch if needed */
 	}
 	
-	if(hadc->Instance == ADC2) {																							/* Check on system start if semaphore is already created */
+	if(hadc->Instance == ADC2) {																											/* Check on system start if semaphore is already created */
 		HAL_ADC_Stop_DMA(hadc);																													/* Stop ADC2 conversion */
 		xSemaphoreGiveFromISR(adc2SemaphoreHandle, &ADC2_xHigherPriorityTaskWoken); 		/* Give semaphore to task when DMA is clear */
 		portYIELD_FROM_ISR(ADC2_xHigherPriorityTaskWoken);															/* Do context-switch if needed */

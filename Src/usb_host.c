@@ -198,7 +198,7 @@ static inline void USB_CloseAndOpenFile(void)
 	
 	if(f_close(&USBHFile) != FR_OK) {
 		DATA_ResetAcquisitionState();			/* Update of the status packet */
-			DATA_PacketReset();							/* Reset the data saving buffer */
+		DATA_PacketReset();								/* Reset the data saving buffer */
 		errorLetter = USB_CLOSE_FILE_ERROR;
 		HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
 		xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
@@ -228,7 +228,7 @@ static inline void USB_WriteLen(uint8_t *buffer)
 
 static inline void USB_GetFilename(void)
 {
-	if((actualTimestamp.GPS_TimestampReady == GPS_TIMESTAMP_READY) && (actualTimestamp.GPS_TimestampReady == GPS_TIMESTAMP_READY)) {
+	if(actualTimestamp.GPS_TimestampReady == GPS_TIMESTAMP_READY) {
 		year = actualTimestamp.yearFromGps;
 		month = actualTimestamp.monthFromGps;
 		day = actualTimestamp.dateNumberFromGps;

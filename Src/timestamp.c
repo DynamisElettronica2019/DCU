@@ -1,11 +1,21 @@
 #include "timestamp.h"
+#include "cmsis_os.h"
 #include "rtc.h"
 #include "GPS.h"
 #include "data.h"
 
 uint32_t dataTimestamp = 0;			/* Data timestamp variable, in ms*/
 actualTimestamp_t actualTimestamp;
+BaseType_t Timestamp_xHigherPriorityTaskWoken = pdFALSE;
 extern NMEA_output_types_t NMEA_output;
+extern osSemaphoreId updateTimestampSemaphoreHandle;
+
+
+extern inline void timestampUpdate(void)
+{
+	xSemaphoreGiveFromISR(updateTimestampSemaphoreHandle, &Timestamp_xHigherPriorityTaskWoken);
+	portYIELD_FROM_ISR(Timestamp_xHigherPriorityTaskWoken);
+}
 
 extern inline uint32_t getDataTimestamp(void)
 {

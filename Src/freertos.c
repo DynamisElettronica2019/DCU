@@ -33,9 +33,11 @@
 #include "usart.h"
 #include "usb_host.h"
 #include "data.h"
+#include "rtc.h"
 #include "GPS.h"
 #include "string.h"
 #include "telemetry.h"
+#include "timestamp.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -82,6 +84,7 @@ osThreadId sendDebugDataHandle;
 osThreadId CAN_SendManagerHandle;
 osThreadId automaticStartAcquisitionMonitoringHandle;
 osThreadId GPSUnboxingTaskHandle;
+osThreadId updateTimestampHandle;
 osMessageQId digitalAuxQueueHandle;
 osMessageQId ErrorQueueHandle;
 osMessageQId Usart1TxModeQueueHandle;
@@ -103,6 +106,7 @@ osSemaphoreId saveUsbSemaphoreHandle;
 osSemaphoreId CAN_SendSemaphoreHandle;
 osSemaphoreId automaticStartAcquisitionSemaphoreHandle;
 osSemaphoreId GPSUnboxSemHandle;
+osSemaphoreId updateTimestampSemaphoreHandle;
 osSemaphoreId CAN_SendDataSemaphoreCounterHandle;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -130,6 +134,7 @@ void sendDebugDataTask(void const * argument);
 void CAN_SendManagerTask(void const * argument);
 void automaticStartAcquisitionMonitoringTask(void const * argument);
 void GPSUnboxingFunc(void const * argument);
+void updateTimestampTask(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -196,6 +201,10 @@ void MX_FREERTOS_Init(void) {
   osSemaphoreDef(GPSUnboxSem);
   GPSUnboxSemHandle = osSemaphoreCreate(osSemaphore(GPSUnboxSem), 1);
 
+  /* definition and creation of updateTimestampSemaphore */
+  osSemaphoreDef(updateTimestampSemaphore);
+  updateTimestampSemaphoreHandle = osSemaphoreCreate(osSemaphore(updateTimestampSemaphore), 1);
+
   /* definition and creation of CAN_SendDataSemaphoreCounter */
   osSemaphoreDef(CAN_SendDataSemaphoreCounter);
   CAN_SendDataSemaphoreCounterHandle = osSemaphoreCreate(osSemaphore(CAN_SendDataSemaphoreCounter), 3);
@@ -214,6 +223,7 @@ void MX_FREERTOS_Init(void) {
   xSemaphoreTake(CAN_SendSemaphoreHandle, portMAX_DELAY);               			/* Start with the task locked */
   xSemaphoreTake(automaticStartAcquisitionSemaphoreHandle, portMAX_DELAY);    /* Start with the task locked */
   xSemaphoreTake(GPSUnboxSemHandle, portMAX_DELAY);                           /* Start with the task locked */
+	xSemaphoreTake(updateTimestampSemaphoreHandle, portMAX_DELAY);              /* Start with the task locked */
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -344,6 +354,10 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of GPSUnboxingTask */
   osThreadDef(GPSUnboxingTask, GPSUnboxingFunc, osPriorityNormal, 0, 512);
   GPSUnboxingTaskHandle = osThreadCreate(osThread(GPSUnboxingTask), NULL);
+
+  /* definition and creation of updateTimestamp */
+  osThreadDef(updateTimestamp, updateTimestampTask, osPriorityNormal, 0, 128);
+  updateTimestampHandle = osThreadCreate(osThread(updateTimestamp), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -786,6 +800,34 @@ void GPSUnboxingFunc(void const * argument)
 		GPS_DataConversion(GPS_RawBuffer);
   }
   /* USER CODE END GPSUnboxingFunc */
+}
+
+/* USER CODE BEGIN Header_updateTimestampTask */
+/**
+* @brief Function implementing the updateTimestamp thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_updateTimestampTask */
+void updateTimestampTask(void const * argument)
+{
+  /* USER CODE BEGIN updateTimestampFromRtcTask */
+	rtcPeripheralInit();				/* RTC peripheral init only */
+	resetRtcTime();							/* RTC time values reset */
+	resetRtcDate();							/* RTC date values reset */
+	resetActualTimestamp();			/* Reset the timestamp struct */
+	
+	/* Infinite loop */
+  for(;;) {
+    xSemaphoreTake(updateTimestampSemaphoreHandle, portMAX_DELAY); 			/* Unlock when timer callback is called */
+		
+		/* You must call GetData after GetTime to unlock the data */
+		setTimestampTimeFormRtc(); 																					/* Set time values in the timestamp struct, from RTC */
+		setTimestampDateFormRtc(); 																					/* Set date values in the timestamp struct, from RTC */
+		setTimestampTimeFormGps();																					/* Set time values in the timestamp struct, from GPS */
+		setTimestampDateFormGps();																					/* Set date values in the timestamp struct, from GPS*/
+  }
+  /* USER CODE END updateTimestampFromRtcTask */
 }
 
 /* Private application code --------------------------------------------------*/

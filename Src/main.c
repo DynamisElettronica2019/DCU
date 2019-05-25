@@ -84,7 +84,7 @@ int main(void)
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
-  
+
   /* Enable I-Cache---------------------------------------------------------*/
   SCB_EnableICache();
 
@@ -238,24 +238,17 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 
 static inline void USER_SystemInit(void)
 {
-	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET); 				/* Green LED off as default */
-	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET); 			/* Yellow LED off as default */
-	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET); 						/* Red LED off as default */
-	DATA_PacketReset();																														/* Reset the data saving buffer */
-	CAN_PacketCounterReset();																											/* Reset the CAN packets recevide counter */
-	ADC_BuffersInit();																														/* ADC buffer initialization */
-	
-	rtcPeripheralInit();																													/* RTC peripheral init only */
-	resetRtcTime();																																/* RTC time values reset */
-	resetRtcDate();																																/* RTC date values reset */
-	resetActualTimestamp();	
-	
-	GPS_Init();																																		/* GPS init */
-	USB_InitStart();																															/* USB peripheral config and start */
-	MX_FATFS_Init();																															/* FatFS init */
-	DATA_SetTelemetryState();																											/* Start telemetry as default */
-	CAN_Start();																																	/* CAN filter config and start */
-	return;
+	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET); 			/* Green LED off as default */
+	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET); 		/* Yellow LED off as default */
+	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET); 					/* Red LED off as default */
+	DATA_PacketReset();																													/* Reset the data saving buffer */
+	CAN_PacketCounterReset();																										/* Reset the CAN packets recevide counter */
+	ADC_BuffersInit();																													/* ADC buffer initialization */
+	GPS_Init();																																	/* GPS init */
+	USB_InitStart();																														/* USB peripheral config and start */
+	MX_FATFS_Init();																														/* FatFS init */
+	DATA_SetTelemetryState();																										/* Start telemetry as default */
+	CAN_Start();																																/* CAN filter config and start */
 }
 
 /* USER CODE END 4 */
@@ -284,11 +277,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		TELEMETRY_StateSendTimCallback(); 		/* Telemetry DCU state packet */
 		ADC_SamplingFunction(); 							/* ADC sampling: debug and aux channels*/
 		GPIO_AuxSamplingFunction(); 					/* GPIO aux sampling */
-		
-		setTimestampTimeFormRtc();
-		setTimestampDateFormRtc();
-		setTimestampTimeFormGps();
-		setTimestampDateFormGps();
+		timestampUpdate();										/* Update timestamp struct */
 	}
 
 	/* Timer 6: 10 Hz */

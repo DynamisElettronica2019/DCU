@@ -64,6 +64,8 @@ dcu_dp11\freertos.o: ../Inc/usart.h
 dcu_dp11\freertos.o: ../Inc/usb_host.h
 dcu_dp11\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
 dcu_dp11\freertos.o: ../Inc/data.h
+dcu_dp11\freertos.o: ../Inc/rtc.h
 dcu_dp11\freertos.o: ../Inc/GPS.h
 dcu_dp11\freertos.o: C:\Keil_v5\ARM\ARM_Compiler_5.06u6\Bin\..\include\string.h
 dcu_dp11\freertos.o: ../Inc/telemetry.h
+dcu_dp11\freertos.o: ../Inc/timestamp.h

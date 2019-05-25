@@ -43,6 +43,8 @@ void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN Prototypes */
 extern inline void UART1_TxCallback(void);
 extern inline void UART1_RxCallback(void);
+extern inline void GPS_RxCallback(void);
+extern void USART2_Init_38400(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

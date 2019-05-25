@@ -35,6 +35,7 @@ typedef struct {
 	uint8_t year;
 } date_t;
 
+extern inline void timestampUpdate(void);
 extern void resetActualTimestamp(void);
 extern inline void setTimestampTimeFormRtc(void);
 extern inline void setTimestampDateFormRtc(void);

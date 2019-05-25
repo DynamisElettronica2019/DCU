@@ -59,6 +59,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+
 extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
 /* USER CODE END PV */
 
@@ -225,7 +226,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		UART1_RxCallback();
 	}
 	else if(huart->Instance == USART2) {
-		GPS_Rx_Cplt();
+		GPS_RxCallback();
 	}
 }
 
@@ -244,7 +245,13 @@ static inline void USER_SystemInit(void)
 	DATA_PacketReset();																														/* Reset the data saving buffer */
 	CAN_PacketCounterReset();																											/* Reset the CAN packets recevide counter */
 	ADC_BuffersInit();																														/* ADC buffer initialization */
-	GPS_init();																																		/* GPS init */
+	
+	rtcPeripheralInit();																													/* RTC peripheral init only */
+	resetRtcTime();																																/* RTC time values reset */
+	resetRtcDate();																																/* RTC date values reset */
+	resetActualTimestamp();	
+	
+	GPS_Init();																																		/* GPS init */
 	USB_InitStart();																															/* USB peripheral config and start */
 	MX_FATFS_Init();																															/* FatFS init */
 	DATA_SetTelemetryState();																											/* Start telemetry as default */
@@ -278,6 +285,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		TELEMETRY_StateSendTimCallback(); 		/* Telemetry DCU state packet */
 		ADC_SamplingFunction(); 							/* ADC sampling: debug and aux channels*/
 		GPIO_AuxSamplingFunction(); 					/* GPIO aux sampling */
+		
+		setTimestampTimeFormRtc();
+		setTimestampDateFormRtc();
+		setTimestampTimeFormGps();
+		setTimestampDateFormGps();
 	}
 
 	/* Timer 6: 10 Hz */
