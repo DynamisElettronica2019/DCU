@@ -1,6 +1,8 @@
 #include "GPS.h"
 #include "cmsis_os.h"
 #include "usart.h"
+#include "data.h"
+#include "string_utility.h"
 
 /*global variables*/
 NMEA_output_types_t NMEA_output;	/*global variable where conversion result are stored*/
@@ -10,7 +12,7 @@ uint8_t GPSFirstChar;
 uint8_t GPSParsingChar = '$';
 uint8_t i = 0;
 uint8_t GPSRawBuffer [GPS_MAX_LENGTH];	/*global buffer where raw nmea message are stored*/
-
+extern uint8_t DATA_BlockBuffer [BUFFER_BLOCK_LEN];
 extern osSemaphoreId GPSUnboxSemHandle;
 BaseType_t xGPSHigherPriorityTaskWoken;
 
@@ -313,6 +315,7 @@ NMEA_RMC_type_t GPS_RMC_conversion(uint8_t * buffer){
 					GPSOutputRMC.latitude.degrees = ((uint8_t)GPS_str_to_int(0, buffer[i], buffer[i+1]));
 					GPSOutputRMC.latitude.minutes = ((uint8_t)GPS_str_to_int(0, buffer[i+2], buffer[i+3]));
 					GPSOutputRMC.latitude.decimal_minutes = GPS_minuts_conversion(buffer[i+5], buffer[i+6], buffer[i+7], buffer[i+8], buffer[i+9])*60;
+					intToStringUnsigned((uint16_t)GPSOutputRMC.latitude.decimal_minutes, &DATA_BlockBuffer[GPS_LATITUDE_MINUTES_CSV_INDEX], 5);
 					i = i +9;
 					break;
 				
@@ -324,6 +327,7 @@ NMEA_RMC_type_t GPS_RMC_conversion(uint8_t * buffer){
 					GPSOutputRMC.longitude.degrees = GPS_str_to_int(buffer[i], buffer[i+1], buffer[i+2]);
 					GPSOutputRMC.longitude.minutes = ((uint8_t)GPS_str_to_int(0, buffer[i+3], buffer[i+4]));
 					GPSOutputRMC.longitude.decimal_minutes = GPS_minuts_conversion(buffer[i+6],buffer[i+7],buffer[i+8],buffer[i+9],buffer[i+10])*60;
+					intToStringUnsigned((uint16_t)GPSOutputRMC.latitude.decimal_minutes, &DATA_BlockBuffer[GPS_LONGITUDE_MINUTES_CSV_INDEX], 5);
 					i = i+10;
 					break;
 				
@@ -419,6 +423,9 @@ NMEA_VTG_type_t GPS_VTG_conversion(uint8_t * buffer){
 					if(buffer[i+1] != '.' && buffer[i+2] == '.'){  						/*speed between 10 and 100 km/h*/
 						GPSOutputVTG.speed2.unit = ((uint8_t)GPS_str_to_int(0, buffer[i+ 1], buffer[i+2]));
 						GPSOutputVTG.speed2.decimal = GPS_speed_decimal_conversion(buffer[i+ 4],buffer[i+ 5],buffer[i+ 6])*1000;
+						intToStringUnsigned((uint16_t)GPSOutputVTG.speed2.unit, &DATA_BlockBuffer[GPS_SPEED_CSV_INDEX], 3);
+						DATA_BlockBuffer[GPS_SPEED_CSV_INDEX + 3] = '.';
+						intToStringUnsigned((uint16_t)GPSOutputVTG.speed2.decimal, &DATA_BlockBuffer[GPS_SPEED_CSV_INDEX + 4], 3);
 						i = i+ 6; 
 					}
 					else if(buffer[i + 2] != '.' && buffer[i+1] != '.'){															/*speed greater than 100 km/h*/

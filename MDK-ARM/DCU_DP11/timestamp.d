@@ -1,8 +1,7 @@
 dcu_dp11\timestamp.o: ..\Src\timestamp.c
 dcu_dp11\timestamp.o: ../Inc/timestamp.h
 dcu_dp11\timestamp.o: C:\Keil_v5\ARM\ARM_Compiler_5.06u6\Bin\..\include\stdint.h
-dcu_dp11\timestamp.o: ../Inc/data.h
-dcu_dp11\timestamp.o: ../Inc/can.h
+dcu_dp11\timestamp.o: ../Inc/rtc.h
 dcu_dp11\timestamp.o: ../Inc/main.h
 dcu_dp11\timestamp.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal.h
 dcu_dp11\timestamp.o: ../Inc/stm32f7xx_hal_conf.h
@@ -45,3 +44,6 @@ dcu_dp11\timestamp.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart.h
 dcu_dp11\timestamp.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart_ex.h
 dcu_dp11\timestamp.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_hcd.h
 dcu_dp11\timestamp.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_usb.h
+dcu_dp11\timestamp.o: ../Inc/GPS.h
+dcu_dp11\timestamp.o: ../Inc/data.h
+dcu_dp11\timestamp.o: ../Inc/can.h

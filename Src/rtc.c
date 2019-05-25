@@ -106,6 +106,72 @@ void HAL_RTC_MspDeInit(RTC_HandleTypeDef* rtcHandle)
 
 /* USER CODE BEGIN 1 */
 
+extern void rtcPeripheralInit(void)
+{
+  /* Initialize RTC Only */
+  hrtc.Instance = RTC;
+  hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
+  hrtc.Init.AsynchPrediv = 126;
+  hrtc.Init.SynchPrediv = 254;
+  hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
+  hrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
+  hrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
+  
+	if (HAL_RTC_Init(&hrtc) != HAL_OK) {
+    Error_Handler();
+  }
+	
+	return;
+}
+
+extern void resetRtcTime(void)
+{
+	RTC_TimeTypeDef time;
+	
+	time.Hours = 0x00;
+  time.Minutes = 0x00;
+  time.Seconds = 0x00;
+  time.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
+  time.StoreOperation = RTC_STOREOPERATION_RESET;
+  HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BCD);
+	return;
+}
+
+extern void resetRtcDate(void)
+{
+	RTC_DateTypeDef date;
+	
+	date.WeekDay = RTC_WEEKDAY_MONDAY;
+  date.Month = RTC_MONTH_JANUARY;
+  date.Date = 0x01;
+  date.Year = 0x00;
+  HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BCD);
+	return;
+}
+
+extern inline void setRtcTime(uint8_t hours, uint8_t minutes, uint8_t seconds) {
+	RTC_TimeTypeDef time;
+	
+	time.Hours = hours;
+  time.Minutes = minutes;
+  time.Seconds = seconds;
+  time.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
+  time.StoreOperation = RTC_STOREOPERATION_RESET;
+  HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BIN);
+	return;
+}
+
+extern inline void setRtcDate(uint8_t weekday, uint8_t month, uint8_t dateNumber, uint8_t year) {
+	RTC_DateTypeDef date;
+	
+	date.WeekDay = weekday;
+  date.Month = month;
+  date.Date = dateNumber;
+  date.Year = year;
+  HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
+	return;
+}
+
 /* USER CODE END 1 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

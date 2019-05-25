@@ -59,6 +59,12 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+
+time_t RTC_Time;
+date_t RTC_Date;
+time_t GPS_Time;
+date_t GPS_Date;
+
 extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
 /* USER CODE END PV */
 
@@ -243,6 +249,12 @@ static inline void USER_SystemInit(void)
 	DATA_PacketReset();																														/* Reset the data saving buffer */
 	CAN_PacketCounterReset();																											/* Reset the CAN packets recevide counter */
 	ADC_BuffersInit();																														/* ADC buffer initialization */
+	
+	rtcPeripheralInit();																													/* RTC peripheral init only */
+	resetRtcTime();																																/* RTC time values reset */
+	resetRtcDate();																																/* RTC date values reset */
+	resetActualTimestamp();	
+	
 	GPS_init();																																		/* GPS init */
 	USB_InitStart();																															/* USB peripheral config and start */
 	MX_FATFS_Init();																															/* FatFS init */
@@ -277,6 +289,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		TELEMETRY_StateSendTimCallback(); 		/* Telemetry DCU state packet */
 		ADC_SamplingFunction(); 							/* ADC sampling: debug and aux channels*/
 		GPIO_AuxSamplingFunction(); 					/* GPIO aux sampling */
+		
+		/* RTC and GPS timestamp reading, only for debug purposes */
+		setTimestampTimeFormRtc();
+		setTimestampDateFormRtc();
+		setTimestampTimeFormGps();
+		setTimestampDateFormGps();
+		getTimestampTimeFormRtc(&RTC_Time);
+		getTimestampDateFormRtc(&RTC_Date);
+		getTimestampTimeFormGps(&GPS_Time);
+		getTimestampDateFormGps(&GPS_Date);
 	}
 
 	/* Timer 6: 10 Hz */
