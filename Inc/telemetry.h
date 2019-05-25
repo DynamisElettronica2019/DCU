@@ -28,46 +28,37 @@
 
 #define CAN_ID_NOT_FOUND							(uint8_t)'A'
 #define STATE_MACHINE_ERROR						(uint8_t)'B'
-#define USB_INIT_ERROR								(uint8_t)'D'
 #define USB_OPEN_FILE_ERROR						(uint8_t)'E'
 #define USB_CLOSE_FILE_ERROR					(uint8_t)'F'
 #define USB_WRITE_FILE_ERROR					(uint8_t)'G'
-#define USB_MOUNT_ERROR								(uint8_t)'H'
-#define USB_UNMOUNT_ERROR							(uint8_t)'I'
-#define USB_FATFS_INIT_ERROR					(uint8_t)'L'
-#define USB_FATFS_DEINIT_ERROR				(uint8_t)'M'
-#define USB_FATFS_LINK_ERROR					(uint8_t)'N'
-#define USB_FATFS_UNLINK_ERROR				(uint8_t)'O'
 #define USB_OVERCURRENT_ERROR					(uint8_t)'P'
-#define CAN_START_ERROR 							(uint8_t)'Q'
-#define CAN_FILTER_CONFIG_ERROR 			(uint8_t)'R'
 #define CAN_TX_ERROR 									(uint8_t)'S'
 #define GPS_NMEA_UNKNOW_ERROR 				(uint8_t)'Q'
 #define UART1_CLEAR_FLAG							(uint8_t)'C'
 
 /* Encoding defines */
-#define ENCODE_0                     0x0
-#define ENCODE_1                     0x1
-#define ENCODE_2                     0x2
-#define ENCODE_3                     0x3
-#define ENCODE_4                     0x4
-#define ENCODE_5                     0xC
-#define ENCODE_6                     0xD
-#define ENCODE_7                     0xF
-#define ENCODE_8                     0x8
-#define ENCODE_9                     0x9
-#define ENCODE_SEMICOLON             0xA
-#define ENCODE_COLON                 0xB
-#define ENCODE_OPEN_SQUARE           0x5
-#define ENCODE_CLOSE_SQUARE          0x6
-#define ENCODE_BLANK                 0x7
-#define ENCODE_MINUS                 0xE
+#define ENCODE_0                     	0x0
+#define ENCODE_1                     	0x1
+#define ENCODE_2                     	0x2
+#define ENCODE_3                     	0x3
+#define ENCODE_4                     	0x4
+#define ENCODE_5                     	0xC
+#define ENCODE_6                     	0xD
+#define ENCODE_7                     	0xF
+#define ENCODE_8                     	0x8
+#define ENCODE_9                     	0x9
+#define ENCODE_SEMICOLON             	0xA
+#define ENCODE_COLON                 	0xB
+#define ENCODE_OPEN_SQUARE           	0x5
+#define ENCODE_CLOSE_SQUARE          	0x6
+#define ENCODE_BLANK                 	0x7
+#define ENCODE_MINUS                 	0xE
 
-#define DATA_MESSAGE_ID							 (uint8_t)'1'
-#define SECOND_DATA_MESSAGE_ID			 (uint8_t)'N'
-#define STATE_MESSAGE_ID						 (uint8_t)'2'
-#define COMMAND_MESSAGE_ID					 (uint8_t)'3'
-#define ERROR_MESSAGE_ID						 (uint8_t)'4'
+#define DATA_MESSAGE_ID							 	(uint8_t)'1'
+#define SECOND_DATA_MESSAGE_ID			 	(uint8_t)'N'
+#define STATE_MESSAGE_ID						 	(uint8_t)'2'
+#define COMMAND_MESSAGE_ID					 	(uint8_t)'3'
+#define ERROR_MESSAGE_ID						 	(uint8_t)'4'
 
 extern inline void TELEMETRY_StateSendTimCallback(void);
 extern inline void TELEMETRY_DataSendTimCallback(void);
