@@ -38,7 +38,7 @@ extern void resetActualTimestamp(void)
 	actualTimestamp.monthFromGps = 0;
 	actualTimestamp.dateNumberFromGps = 0;
 	actualTimestamp.yearFromGps = 0;
-	return;
+	actualTimestamp.GPS_TimestampReady = 0;
 }
 
 extern inline void setTimestampTimeFormRtc(void)
@@ -72,6 +72,12 @@ extern inline void setTimestampTimeFormGps(void)
 	actualTimestamp.hoursFromGps = NMEA_output.NMEA_RMC_type.UTC_time.hours; 					/* Update the hours of the actual timestamp struct */
 	actualTimestamp.minutesFromGps = NMEA_output.NMEA_RMC_type.UTC_time.minutes; 			/* Update the minutes of the actual timestamp struct */
 	actualTimestamp.secondsFromGps = NMEA_output.NMEA_RMC_type.UTC_time.seconds; 			/* Update the seconds of the actual timestamp struct */
+	
+	if((actualTimestamp.hoursFromGps != 0) ||
+		 (actualTimestamp.minutesFromGps != 0) ||
+		 (actualTimestamp.secondsFromGps != 0)) {
+		actualTimestamp.GPS_TimestampReady = GPS_TIMESTAMP_READY;
+	}
 }
 
 extern inline void setTimestampDateFormGps(void)
@@ -79,6 +85,12 @@ extern inline void setTimestampDateFormGps(void)
 	actualTimestamp.monthFromGps = NMEA_output.NMEA_RMC_type.UTC_date.month;					/* Update the month of the actual timestamp struct */
 	actualTimestamp.dateNumberFromGps = NMEA_output.NMEA_RMC_type.UTC_date.day;				/* Update the date number of the actual timestamp struct */
 	actualTimestamp.yearFromGps = NMEA_output.NMEA_RMC_type.UTC_date.year;						/* Update the year of the actual timestamp struct */
+	
+	if((actualTimestamp.monthFromGps != 0) ||
+	 (actualTimestamp.dateNumberFromGps != 0) ||
+	 (actualTimestamp.yearFromGps != 0)) {
+		actualTimestamp.GPS_TimestampReady = GPS_TIMESTAMP_READY;
+	}
 }
 
 extern inline void getTimestampTimeFormRtc(time_t *time)

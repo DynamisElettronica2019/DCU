@@ -37,6 +37,12 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+uint8_t year;
+uint8_t month;
+uint8_t day;
+uint8_t hours;
+uint8_t minutes;
+uint8_t seconds;
 uint32_t len;
 UINT bytesWritten;
 FRESULT openResult;
@@ -45,6 +51,7 @@ FRESULT writeResult;
 BaseType_t USB_xHigherPriorityTaskWoken = pdFALSE;
 TCHAR USB_Filename[25];
 extern uint8_t DATA_BlockBuffer [BUFFER_BLOCK_LEN];
+extern actualTimestamp_t actualTimestamp;
 extern osSemaphoreId saveUsbSemaphoreHandle;
 extern osMessageQId usbEventQueueHandle;
 extern osMessageQId ErrorQueueHandle;
@@ -227,9 +234,24 @@ static inline void USB_WriteLen(uint8_t *buffer)
 
 static inline void USB_GetFilename(void)
 {
-  //RTC_Get_Value(&RTC_Date, &RTC_Time);
-  //sprintf(filename, "%d_%d_%d.csv", RTC_Time.Hours, RTC_Time.Minutes, RTC_Time.Seconds);
-	sprintf(USB_Filename, "DynamisPRC_USB_test.csv");
+	if((actualTimestamp.GPS_TimestampReady == GPS_TIMESTAMP_READY) && (actualTimestamp.GPS_TimestampReady == GPS_TIMESTAMP_READY)) {
+		year = actualTimestamp.yearFromGps;
+		month = actualTimestamp.monthFromGps;
+		day = actualTimestamp.dateNumberFromGps;
+		hours = actualTimestamp.hoursFromGps;
+		minutes = actualTimestamp.minutesFromGps;
+		seconds = actualTimestamp.secondsFromGps;
+	}
+	else {
+		year = actualTimestamp.yearFromRtc;
+		month = actualTimestamp.monthFromRtc;
+		day = actualTimestamp.dateNumberFromRtc;
+		hours = actualTimestamp.hoursFromRtc;
+		minutes = actualTimestamp.minutesFromRtc;
+		seconds = actualTimestamp.secondsFromRtc;
+	}
+	
+  sprintf(USB_Filename, "%d_%d_%d-%d_%d_%d.csv", year, month, day, hours, minutes, seconds);
 }
 
 /* USER CODE END 1 */

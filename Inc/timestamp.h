@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define GPS_TIMESTAMP_READY (uint8_t)1
+
 typedef struct {
 	uint8_t hoursFromRtc;
 	uint8_t minutesFromRtc;
@@ -14,10 +16,11 @@ typedef struct {
 	uint8_t yearFromRtc;
 	uint8_t hoursFromGps;
 	uint8_t minutesFromGps;
-	uint32_t secondsFromGps;
+	uint8_t secondsFromGps;
 	uint8_t monthFromGps;
 	uint8_t dateNumberFromGps;
 	uint8_t yearFromGps;
+	uint8_t GPS_TimestampReady;
 } actualTimestamp_t;
 
 typedef struct {
