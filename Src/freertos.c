@@ -23,7 +23,6 @@
 #include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */     
 #include "gpio.h"
@@ -741,8 +740,8 @@ void CAN_SendManagerTask(void const * argument)
 	
   /* Infinite loop */
   for(;;) {
-		xSemaphoreTake(CAN_SendDataSemaphoreCounterHandle, portMAX_DELAY);				/* Decrement CAN counting semapgore */
 		xQueueReceive(CAN_SendDataQueueHandle, &CAN_TxPacket, portMAX_DELAY);			/* Wait to transmit a packet */
+		xSemaphoreTake(CAN_SendDataSemaphoreCounterHandle, portMAX_DELAY);				/* Decrement CAN counting semapgore */
 		CAN_SendError = HAL_CAN_AddTxMessage(&hcan1, &CAN_TxPacket.packetHeader, CAN_TxPacket.packetData, &packetMailbox);		/* Send CAN message */
 		
 		if(CAN_SendError != HAL_OK) {

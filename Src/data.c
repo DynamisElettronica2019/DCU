@@ -537,7 +537,7 @@ extern void DATA_PacketReset(void)
 	
 	for(uint8_t i = 0; i < 2; i++) {
 		for(uint16_t j = 0; j < BUFFER_BLOCK_LEN; j++) {
-			DATA_BlockBuffer[DATA_BlockWriteIndex][j] = '0';
+			DATA_BlockBuffer[i][j] = '0';
 		}
 		
 		DATA_BlockBuffer[i][HALL_EFFECT_FR_CSV_SEPARATOR] = CHANNEL_SEPARATION;

@@ -83,7 +83,6 @@ int main(void)
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
-  
 
   /* Enable I-Cache---------------------------------------------------------*/
   SCB_EnableICache();
@@ -243,13 +242,12 @@ static inline void USER_SystemInit(void)
 	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET); 						/* Red LED off as default */
 	DATA_PacketReset();																														/* Reset the data saving buffer */
 	CAN_PacketCounterReset();																											/* Reset the CAN packets recevide counter */
-	CAN_Start();																																	/* CAN filter config and start */
 	ADC_BuffersInit();																														/* ADC buffer initialization */
 	GPS_init();																																		/* GPS init */
 	USB_InitStart();																															/* USB peripheral config and start */
 	MX_FATFS_Init();																															/* FatFS init */
 	DATA_SetTelemetryState();																											/* Start telemetry as default */
-	HAL_Delay(500);																																/* Delay for Vbus stabilization */
+	CAN_Start();																																	/* CAN filter config and start */
 	return;
 }
 

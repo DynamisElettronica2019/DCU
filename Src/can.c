@@ -27,12 +27,14 @@
 #include "data.h"
 #include "telemetry.h"
 
+uint8_t toSW_AcquisitionState = TO_SW_ACQUISITION_IS_ON;
 CAN_FilterTypeDef CAN_FilterConfigHeader;
 CAN_RxPacket_t CAN_CurrentFifo0ReceivedPacket;
 CAN_RxPacket_t CAN_CurrentFifo1ReceivedPacket;
 CAN_TxPacket_t CAN_AutogearPacket;
-HAL_StatusTypeDef CAN_StartError;
-HAL_StatusTypeDef CAN_FilterConfigError;
+CAN_TxPacket_t CAN_DebugPacket1Packet;
+CAN_TxPacket_t CAN_DebugPacket2Packet;
+CAN_TxPacket_t CAN_AcquisitionStatePacket;
 BaseType_t CAN_SendxHigherPriorityTaskWoken = pdFALSE;
 BaseType_t CAN_Rx0xHigherPriorityTaskWoken = pdFALSE;
 BaseType_t CAN_Rx1xHigherPriorityTaskWoken = pdFALSE;
@@ -46,7 +48,6 @@ extern osSemaphoreId CAN_SendDataSemaphoreCounterHandle;
 extern osMessageQId canFifo0QueueHandle;
 extern osMessageQId canFifo1QueueHandle;
 extern osMessageQId CAN_SendDataQueueHandle;
-extern osMessageQId ErrorQueueHandle;
 /* USER CODE END 0 */
 
 CAN_HandleTypeDef hcan1;
@@ -141,18 +142,12 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 /* USER CODE BEGIN 1 */
 
 extern void CAN_Start(void)
-{
-	uint8_t errorLetter = CAN_START_ERROR;
-	
+{	
 	CAN_FilterConfig();
 	HAL_CAN_ActivateNotification(&hcan1, CAN_IT_TX_MAILBOX_EMPTY);
 	HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
   HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO1_MSG_PENDING);
-	CAN_StartError = HAL_CAN_Start(&hcan1);
-	
-	if(CAN_StartError != HAL_OK) {
-		xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
-	}
+	HAL_CAN_Start(&hcan1);
 }
 
 extern inline void CAN_SendPackets(void)
@@ -163,9 +158,12 @@ extern inline void CAN_SendPackets(void)
 
 extern inline void CAN_SendDebugPackets(void)
 {
-	CAN_TxPacket_t CAN_DebugPacket1Packet;
-	CAN_TxPacket_t CAN_DebugPacket2Packet;
-	CAN_TxPacket_t CAN_AcquisitionStatePacket;
+	if(DATA_GetAcquisitionState() == STATE_ON) {
+		toSW_AcquisitionState = TO_SW_ACQUISITION_IS_ON;
+	}
+	else if(DATA_GetAcquisitionState() == STATE_OFF) {
+		toSW_AcquisitionState = TO_SW_ACQUISITION_IS_OFF;
+	}
 	
 	/* DCU_DEBUG_1_ID */
 	CAN_DebugPacket1Packet.packetData[0] = (uint8_t)(((uint16_t)(ADC_BufferConvertedDebug[DCU_TEMP_SENSE_POSITION]) >> 8) & 0x00FF);
@@ -181,7 +179,7 @@ extern inline void CAN_SendDebugPackets(void)
 	CAN_DebugPacket1Packet.packetHeader.IDE = CAN_ID_STD;
 	CAN_DebugPacket1Packet.packetHeader.DLC = 8;
 	CAN_DebugPacket1Packet.packetHeader.TransmitGlobalTime = DISABLE;
-	xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_DebugPacket1Packet, (TickType_t)0);				/* Add CAN message to queue */
+	xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_DebugPacket1Packet, (TickType_t)0);
 	
 	/* DCU_DEBUG_2_ID */
 	CAN_DebugPacket2Packet.packetData[0] = (uint8_t)(((uint16_t)(ADC_BufferConvertedDebug[_12V_POST_DIODES_SENSE_POSITION]) >> 8) & 0x00FF);
@@ -195,17 +193,17 @@ extern inline void CAN_SendDebugPackets(void)
 	CAN_DebugPacket2Packet.packetHeader.IDE = CAN_ID_STD;
 	CAN_DebugPacket2Packet.packetHeader.DLC = 6;
 	CAN_DebugPacket2Packet.packetHeader.TransmitGlobalTime = DISABLE;
-	xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_DebugPacket2Packet, (TickType_t)0);				/* Add CAN message to queue */
+	xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_DebugPacket2Packet, (TickType_t)0);
 	
 	/* DCU_ACQUISITION_SW_ID */
 	CAN_AcquisitionStatePacket.packetData[0] = 0;
-	CAN_AcquisitionStatePacket.packetData[1] = DATA_GetAcquisitionState() - '0';
+	CAN_AcquisitionStatePacket.packetData[1] = toSW_AcquisitionState;
 	CAN_AcquisitionStatePacket.packetHeader.StdId = DCU_ACQUISITION_SW_ID;
 	CAN_AcquisitionStatePacket.packetHeader.RTR = CAN_RTR_DATA;
 	CAN_AcquisitionStatePacket.packetHeader.IDE = CAN_ID_STD;
 	CAN_AcquisitionStatePacket.packetHeader.DLC = 2;
 	CAN_AcquisitionStatePacket.packetHeader.TransmitGlobalTime = DISABLE;
-	xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_AcquisitionStatePacket, (TickType_t)0);		/* Add CAN message to queue */
+	xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_AcquisitionStatePacket, (TickType_t)0);
 }
 
 extern inline void CAN_SendAutogearPacket(void)
@@ -231,8 +229,6 @@ extern void CAN_PacketCounterReset(void)
 
 static void CAN_FilterConfig(void)
 {
-	uint8_t errorLetter = CAN_FILTER_CONFIG_ERROR;
-	
 	CAN_FilterConfigHeader.FilterBank = 0;
   CAN_FilterConfigHeader.FilterMode = CAN_FILTERMODE_IDMASK;
   CAN_FilterConfigHeader.FilterScale = CAN_FILTERSCALE_32BIT;
@@ -243,7 +239,7 @@ static void CAN_FilterConfig(void)
 	CAN_FilterConfigHeader.FilterFIFOAssignment = CAN_RX_FIFO0;
   CAN_FilterConfigHeader.FilterActivation = ENABLE;	
   CAN_FilterConfigHeader.SlaveStartFilterBank = 14;
-	CAN_FilterConfigError = HAL_CAN_ConfigFilter(&hcan1, &CAN_FilterConfigHeader);
+	HAL_CAN_ConfigFilter(&hcan1, &CAN_FilterConfigHeader);
 	
   CAN_FilterConfigHeader.FilterBank = 1;
   CAN_FilterConfigHeader.FilterMode = CAN_FILTERMODE_IDMASK;
@@ -255,11 +251,7 @@ static void CAN_FilterConfig(void)
 	CAN_FilterConfigHeader.FilterFIFOAssignment = CAN_RX_FIFO1;
   CAN_FilterConfigHeader.FilterActivation = ENABLE;	
   CAN_FilterConfigHeader.SlaveStartFilterBank = 14;
-	CAN_FilterConfigError = HAL_CAN_ConfigFilter(&hcan1, &CAN_FilterConfigHeader);
-	
-	if(CAN_FilterConfigError != HAL_OK) {
-		xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
-	}
+	HAL_CAN_ConfigFilter(&hcan1, &CAN_FilterConfigHeader);
 }
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
