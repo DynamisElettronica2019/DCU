@@ -103,8 +103,6 @@ void Error_Handler(void);
 #define I2C_IMU_SDA_GPIO_Port GPIOD
 #define ETH_nRST_Pin GPIO_PIN_15
 #define ETH_nRST_GPIO_Port GPIOD
-#define IMU_nRST_Pin GPIO_PIN_6
-#define IMU_nRST_GPIO_Port GPIOC
 #define uSD_D0_Pin GPIO_PIN_8
 #define uSD_D0_GPIO_Port GPIOC
 #define uSD_D1_Pin GPIO_PIN_9

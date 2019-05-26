@@ -1,4 +1,5 @@
 --cpu Cortex-M7.fp.dp
+"dcu_dp11\bno085.o"
 "dcu_dp11\main.o"
 "dcu_dp11\gpio.o"
 "dcu_dp11\adc.o"

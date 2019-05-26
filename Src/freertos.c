@@ -27,6 +27,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */     
 
+#include "BNO085.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -46,9 +48,18 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
+extern BNO085 myIMU;
+extern TIM_HandleTypeDef htim7;
+BaseType_t IMUHigherPriorityTaskWoken = pdFALSE;
+
+uint8_t stat = 1; /*only for debug*/
+int addr = 0;
+
 
 /* USER CODE END Variables */
 osThreadId aliveHandle;
+osThreadId IMUUnboxTaskHandle;
+osSemaphoreId IMUSemHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -56,6 +67,7 @@ osThreadId aliveHandle;
 /* USER CODE END FunctionPrototypes */
 
 void aliveTask(void const * argument);
+void IMUUnboxFunc(void const * argument);
 
 extern void MX_FATFS_Init(void);
 extern void MX_USB_HOST_Init(void);
@@ -75,8 +87,13 @@ void MX_FREERTOS_Init(void) {
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
+  /* Create the semaphores(s) */
+  /* definition and creation of IMUSem */
+  osSemaphoreDef(IMUSem);
+  IMUSemHandle = osSemaphoreCreate(osSemaphore(IMUSem), 1);
+
   /* USER CODE BEGIN RTOS_SEMAPHORES */
-  /* add semaphores, ... */
+  xSemaphoreTake(IMUSemHandle, portMAX_DELAY);
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -91,6 +108,10 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of alive */
   osThreadDef(alive, aliveTask, osPriorityLow, 0, 128);
   aliveHandle = osThreadCreate(osThread(alive), NULL);
+
+  /* definition and creation of IMUUnboxTask */
+  osThreadDef(IMUUnboxTask, IMUUnboxFunc, osPriorityIdle, 0, 512);
+  IMUUnboxTaskHandle = osThreadCreate(osThread(IMUUnboxTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -120,6 +141,33 @@ void aliveTask(void const * argument)
 		osDelay(250);
   }
   /* USER CODE END aliveTask */
+}
+
+/* USER CODE BEGIN Header_IMUUnboxFunc */
+/**
+* @brief Function implementing the IMUUnboxTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_IMUUnboxFunc */
+void IMUUnboxFunc(void const * argument)
+{
+  /* USER CODE BEGIN IMUUnboxFunc */
+	while (stat != 0){
+		stat = HAL_I2C_IsDeviceReady(&hi2c4,addr, 10, 1000); /*only for debug*/
+		addr++;
+		HAL_Delay(50);
+	}
+	BNO085_init();
+	HAL_TIM_Base_Start_IT(&htim7);
+  /* Infinite loop */
+  for(;;)
+  {
+		xSemaphoreTake(IMUSemHandle, portMAX_DELAY);	/*tries to take semaphore*/
+		BNO085_UpdateSensorReading(&myIMU);						/*should fill myIMU fileds with new data, right?*/
+    osDelay(1);
+  }
+  /* USER CODE END IMUUnboxFunc */
 }
 
 /* Private application code --------------------------------------------------*/

@@ -1,7 +1,7 @@
 dcu_dp11\freertos.o: ../Src/freertos.c
 dcu_dp11\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-dcu_dp11\freertos.o: C:\Keil_v5\ARM\ARM_Compiler_5.06u6\Bin\..\include\stddef.h
-dcu_dp11\freertos.o: C:\Keil_v5\ARM\ARM_Compiler_5.06u6\Bin\..\include\stdint.h
+dcu_dp11\freertos.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+dcu_dp11\freertos.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 dcu_dp11\freertos.o: ../Inc/FreeRTOSConfig.h
 dcu_dp11\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 dcu_dp11\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
@@ -56,3 +56,6 @@ dcu_dp11\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h
 dcu_dp11\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 dcu_dp11\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 dcu_dp11\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
+dcu_dp11\freertos.o: ../Inc/BNO085.h
+dcu_dp11\freertos.o: ../Inc/i2c.h
+dcu_dp11\freertos.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h

@@ -36,6 +36,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include "BNO085.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,7 +58,12 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+	uint8_t sendCommand=0;		/*a cosa serve? dove viene inizializzato?*/
+	uint8_t readResult;
+	
+	extern BNO085 myIMU;
+	extern osSemaphoreId IMUSemHandle;
+	extern BaseType_t IMUHigherPriorityTaskWoken;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
