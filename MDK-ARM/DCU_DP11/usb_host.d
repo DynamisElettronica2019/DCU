@@ -3,7 +3,7 @@ dcu_dp11\usb_host.o: ../Inc/usb_host.h
 dcu_dp11\usb_host.o: ../Drivers/CMSIS/Device/ST/STM32F7xx/Include/stm32f7xx.h
 dcu_dp11\usb_host.o: ../Drivers/CMSIS/Device/ST/STM32F7xx/Include/stm32f767xx.h
 dcu_dp11\usb_host.o: ../Drivers/CMSIS/Include/core_cm7.h
-dcu_dp11\usb_host.o: C:\Keil_v5\ARM\ARM_Compiler_5.06u6\Bin\..\include\stdint.h
+dcu_dp11\usb_host.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 dcu_dp11\usb_host.o: ../Drivers/CMSIS/Include/cmsis_version.h
 dcu_dp11\usb_host.o: ../Drivers/CMSIS/Include/cmsis_compiler.h
 dcu_dp11\usb_host.o: ../Drivers/CMSIS/Include/cmsis_armcc.h
@@ -15,7 +15,7 @@ dcu_dp11\usb_host.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_rcc.h
 dcu_dp11\usb_host.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_def.h
 dcu_dp11\usb_host.o: ../Drivers/CMSIS/Device/ST/STM32F7xx/Include/stm32f7xx.h
 dcu_dp11\usb_host.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
-dcu_dp11\usb_host.o: C:\Keil_v5\ARM\ARM_Compiler_5.06u6\Bin\..\include\stddef.h
+dcu_dp11\usb_host.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
 dcu_dp11\usb_host.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_rcc_ex.h
 dcu_dp11\usb_host.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_exti.h
 dcu_dp11\usb_host.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_gpio.h
@@ -58,9 +58,9 @@ dcu_dp11\usb_host.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 dcu_dp11\usb_host.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
 dcu_dp11\usb_host.o: ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_core.h
 dcu_dp11\usb_host.o: ../Inc/usbh_conf.h
-dcu_dp11\usb_host.o: C:\Keil_v5\ARM\ARM_Compiler_5.06u6\Bin\..\include\stdio.h
-dcu_dp11\usb_host.o: C:\Keil_v5\ARM\ARM_Compiler_5.06u6\Bin\..\include\stdlib.h
-dcu_dp11\usb_host.o: C:\Keil_v5\ARM\ARM_Compiler_5.06u6\Bin\..\include\string.h
+dcu_dp11\usb_host.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+dcu_dp11\usb_host.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+dcu_dp11\usb_host.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 dcu_dp11\usb_host.o: ../Inc/main.h
 dcu_dp11\usb_host.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
 dcu_dp11\usb_host.o: ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_def.h

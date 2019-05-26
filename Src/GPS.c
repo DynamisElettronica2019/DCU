@@ -87,8 +87,8 @@ static inline uint8_t GPS_get_messageID(uint8_t * buffer)
 		case 'G': return MESSAGE_TYPE_GGA;
 		case 'L': return MESSAGE_TYPE_GLL;
 		case 'S': return MESSAGE_TYPE_GSA;
-		case 'R': return MESSAGE_TYPE_RMC;
-		case 'V': return MESSAGE_TYPE_VTG;		
+		case 'M': return MESSAGE_TYPE_RMC;
+		case 'T': return MESSAGE_TYPE_VTG;		
 		default: return MESSAGE_TYPE_UNKNOWN;
 	}
 }

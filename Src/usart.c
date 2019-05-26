@@ -322,7 +322,7 @@ extern inline void GPS_RxCallback(void)
 	}
 	
 	/* If last char of the message has been saved */
-	else if(GPS_ParsingChar == '\n') {								
+	if(GPS_ParsingChar == '\n') {								
 		GPS_RawBuffer[i] = '\n';		/* Store the last char*/
 		GPS_ParsingChar = '$';			/* Reinit variable */
 		i = 0;
