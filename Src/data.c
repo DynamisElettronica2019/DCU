@@ -89,10 +89,11 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 		
 		case EFI_TRACTION_CONTROL_ID:
 			DATA_SetEfiIsAlive();
+			fData3 = SLIP_DataCoversion((int16_t)data3) * 10.0f;		/* Taking into account the division by 10 */
 			CAN_ReceivedPacketsCounter[EFI_TRACTION_CONTROL_ID_COUNTER_INDEX]++;
-			decimalToStringUnsigned(data1, &DATA_BlockBuffer[VH_SPEED_CSV_INDEX], 3, 1); 				/* Taking into account the division by 10 */
-			decimalToStringUnsigned(data2, &DATA_BlockBuffer[SLIP_TARGET_CSV_INDEX], 3, 1); 		/* Taking into account the division by 10 */
-			decimalToString((int16_t)data3, &DATA_BlockBuffer[SLIP_CSV_INDEX], 4, 1); 					/* Taking into account the division by 10 */
+			decimalToStringUnsigned(data1, &DATA_BlockBuffer[VH_SPEED_CSV_INDEX], 3, 1); 			/* Taking into account the division by 10 */
+			decimalToStringUnsigned(data2, &DATA_BlockBuffer[SLIP_TARGET_CSV_INDEX], 3, 1); 	/* Taking into account the division by 10 */
+			decimalToString((int16_t)fData3, &DATA_BlockBuffer[SLIP_CSV_INDEX], 4, 1); 					
 			break;
 		
 		case EFI_FUEL_FAN_H2O_LAUNCH_ID_COUNTER_INDEX:
@@ -126,6 +127,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			break;
 		
 		/* SW ID range */
+		
 		case SW_ACQUISITION_DCU_ID:
 			if(data1 == SW_ACQUISITION_CAN_REQUEST) {
 				if(data2 == SW_START_ACQUISITION_CAN_REQUEST) {
@@ -162,7 +164,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			decimalToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[LINEARE_FL_CSV_INDEX], 2, 2);
 			intToString((int16_t)fData2, &DATA_BlockBuffer[LOAD_CELL_FL_CSV_INDEX], 4);
 			decimalToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[BPS_REAR_CSV_INDEX], 2, 2);
-			decimalToString((int16_t)fData4, &DATA_BlockBuffer[STEERING_WHEEL_ANGLE_CSV_INDEX], 3, 1);
+			decimalToString((uint16_t)fData4, &DATA_BlockBuffer[STEERING_WHEEL_ANGLE_CSV_INDEX], 3, 1);
 			break;
 		
 		case DAU_REAR_ID:
@@ -174,7 +176,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			decimalToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[LINEARE_RL_CSV_INDEX], 2, 2);
 			intToString((int16_t)fData2, &DATA_BlockBuffer[LOAD_CELL_RL_CSV_INDEX], 4);
 			decimalToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[LINEARE_RR_CSV_INDEX], 2, 2);
-			intToString((int16_t)fData2, &DATA_BlockBuffer[LOAD_CELL_RR_CSV_INDEX], 4);
+			intToString((int16_t)fData4, &DATA_BlockBuffer[LOAD_CELL_RR_CSV_INDEX], 4);
 			break;
 		
 		case DAU_FL_IR_ID:

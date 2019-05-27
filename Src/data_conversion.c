@@ -44,6 +44,16 @@ extern inline float EXHAUST_TEMPERATURE_DataConversion(uint16_t input)
   return (1.2219f * (float)input);
 }
 
+extern inline float SLIP_DataCoversion(int16_t input)
+{
+	if(input <= (-9999.0f)) {
+		return (-9999.0f);
+	}
+	else {
+		return (float)input;
+	}
+}
+
 extern inline float H20_PUMP_DUTY_CYCLE_DataConversion(uint16_t input)
 {
 	float temp;

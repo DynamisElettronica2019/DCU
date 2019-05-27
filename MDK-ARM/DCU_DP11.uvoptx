@@ -152,7 +152,7 @@
           <Type>0</Type>
           <LineNumber>86</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>2104512</Address>
+          <Address>2104544</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -178,17 +178,7 @@
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>acquisitionState</ItemText>
-        </Ww>
-        <Ww>
-          <count>3</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>GPS_RawBuffer</ItemText>
-        </Ww>
-        <Ww>
-          <count>4</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>(uint8_t)1</ItemText>
+          <ItemText>DATA_StateBuffer</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
@@ -588,7 +578,7 @@
 
   <Group>
     <GroupName>Headre Files</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

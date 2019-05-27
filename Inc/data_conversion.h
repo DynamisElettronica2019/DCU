@@ -24,6 +24,7 @@ extern inline float BATTERY_VOLTAGE_DataConversion(uint16_t input);
 extern inline float TPS_DataConversion(uint16_t input);
 extern inline float WATER_PRESSURE_DataConversion(uint16_t input);
 extern inline float EXHAUST_TEMPERATURE_DataConversion(uint16_t input);
+extern inline float SLIP_DataCoversion(int16_t input);
 extern inline float H20_PUMP_DUTY_CYCLE_DataConversion(uint16_t input);
 extern inline float FUEL_LEVEL_DataConversion(uint16_t input);
 extern inline float LINEAR_DataConversion(uint16_t input);

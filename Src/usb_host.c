@@ -116,9 +116,9 @@ extern inline void USB_SavingTask(void)
 			xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
 		}
 		
-		/*if((timestamp % CLOSE_FILE_INTERVAL) == 0) {
+		if((timestamp % CLOSE_FILE_INTERVAL) == 0) {
 			USB_CloseAndOpenFile();
-		}*/
+		}
 	}
 }
 
@@ -169,8 +169,6 @@ extern inline void USB_EventHandler(uint8_t USB_Event)
 			DATA_ResetAcquisitionStateMachine();
 			FATFS_UnLinkDriver(USBHPath);
 			DATA_ResetUsbReadyState();			/* Update of the status packet */
-			break;
-
 		case CONNECTED_EVENT:
 			if(FATFS_LinkDriver(&USBH_Driver, USBHPath) == 0) {
 				f_mount(&USBHFatFS, (TCHAR const *)USBHPath, 1);
