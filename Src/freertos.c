@@ -269,6 +269,7 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+	
 	/* Start the transmit process */
 	uint8_t usart1LockFlag = UART1_CLEAR_FLAG;
 	xQueueSend(Usart1LockQueueHandle, &usart1LockFlag, 0);
@@ -648,15 +649,15 @@ void saveUsbTask(void const * argument)
 void usbManagerTask(void const * argument)
 {
   /* USER CODE BEGIN usbManageTask */
-	osEvent USB_Event;
+	uint8_t USB_Event;
 	
 	USB_InitStart();		/* USB peripheral config and start */
 	MX_FATFS_Init();		/* FatFS init */
 	
   /* Infinite loop */
   for(;;) {
-		USB_Event = osMessageGet(usbEventQueueHandle, osWaitForever); 		/* Wait for and event */
-		USB_EventHandler(USB_Event.value.v); 															/* Manage USB insertion evets */
+		xQueueReceive(usbEventQueueHandle, &USB_Event, portMAX_DELAY);		/* Wait for and event */
+		USB_EventHandler(USB_Event); 																			/* Manage USB insertion evets */														
 	}
   /* USER CODE END usbManageTask */
 }

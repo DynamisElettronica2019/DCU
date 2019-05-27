@@ -37,6 +37,7 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+uint8_t USB_ISR_Event;
 uint8_t year;
 uint8_t month;
 uint8_t day;
@@ -49,6 +50,7 @@ FRESULT openResult;
 FRESULT closeResult;
 FRESULT writeResult;
 BaseType_t USB_xHigherPriorityTaskWoken = pdFALSE;
+BaseType_t USB_EventHigherPriorityTaskWoken = pdFALSE;
 TCHAR USB_Filename[25];
 extern uint8_t DATA_BlockBuffer [BUFFER_BLOCK_LEN];
 extern actualTimestamp_t actualTimestamp;
@@ -169,12 +171,12 @@ extern inline void USB_EventHandler(uint8_t USB_Event)
 			DATA_ResetUsbReadyState();			/* Update of the status packet */
 			break;
 
-			case CONNECTED_EVENT:
-				if(FATFS_LinkDriver(&USBH_Driver, USBHPath) == 0) {
-					f_mount(&USBHFatFS, (TCHAR const *)USBHPath, 1);
-					DATA_SetUsbReadyState();		/* Update of the status packet */
-				}
-				break;
+		case CONNECTED_EVENT:
+			if(FATFS_LinkDriver(&USBH_Driver, USBHPath) == 0) {
+				f_mount(&USBHFatFS, (TCHAR const *)USBHPath, 1);
+				DATA_SetUsbReadyState();		/* Update of the status packet */
+			}
+			break;
 			
 		default:
 			break;
@@ -204,7 +206,7 @@ static inline void USB_CloseAndOpenFile(void)
 		xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
 	}
 	else {
-		if(f_open(&USBHFile, USB_Filename, FA_CREATE_ALWAYS | FA_WRITE) != FR_OK) {
+		if(f_open(&USBHFile, USB_Filename, FA_OPEN_APPEND | FA_WRITE) != FR_OK) {
 			DATA_ResetAcquisitionState();		/* Update of the status packet */
 			DATA_PacketReset();							/* Reset the data saving buffer */
 			errorLetter = USB_OPEN_FILE_ERROR;
@@ -285,25 +287,22 @@ void MX_USB_HOST_Init(void)
 static void USBH_UserProcess  (USBH_HandleTypeDef *phost, uint8_t id)
 {
   /* USER CODE BEGIN CALL_BACK_1 */
-	uint8_t temp;
-	BaseType_t usbEvent = pdFALSE;
-	
 	switch(id) {
     case HOST_USER_SELECT_CONFIGURATION:
       break;
       
     case HOST_USER_DISCONNECTION:
       Appli_state = APPLICATION_DISCONNECT;
-			temp = DISCONNECTION_EVENT;
-			xQueueSendFromISR(usbEventQueueHandle, &temp, &usbEvent);
-			portYIELD_FROM_ISR(usbEvent); 
+			USB_ISR_Event = DISCONNECTION_EVENT;
+			xQueueSendFromISR(usbEventQueueHandle, &USB_ISR_Event, &USB_EventHigherPriorityTaskWoken);
+			portYIELD_FROM_ISR(USB_EventHigherPriorityTaskWoken); 
 			break;
       
     case HOST_USER_CLASS_ACTIVE:
       Appli_state = APPLICATION_READY;
-			temp = CONNECTED_EVENT;
-			xQueueSendFromISR(usbEventQueueHandle, &temp, &usbEvent);
-			portYIELD_FROM_ISR(usbEvent); 
+			USB_ISR_Event = CONNECTED_EVENT;
+			xQueueSendFromISR(usbEventQueueHandle, &USB_ISR_Event, &USB_EventHigherPriorityTaskWoken);
+			portYIELD_FROM_ISR(USB_EventHigherPriorityTaskWoken); 
 			break;
 
     case HOST_USER_CONNECTION:
