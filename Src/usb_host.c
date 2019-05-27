@@ -109,7 +109,6 @@ extern inline void USB_SavingTask(void)
 	
 	if(DATA_GetAcquisitionState() == STATE_ON) {
 		timestamp = getDataTimestamp();			/* Get data timestamp private variable */
-		incrementDataTimestamp();						/* Incremente data timestamp private variable by 10 ms */
 		uint32ToString(timestamp, &DATA_BlockBuffer[DATA_BlockWriteIndex][TIMESTAMP_CSV_INDEX], 7);
 		DATA_SwapDataPackePointers();
 		writeResult = f_write(&USBHFile, DATA_BlockBuffer[DATA_BlockReadIndex], BUFFER_BLOCK_LEN, (void *)&bytesWritten);

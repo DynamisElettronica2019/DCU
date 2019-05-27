@@ -257,23 +257,24 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	
 	/* Timer 5: 1 Hz */
 	if (htim->Instance == TIM5) {	
-		CAN_SendPackets(); 										/* CAN send: temperature, currents, voltages and acquisition status */
-		DATA_ResetEfiIsAlive();								/* Reset EFI alive flag */
-		TELEMETRY_StateSendTimCallback(); 		/* Telemetry DCU state packet */
-		ADC_SamplingFunction(); 							/* ADC sampling: debug and aux channels*/
-		GPIO_AuxSamplingFunction(); 					/* GPIO aux sampling */
-		timestampUpdate();										/* Update timestamp struct */
+		CAN_SendPackets(); 									/* CAN send: temperature, currents, voltages and acquisition status */
+		DATA_ResetEfiIsAlive();							/* Reset EFI alive flag */
+		TELEMETRY_StateSendTimCallback(); 	/* Telemetry DCU state packet */
+		ADC_SamplingFunction(); 						/* ADC sampling: debug and aux channels*/
+		GPIO_AuxSamplingFunction(); 				/* GPIO aux sampling */
+		timestampUpdate();									/* Update timestamp struct */
 	}
 
 	/* Timer 6: 10 Hz */
 	if(htim->Instance == TIM6) {
-		DATA_CheckEfiIsAlive();								/* Check EFI status: switch on/off automatic start acquisition */
-		TELEMETRY_DataSendTimCallback();			/* Send telemetry data */
+		DATA_CheckEfiIsAlive();							/* Check EFI status: switch on/off automatic start acquisition */
+		TELEMETRY_DataSendTimCallback();		/* Send telemetry data */
 	}
 
 	/* Timer 7: 100 Hz */
 	if(htim->Instance == TIM7) {		
-		USB_SavingRequest();									/* USB data saving */
+		incrementDataTimestamp();		/* Incremente data timestamp private variable by 10 ms */
+		USB_SavingRequest();				/* USB data saving */
 	}
   
   /* USER CODE END Callback 1 */
