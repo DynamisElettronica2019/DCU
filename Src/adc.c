@@ -35,7 +35,8 @@ float _12vTemp = 0.0f;
 float _3v3Temp = 0.0f;
 float ADC_BufferConvertedDebug [ADC_CONVERTED_DEBUG_DATA_LEN];
 float ADC_BufferConvertedAux [ADC_CONVERTED_AUX_DATA_LEN];
-extern uint8_t DATA_BlockBuffer [BUFFER_BLOCK_LEN];
+extern uint8_t DATA_BlockWriteIndex;
+extern uint8_t DATA_BlockBuffer [BUFFER_POINTERS_NUMBER][BUFFER_BLOCK_LEN];
 extern osSemaphoreId adc1SemaphoreHandle;
 extern osSemaphoreId adc2SemaphoreHandle;
 /* USER CODE END 0 */
@@ -386,7 +387,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 extern inline void ADC_SamplingFunction(void)
 {
 	HAL_ADC_Start_DMA(&hadc1,ADC1_BufferRaw, ADC1_NUMBER_OF_CHANNELS);			/* Start ADC 1 in DMA mode */
-	//HAL_ADC_Start_DMA(&hadc2,ADC2_BufferRaw, ADC2_NUMBER_OF_CHANNELS); 		/* Start ADC 2 in DMA mode */
+	HAL_ADC_Start_DMA(&hadc2,ADC2_BufferRaw, ADC2_NUMBER_OF_CHANNELS); 			/* Start ADC 2 in DMA mode */
 }
 
 extern inline void ADC_ReadDataDebug(void)
@@ -405,13 +406,13 @@ extern inline void ADC_ReadDataDebug(void)
 		_5vTemp = ADC_BufferConvertedDebug[_5V_DCU_POSITION] * 100.0f;
 		_12vTemp = ADC_BufferConvertedDebug[_12V_POST_DIODES_SENSE_POSITION] * 100.0f;
 		_3v3Temp = ADC_BufferConvertedDebug[_3V3_MCU_POSITION] * 100.0f;
-		intToStringUnsigned(ADC_BufferConvertedDebug[DCU_TEMP_SENSE_POSITION], &DATA_BlockBuffer[DCU_TEMP_CSV_INDEX], 2);
-		intToStringUnsigned(ADC_BufferConvertedDebug[MAIN_CURRENT_SENSE_POSITION], &DATA_BlockBuffer[DCU_CURRENT_CSV_INDEX], 4);
-		intToStringUnsigned(ADC_BufferConvertedDebug[DCU_CURRENT_SENSE_POSITION], &DATA_BlockBuffer[DUC_3V3_CURRENT_CSV_INDEX], 3);
-		decimalToStringUnsigned((uint16_t)_5vTemp, &DATA_BlockBuffer[DCU_5V_VOLTAGE_CSV_INDEX], 1, 2);
-		decimalToStringUnsigned((uint16_t)_12vTemp, &DATA_BlockBuffer[DCU_12V_VOLTAGE_CSV_INDEX], 2, 2);
-		decimalToStringUnsigned((uint16_t)_3v3Temp, &DATA_BlockBuffer[DCU_3V3_VOLTAGE_CSV_INDEX], 1, 2);
-		intToStringUnsigned(ADC_BufferConvertedDebug[XBEE_CURRENT_SENSE_POSITION], &DATA_BlockBuffer[XBEE_CURRENT_CSV_INDEX], 3);
+		intToStringUnsigned(ADC_BufferConvertedDebug[DCU_TEMP_SENSE_POSITION], &DATA_BlockBuffer[DATA_BlockWriteIndex][DCU_TEMP_CSV_INDEX], 2);
+		intToStringUnsigned(ADC_BufferConvertedDebug[MAIN_CURRENT_SENSE_POSITION], &DATA_BlockBuffer[DATA_BlockWriteIndex][DCU_CURRENT_CSV_INDEX], 4);
+		intToStringUnsigned(ADC_BufferConvertedDebug[DCU_CURRENT_SENSE_POSITION], &DATA_BlockBuffer[DATA_BlockWriteIndex][DUC_3V3_CURRENT_CSV_INDEX], 3);
+		decimalToStringUnsigned((uint16_t)_5vTemp, &DATA_BlockBuffer[DATA_BlockWriteIndex][DCU_5V_VOLTAGE_CSV_INDEX], 1, 2);
+		decimalToStringUnsigned((uint16_t)_12vTemp, &DATA_BlockBuffer[DATA_BlockWriteIndex][DCU_12V_VOLTAGE_CSV_INDEX], 2, 2);
+		decimalToStringUnsigned((uint16_t)_3v3Temp, &DATA_BlockBuffer[DATA_BlockWriteIndex][DCU_3V3_VOLTAGE_CSV_INDEX], 1, 2);
+		intToStringUnsigned(ADC_BufferConvertedDebug[XBEE_CURRENT_SENSE_POSITION], &DATA_BlockBuffer[DATA_BlockWriteIndex][XBEE_CURRENT_CSV_INDEX], 3);
 	}
 }
 

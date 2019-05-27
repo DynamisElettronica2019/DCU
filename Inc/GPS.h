@@ -156,6 +156,8 @@ static inline void  GPS_GSA_conversion(uint8_t * buffer);
 static inline void  GPS_RMC_conversion(uint8_t * buffer);
 static inline void  GPS_VTG_conversion(uint8_t * buffer);
 static inline float GPS_minuts_conversion(uint8_t decimi, uint8_t  centesimi, uint8_t millesimi, uint8_t decimillesimi, uint8_t centimillesimi);
+static inline void GPS_SpeedConversion(uint8_t *buffer);
+static inline void GPS_SpeedSave(uint8_t *buffer);
 static inline float GPS_speed_decimal_conversion(uint8_t decimi, uint8_t  centesimi, uint8_t millesimi);
 static inline uint16_t GPS_StrToInt(uint8_t centinaia, uint8_t decine, uint8_t unita);
 static inline float GPS_str_to_float(uint8_t decimi, uint8_t  centesimi);
