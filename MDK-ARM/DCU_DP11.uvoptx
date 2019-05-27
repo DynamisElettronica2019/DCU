@@ -156,17 +156,7 @@
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>DATA_StateBuffer</ItemText>
-        </Ww>
-        <Ww>
-          <count>2</count>
-          <WinNumber>1</WinNumber>
           <ItemText>\\DCU_DP11\../Src/usb_host.c\Appli_state</ItemText>
-        </Ww>
-        <Ww>
-          <count>3</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>GPS_RawBuffer</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
