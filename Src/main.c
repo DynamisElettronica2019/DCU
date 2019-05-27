@@ -59,7 +59,6 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
 extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
 /* USER CODE END PV */
 
@@ -122,7 +121,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-	USER_SystemInit();
+
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
@@ -234,21 +233,6 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 	if(huart->Instance == USART1) {
 		UART1_TxCallback();
 	}
-}
-
-static inline void USER_SystemInit(void)
-{
-	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET); 			/* Green LED off as default */
-	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET); 		/* Yellow LED off as default */
-	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET); 					/* Red LED off as default */
-	DATA_PacketReset();																													/* Reset the data saving buffer */
-	CAN_PacketCounterReset();																										/* Reset the CAN packets recevide counter */
-	ADC_BuffersInit();																													/* ADC buffer initialization */
-	GPS_Init();																																	/* GPS init */
-	USB_InitStart();																														/* USB peripheral config and start */
-	MX_FATFS_Init();																														/* FatFS init */
-	DATA_SetTelemetryState();																										/* Start telemetry as default */
-	CAN_Start();																																/* CAN filter config and start */
 }
 
 /* USER CODE END 4 */

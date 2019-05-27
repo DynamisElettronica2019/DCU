@@ -32,10 +32,10 @@
 #include "can.h"
 #include "usart.h"
 #include "usb_host.h"
-#include "data.h"
+#include "fatfs.h"
 #include "rtc.h"
 #include "GPS.h"
-#include "string.h"
+#include "data.h"
 #include "telemetry.h"
 #include "timestamp.h"
 /* USER CODE END Includes */
@@ -376,9 +376,12 @@ void aliveTask(void const * argument)
 {
 
   /* USER CODE BEGIN aliveTask */
-	HAL_TIM_Base_Start_IT(&htim5); 				/* Start timer 5 in interrupt mode */
-	HAL_TIM_Base_Start_IT(&htim6); 				/* Start timer 6 in interrupt mode */
-	HAL_TIM_Base_Start_IT(&htim7); 				/* Start timer 7 in interrupt mode */
+	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET); 			/* Green LED off as default */
+	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET); 		/* Yellow LED off as default */
+	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET); 					/* Red LED off as default */
+	HAL_TIM_Base_Start_IT(&htim5); 		/* Start timer 5 (1 Hz) in interrupt mode */
+	HAL_TIM_Base_Start_IT(&htim6); 		/* Start timer 6 (10 Hz) in interrupt mode */
+	HAL_TIM_Base_Start_IT(&htim7); 		/* Start timer 7 (100 Hz) in interrupt mode */
   
 	/* Infinite loop */
   for(;;) {
@@ -398,6 +401,8 @@ void aliveTask(void const * argument)
 void adc1ConversionTask(void const * argument)
 {
   /* USER CODE BEGIN adc1ConversionTask */
+	ADC_BuffersInit();		/* ADC buffer initialization */
+	
   /* Infinite loop */
   for(;;) {
 		xSemaphoreTake(adc1SemaphoreHandle, portMAX_DELAY); 		/* Unlock when DMA callback is called */
@@ -499,6 +504,8 @@ void SendStatesFunc(void const * argument)
   uint8_t usartLockFlag;
 	uint8_t strToSend[BUFFER_STATE_LEN/2+5];
 	uint16_t strToSenLen;
+	
+	DATA_SetTelemetryState();			/* Start telemetry as default */
 	
 	/* Infinite loop */
   for(;;) {
@@ -643,6 +650,9 @@ void usbManagerTask(void const * argument)
   /* USER CODE BEGIN usbManageTask */
 	osEvent USB_Event;
 	
+	USB_InitStart();		/* USB peripheral config and start */
+	MX_FATFS_Init();		/* FatFS init */
+	
   /* Infinite loop */
   for(;;) {
 		USB_Event = osMessageGet(usbEventQueueHandle, osWaitForever); 		/* Wait for and event */
@@ -687,6 +697,10 @@ void canFifo0UnpackTask(void const * argument)
 {
   /* USER CODE BEGIN canFifo0UnpackTask */
 	CAN_RxPacket_t CAN_UnpackedData;
+	
+	DATA_PacketReset();					/* Reset the data saving buffer */
+	CAN_PacketCounterReset();		/* Reset the CAN packets recevide counter */
+	CAN_Start();								/* CAN filter config and start */
 	
   /* Infinite loop */
   for(;;) {		
@@ -792,7 +806,8 @@ void automaticStartAcquisitionMonitoringTask(void const * argument)
 void GPSUnboxingFunc(void const * argument)
 {
   /* USER CODE BEGIN GPSUnboxingFunc */
-	HAL_UART_Receive_DMA(&huart2, &GPS_FirstChar, 1);
+	GPS_Init();																					/* GPS init */
+	HAL_UART_Receive_DMA(&huart2, &GPS_FirstChar, 1);		/* Start UART RX */
   
 	/* Infinite loop */
   for(;;) {
