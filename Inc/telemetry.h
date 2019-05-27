@@ -4,7 +4,7 @@
 #include "data.h"
 
 #define BUFFER_COMMAND_LEN          	(uint8_t)4
-#define BUFFER_RTC_SET_LEN          	(uint8_t)20
+#define BUFFER_RTC_SET_LEN          	(uint8_t)18
 #define ERROR_MSG_LEN               	(uint8_t)4
 #define COMMAND_ACK_MSG_LEN         	(uint8_t)4
 #define ERROR_MSG_IDENTIFIER_POS    	(uint8_t)2
@@ -21,8 +21,6 @@
 #define RESET_TELEM_ID              	(uint8_t)'M'
 #define START_ACQ_ID                	(uint8_t)'B'
 #define STOP_ACQ_ID                 	(uint8_t)'V'
-#define GIVE_RTC_TIME_ID            	(uint8_t)'J'
-#define GIVE_RTC_DATE_ID            	(uint8_t)'H'
 #define SET_RTC_ID                  	(uint8_t)'R'
 #define CMD_READ_ERR_ID          			(uint8_t)'B'
 

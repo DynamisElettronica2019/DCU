@@ -36,8 +36,8 @@ extern RTC_HandleTypeDef hrtc;
 extern void rtcPeripheralInit(void);
 extern void resetRtcTime(void);
 extern void resetRtcDate(void);
-extern inline void setRtcTime(uint8_t hours, uint8_t minutes, uint8_t seconds);
-extern inline void setRtcDate(uint8_t weekday, uint8_t month, uint8_t dateNumber, uint8_t year);
+extern inline uint8_t RTC_SetTimeDataFromTelemetry(uint8_t *buffer);
+static inline uint8_t getByteFromString(uint8_t char1, uint8_t char2);	 
 /* USER CODE END Private defines */
 
 void MX_RTC_Init(void);

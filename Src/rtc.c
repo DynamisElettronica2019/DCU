@@ -142,23 +142,34 @@ extern void resetRtcDate(void)
   HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BCD);
 }
 
-extern inline void setRtcTime(uint8_t hours, uint8_t minutes, uint8_t seconds)
+extern inline uint8_t RTC_SetTimeDataFromTelemetry(uint8_t *buffer)
 {
-	time.Hours = hours;
-  time.Minutes = minutes;
-  time.Seconds = seconds;
+	HAL_StatusTypeDef RTC_ConfgiResult;
+	
+	time.Hours = getByteFromString(buffer[0], buffer[1]);;
+  time.Minutes = getByteFromString(buffer[3], buffer[4]);;
+  time.Seconds = getByteFromString(buffer[6], buffer[7]);;
   time.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
   time.StoreOperation = RTC_STOREOPERATION_RESET;
-  HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BIN);
+	date.WeekDay = RTC_WEEKDAY_MONDAY;
+  date.Month = getByteFromString(buffer[12], buffer[13]);;
+  date.Date = getByteFromString(buffer[9], buffer[10]);;
+  date.Year = getByteFromString(buffer[15], buffer[16]);;
+  RTC_ConfgiResult = HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BIN);
+	RTC_ConfgiResult = HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
+	return RTC_ConfgiResult;
 }
 
-extern inline void setRtcDate(uint8_t weekday, uint8_t month, uint8_t dateNumber, uint8_t year)
+static inline uint8_t getByteFromString(uint8_t char1, uint8_t char2)
 {
-	date.WeekDay = weekday;
-  date.Month = month;
-  date.Date = dateNumber;
-  date.Year = year;
-  HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
+  uint8_t byte;
+  uint8_t temp;
+  
+  temp = char1 - '0';
+  byte = temp * 10;
+  temp = char2 - '0';
+  byte = byte + temp;
+  return byte;
 }
 
 /* USER CODE END 1 */

@@ -60,3 +60,4 @@ dcu_dp11\telemetry.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 dcu_dp11\telemetry.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 dcu_dp11\telemetry.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
 dcu_dp11\telemetry.o: ../Inc/usart.h
+dcu_dp11\telemetry.o: ../Inc/rtc.h

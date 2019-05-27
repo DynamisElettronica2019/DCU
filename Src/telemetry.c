@@ -1,6 +1,7 @@
 #include "telemetry.h"
 #include "cmsis_os.h"
 #include "usart.h"
+#include "rtc.h"
 #include "data.h"
 
 uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
@@ -38,16 +39,20 @@ extern inline void TELEMETRY_Receive(void)
 	
 	if(setRtcComing == 1) { 																															/* If you are waiting for set rtc parameter */
 		if(setRtcReceivedBuffer[BUFFER_RTC_SET_LEN - 1] == MESSAGE_END_ID) { 								/* Check if message ends correctly */
-			/* Put here the code for the RTC setting */
-			xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);							/* Lock if DMA is in use */
-			commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = SET_RTC_ID; 													/* Set the correct identifier */
-			HAL_UART_Transmit_DMA(&huart1, commandAckMsg, COMMAND_ACK_MSG_LEN); 							/* Transmit ack message */
+			if(RTC_SetTimeDataFromTelemetry(setRtcReceivedBuffer) == HAL_OK) {
+				xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);							/* Lock if DMA is in use */
+				commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = SET_RTC_ID; 													/* Set the correct identifier */
+				HAL_UART_Transmit_DMA(&huart1, commandAckMsg, COMMAND_ACK_MSG_LEN); 							/* Transmit ack message */
+			}
+			
 			HAL_UART_Receive_DMA(&huart1, telemetryReceivedBuffer, BUFFER_COMMAND_LEN); 			/* Re enable receiving */
 		}
 		else { 																																							/* If message does not end correctly */
 			xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0);			 					/* Add error to queue */
 			HAL_UART_Receive_DMA(&huart1, telemetryReceivedBuffer, BUFFER_COMMAND_LEN); 			/* Re enable receiving */
 		}
+		
+		setRtcComing = 0;
 	}
 	
 	else { 																																								/* If you are waiting for standard message */
@@ -82,20 +87,6 @@ extern inline void TELEMETRY_Receive(void)
 						xQueueSendFromISR(startAcquisitionEventHandle, &startAquisitionEvent, &startAcquisition_xHigherPriorityTaskWoken);			
 						xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);				/* Lock if DMA is in use */
 						commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = STOP_ACQ_ID; 										/* Set the correct identifier */
-						HAL_UART_Transmit_DMA(&huart1, commandAckMsg, COMMAND_ACK_MSG_LEN); 				/* Transmit ack message */
-						break;
-
-					case GIVE_RTC_TIME_ID:
-						/* Put here the code necessary for giving RTC time */
-						xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);				/* Lock if DMA is in use */
-						commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = GIVE_RTC_TIME_ID; 							/* Set the correct identifier */
-						HAL_UART_Transmit_DMA(&huart1, commandAckMsg, COMMAND_ACK_MSG_LEN); 				/* Transmit ack message */
-						break;
-
-					case GIVE_RTC_DATE_ID:
-						/* Here put the code necessary for giving RTC data */
-						xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);				/* Lock if DMA is in use */
-						commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = GIVE_RTC_DATE_ID; 							/* Set the correct identifier */
 						HAL_UART_Transmit_DMA(&huart1, commandAckMsg, COMMAND_ACK_MSG_LEN); 				/* Transmit ack message */
 						break;
 

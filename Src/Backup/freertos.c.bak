@@ -326,7 +326,7 @@ void MX_FREERTOS_Init(void) {
   saveUsbHandle = osThreadCreate(osThread(saveUsb), NULL);
 
   /* definition and creation of usbManager */
-  osThreadDef(usbManager, usbManagerTask, osPriorityAboveNormal, 0, 512);
+  osThreadDef(usbManager, usbManagerTask, osPriorityLow, 0, 512);
   usbManagerHandle = osThreadCreate(osThread(usbManager), NULL);
 
   /* definition and creation of startAcquisitionStateMachine */
@@ -828,13 +828,23 @@ void GPSUnboxingFunc(void const * argument)
 /* USER CODE END Header_updateTimestampTask */
 void updateTimestampTask(void const * argument)
 {
-  /* USER CODE BEGIN updateTimestampTask */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
+  /* USER CODE BEGIN updateTimestampFromRtcTask */
+	rtcPeripheralInit();				/* RTC peripheral init only */
+	resetRtcTime();							/* RTC time values reset */
+	resetRtcDate();							/* RTC date values reset */
+	resetActualTimestamp();			/* Reset the timestamp struct */
+	
+	/* Infinite loop */
+  for(;;) {
+    xSemaphoreTake(updateTimestampSemaphoreHandle, portMAX_DELAY); 			/* Unlock when timer callback is called */
+		
+		/* You must call GetData after GetTime to unlock the data */
+		setTimestampTimeFormRtc(); 																					/* Set time values in the timestamp struct, from RTC */
+		setTimestampDateFormRtc(); 																					/* Set date values in the timestamp struct, from RTC */
+		setTimestampTimeFormGps();																					/* Set time values in the timestamp struct, from GPS */
+		setTimestampDateFormGps();																					/* Set date values in the timestamp struct, from GPS*/
   }
-  /* USER CODE END updateTimestampTask */
+  /* USER CODE END updateTimestampFromRtcTask */
 }
 
 /* Private application code --------------------------------------------------*/
