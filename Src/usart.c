@@ -299,7 +299,6 @@ extern inline void UART1_TxCallback(void)
 		
 		/* If the flag is unrecognised, raise eventually an error and return to normal mode */
 		default:
-			/* Eventual error throwing code to be inserted here */
 			xQueueSendFromISR(Usart1LockQueueHandle, &usart1LockFlag, &UART1_TxHigherPriorityTaskWoken);		/* Send wake up signal to task when DMA is clear */
 			portYIELD_FROM_ISR(UART1_TxHigherPriorityTaskWoken); 																						/* Do context-switch if needed */
 			break;
@@ -308,8 +307,10 @@ extern inline void UART1_TxCallback(void)
 
 extern inline void UART1_RxCallback(void)
 {
-	xSemaphoreGiveFromISR(receiveCommandSemaphoreHandle, &UART1_RxHigherPriorityTaskWoken); 		/* Give semaphore to task when DMA is clear */
-	portYIELD_FROM_ISR(UART1_RxHigherPriorityTaskWoken); 																				/* Do context-switch if needed */
+	if(receiveCommandSemaphoreHandle != NULL) {																									/* Check at the beginning if the semaphore has been already created */
+		xSemaphoreGiveFromISR(receiveCommandSemaphoreHandle, &UART1_RxHigherPriorityTaskWoken); 	/* Give semaphore to task when DMA is clear */
+		portYIELD_FROM_ISR(UART1_RxHigherPriorityTaskWoken); 																			/* Do context-switch if needed */
+	}
 }
 
 extern inline void GPS_RxCallback(void)
@@ -326,8 +327,11 @@ extern inline void GPS_RxCallback(void)
 		GPS_RawBuffer[i] = '\n';		/* Store the last char*/
 		GPS_ParsingChar = '$';			/* Reinit variable */
 		i = 0;
-		xSemaphoreGiveFromISR(GPSUnboxSemHandle, &GPS_xHigherPriorityTaskWoken);		/* Unlock the unboxing task*/
-		portYIELD_FROM_ISR(GPS_xHigherPriorityTaskWoken);
+		
+		if(GPSUnboxSemHandle != NULL) {		/* Check at the beginning if the semaphore has been already created */
+			xSemaphoreGiveFromISR(GPSUnboxSemHandle, &GPS_xHigherPriorityTaskWoken);		/* Unlock the unboxing task*/
+			portYIELD_FROM_ISR(GPS_xHigherPriorityTaskWoken);
+		}
 	}
 	
 	/* If last char of the message has not arrived yet, keep searching for it */
