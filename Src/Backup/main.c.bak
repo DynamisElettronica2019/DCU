@@ -59,7 +59,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -84,7 +84,6 @@ int main(void)
 
   /* USER CODE END 1 */
   
-
   /* Enable I-Cache---------------------------------------------------------*/
   SCB_EnableICache();
 
@@ -262,7 +261,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		DATA_ResetEfiIsAlive();							/* Reset EFI alive flag */
 		TELEMETRY_StateSendTimCallback(); 	/* Telemetry DCU state packet */
 		ADC_SamplingFunction(); 						/* ADC sampling: debug and aux channels*/
-		GPIO_AuxSamplingFunction(); 				/* GPIO aux sampling */
+		//GPIO_AuxSamplingFunction(); 			/* GPIO aux sampling */
 		timestampUpdate();									/* Update timestamp struct */
 	}
 

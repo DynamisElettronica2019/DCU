@@ -287,8 +287,8 @@ extern inline void UART1_TxCallback(void)
 		
 		/* To send second part of data, unlock the secont part tx task and keep the UART semaphore locked to avoit its use from other tasks */
 		case SECOND_HALF_TX_FLAG:
-			xSemaphoreGiveFromISR(sendFollowingDataSemaphoreHandle, &UART1_TxHigherPriorityTaskWoken); 		/* Give semaphore to task when DMA is clear */
-			portYIELD_FROM_ISR(UART1_TxHigherPriorityTaskWoken); 																					/* Do context-switch if needed */
+			xSemaphoreGiveFromISR(sendFollowingDataSemaphoreHandle, &UART1_TxHigherPriorityTaskWoken); 			/* Give semaphore to task when DMA is clear */
+			portYIELD_FROM_ISR(UART1_TxHigherPriorityTaskWoken); 																						/* Do context-switch if needed */
 			break;
 		
 		/* To return to normal mode, unlock the UART locking semaphore */
@@ -333,15 +333,13 @@ extern inline void GPS_RxCallback(void)
 			portYIELD_FROM_ISR(GPS_xHigherPriorityTaskWoken);
 		}
 	}
-	
-	/* If last char of the message has not arrived yet, keep searching for it */
-	else {			
+	else {		/* If last char of the message has not arrived yet, keep searching for it */	
 	 HAL_UART_Receive_DMA(&huart2, &GPS_FirstChar, 1);
 	}
 }
 
 extern void USART2_Init_38400(void)
-{	
+{
 	huart2.Instance = USART2;
   huart2.Init.BaudRate = 38400;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;

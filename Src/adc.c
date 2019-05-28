@@ -387,7 +387,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 extern inline void ADC_SamplingFunction(void)
 {
 	HAL_ADC_Start_DMA(&hadc1,ADC1_BufferRaw, ADC1_NUMBER_OF_CHANNELS);			/* Start ADC 1 in DMA mode */
-	HAL_ADC_Start_DMA(&hadc2,ADC2_BufferRaw, ADC2_NUMBER_OF_CHANNELS); 			/* Start ADC 2 in DMA mode */
+	//HAL_ADC_Start_DMA(&hadc2,ADC2_BufferRaw, ADC2_NUMBER_OF_CHANNELS); 		/* Start ADC 2 in DMA mode */
 }
 
 extern inline void ADC_ReadDataDebug(void)

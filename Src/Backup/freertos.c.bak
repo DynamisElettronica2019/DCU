@@ -63,7 +63,7 @@ extern uint8_t DATA_BlockBuffer [BUFFER_POINTERS_NUMBER][BUFFER_BLOCK_LEN];
 extern uint8_t DATA_StateBuffer [BUFFER_STATE_LEN];
 extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
 extern uint8_t GPS_RawBuffer [GPS_MAX_LENGTH];
-extern BaseType_t xGPSHigherPriorityTaskWoken;
+extern BaseType_t GPS_xHigherPriorityTaskWoken;
 /* USER CODE END Variables */
 osThreadId aliveHandle;
 osThreadId adc1ConversionHandle;
@@ -326,7 +326,7 @@ void MX_FREERTOS_Init(void) {
   saveUsbHandle = osThreadCreate(osThread(saveUsb), NULL);
 
   /* definition and creation of usbManager */
-  osThreadDef(usbManager, usbManagerTask, osPriorityLow, 0, 512);
+  osThreadDef(usbManager, usbManagerTask, osPriorityAboveNormal, 0, 512);
   usbManagerHandle = osThreadCreate(osThread(usbManager), NULL);
 
   /* definition and creation of startAcquisitionStateMachine */
@@ -376,7 +376,6 @@ void MX_FREERTOS_Init(void) {
 /* USER CODE END Header_aliveTask */
 void aliveTask(void const * argument)
 {
-
   /* USER CODE BEGIN aliveTask */
 	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET); 			/* Green LED off as default */
 	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET); 		/* Yellow LED off as default */
