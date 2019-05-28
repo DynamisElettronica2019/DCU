@@ -8,6 +8,7 @@ extern inline void decimalToStringUnsigned(uint16_t i, uint8_t *s, uint8_t num_I
 extern inline void intToString(int16_t i, uint8_t *s, uint8_t size);
 extern inline void intToStringUnsigned(uint16_t i, uint8_t *s, uint8_t size);
 extern inline void uint32ToString(uint32_t i, uint8_t *s, uint8_t size);
+extern inline uint8_t getByteFromString(uint8_t char1, uint8_t char2);	
 static inline uint16_t power(uint16_t base, uint16_t num);
 
 #endif

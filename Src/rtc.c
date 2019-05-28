@@ -21,6 +21,8 @@
 #include "rtc.h"
 
 /* USER CODE BEGIN 0 */
+#include "string_utility.h"
+
 RTC_DateTypeDef date;
 RTC_TimeTypeDef time;
 /* USER CODE END 0 */
@@ -158,18 +160,6 @@ extern inline uint8_t RTC_SetTimeDataFromTelemetry(uint8_t *buffer)
   RTC_ConfgiResult = HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BIN);
 	RTC_ConfgiResult = HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
 	return RTC_ConfgiResult;
-}
-
-static inline uint8_t getByteFromString(uint8_t char1, uint8_t char2)
-{
-  uint8_t byte;
-  uint8_t temp;
-  
-  temp = char1 - '0';
-  byte = temp * 10;
-  temp = char2 - '0';
-  byte = byte + temp;
-  return byte;
 }
 
 /* USER CODE END 1 */
