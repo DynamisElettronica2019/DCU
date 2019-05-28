@@ -375,6 +375,7 @@ void MX_FREERTOS_Init(void) {
 /* USER CODE END Header_aliveTask */
 void aliveTask(void const * argument)
 {
+
   /* USER CODE BEGIN aliveTask */
 	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET); 			/* Green LED off as default */
 	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET); 		/* Yellow LED off as default */
@@ -807,7 +808,7 @@ void GPSUnboxingFunc(void const * argument)
 {
   /* USER CODE BEGIN GPSUnboxingFunc */
 	GPS_Init();																					/* GPS init */
-	HAL_UART_Receive_DMA(&huart2, &GPS_FirstChar, 1);		/* Start UART RX */
+	HAL_UART_Receive_IT(&huart2, &GPS_FirstChar, 1);		/* Start UART RX */
   
 	/* Infinite loop */
   for(;;) {
@@ -827,10 +828,10 @@ void GPSUnboxingFunc(void const * argument)
 void updateTimestampTask(void const * argument)
 {
   /* USER CODE BEGIN updateTimestampFromRtcTask */
-	rtcPeripheralInit();				/* RTC peripheral init only */
-	resetRtcTime();							/* RTC time values reset */
-	resetRtcDate();							/* RTC date values reset */
 	resetActualTimestamp();			/* Reset the timestamp struct */
+	rtcPeripheralInit();				/* RTC peripheral init only */
+	//resetRtcTime();						/* RTC time values reset */
+	//resetRtcDate();						/* RTC date values reset */
 	
 	/* Infinite loop */
   for(;;) {
@@ -844,7 +845,6 @@ void updateTimestampTask(void const * argument)
   }
   /* USER CODE END updateTimestampFromRtcTask */
 }
-
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
 

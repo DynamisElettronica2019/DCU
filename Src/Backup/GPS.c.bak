@@ -80,7 +80,7 @@ extern inline void GPS_DataConversion(uint8_t * GPSRawBuffer)
 			break;
 	}
 	
-	HAL_UART_Receive_DMA(&huart2, &GPS_FirstChar, 1);			/* At the end of the conversion, restar searching for first char $ */
+	HAL_UART_Receive_IT(&huart2, &GPS_FirstChar, 1);			/* At the end of the conversion, restar searching for first char $ */
 }
 
 static inline uint8_t GPS_get_messageID(uint8_t * buffer)

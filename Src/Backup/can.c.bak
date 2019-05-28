@@ -161,12 +161,12 @@ extern inline void CAN_SendPackets(void)
 
 extern inline void CAN_SendDebugPackets(void)
 {
-	uint32_t packetMailbox;
+	//uint32_t packetMailbox;
 	
 	if(DATA_GetAcquisitionState() == STATE_ON) {
 		toSW_AcquisitionState = TO_SW_ACQUISITION_IS_ON;
 	}
-	else if(DATA_GetAcquisitionState() == STATE_OFF) {
+	else {
 		toSW_AcquisitionState = TO_SW_ACQUISITION_IS_OFF;
 	}
 	
@@ -184,8 +184,8 @@ extern inline void CAN_SendDebugPackets(void)
 	CAN_DebugPacket1Packet.packetHeader.IDE = CAN_ID_STD;
 	CAN_DebugPacket1Packet.packetHeader.DLC = 8;
 	CAN_DebugPacket1Packet.packetHeader.TransmitGlobalTime = DISABLE;
-	HAL_CAN_AddTxMessage(&hcan1, &CAN_DebugPacket1Packet.packetHeader, CAN_DebugPacket1Packet.packetData, &packetMailbox);
-	//xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_DebugPacket1Packet, (TickType_t)0);
+	xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_DebugPacket1Packet, 10/portTICK_PERIOD_MS);
+	//HAL_CAN_AddTxMessage(&hcan1, &CAN_DebugPacket1Packet.packetHeader, CAN_DebugPacket1Packet.packetData, &packetMailbox);
 	
 	/* DCU_DEBUG_2_ID */
 	CAN_DebugPacket2Packet.packetData[0] = (uint8_t)(((uint16_t)(ADC_BufferConvertedDebug[_12V_POST_DIODES_SENSE_POSITION]) >> 8) & 0x00FF);
@@ -199,8 +199,8 @@ extern inline void CAN_SendDebugPackets(void)
 	CAN_DebugPacket2Packet.packetHeader.IDE = CAN_ID_STD;
 	CAN_DebugPacket2Packet.packetHeader.DLC = 6;
 	CAN_DebugPacket2Packet.packetHeader.TransmitGlobalTime = DISABLE;
-	HAL_CAN_AddTxMessage(&hcan1, &CAN_DebugPacket2Packet.packetHeader, CAN_DebugPacket2Packet.packetData, &packetMailbox);
-	//xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_DebugPacket2Packet, (TickType_t)0);
+	xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_DebugPacket2Packet, 10/portTICK_PERIOD_MS);
+	//HAL_CAN_AddTxMessage(&hcan1, &CAN_DebugPacket2Packet.packetHeader, CAN_DebugPacket2Packet.packetData, &packetMailbox);
 	
 	/* DCU_ACQUISITION_SW_ID */
 	CAN_AcquisitionStatePacket.packetData[0] = 0;
@@ -210,8 +210,8 @@ extern inline void CAN_SendDebugPackets(void)
 	CAN_AcquisitionStatePacket.packetHeader.IDE = CAN_ID_STD;
 	CAN_AcquisitionStatePacket.packetHeader.DLC = 2;
 	CAN_AcquisitionStatePacket.packetHeader.TransmitGlobalTime = DISABLE;
-	HAL_CAN_AddTxMessage(&hcan1, &CAN_AcquisitionStatePacket.packetHeader, CAN_AcquisitionStatePacket.packetData, &packetMailbox);
-	//xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_AcquisitionStatePacket, (TickType_t)0);
+	xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_AcquisitionStatePacket, 10/portTICK_PERIOD_MS);
+	//HAL_CAN_AddTxMessage(&hcan1, &CAN_AcquisitionStatePacket.packetHeader, CAN_AcquisitionStatePacket.packetData, &packetMailbox);	
 }
 
 extern inline void CAN_SendAutogearPacket(void)
@@ -224,7 +224,8 @@ extern inline void CAN_SendAutogearPacket(void)
 		CAN_AutogearPacket.packetHeader.IDE = CAN_ID_STD;
 		CAN_AutogearPacket.packetHeader.DLC = 2;
 		CAN_AutogearPacket.packetHeader.TransmitGlobalTime = DISABLE;
-		xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_AutogearPacket, (TickType_t)0);		/* Add CAN message to queue */
+		xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_AutogearPacket, 10/portTICK_PERIOD_MS);		/* Add CAN message to queue */
+		//HAL_CAN_AddTxMessage(&hcan1, &CAN_AutogearPacket.packetHeader, CAN_AutogearPacket.packetData, &packetMailbox);
 	}
 }
 
@@ -266,12 +267,14 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
 	HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &(CAN_CurrentFifo0ReceivedPacket.packetHeader), CAN_CurrentFifo0ReceivedPacket.packetData);
 	xQueueSendFromISR(canFifo0QueueHandle, &CAN_CurrentFifo0ReceivedPacket, &CAN_Rx0xHigherPriorityTaskWoken);
+	portYIELD_FROM_ISR(CAN_Rx0xHigherPriorityTaskWoken);
 }
 
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
 	HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO1, &(CAN_CurrentFifo1ReceivedPacket.packetHeader), CAN_CurrentFifo1ReceivedPacket.packetData); 
 	xQueueSendFromISR(canFifo1QueueHandle, &CAN_CurrentFifo1ReceivedPacket, &CAN_Rx1xHigherPriorityTaskWoken);
+	portYIELD_FROM_ISR(CAN_Rx1xHigherPriorityTaskWoken);
 }
 
 void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *hcan)

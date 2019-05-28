@@ -187,7 +187,7 @@ extern inline void USB_OvercurrentEvent(void)
 	uint8_t errorLetter = USB_OVERCURRENT_ERROR;
 	
 	if(HAL_GPIO_ReadPin(USB_OVERCURRENT_GPIO_Port, USB_OVERCURRENT_Pin) == GPIO_PIN_RESET) {
-		MX_DriverVbusHS(VBUS_DISABLE);																				/* Disable USB Vbus power */
+		MX_DriverVbusHS(VBUS_DISABLE);		/* Disable USB Vbus power */
 		DATA_ResetAcquisitionStateMachine();
 		xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
 	}

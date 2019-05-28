@@ -63,7 +63,6 @@ extern uint8_t DATA_BlockBuffer [BUFFER_POINTERS_NUMBER][BUFFER_BLOCK_LEN];
 extern uint8_t DATA_StateBuffer [BUFFER_STATE_LEN];
 extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
 extern uint8_t GPS_RawBuffer [GPS_MAX_LENGTH];
-extern BaseType_t GPS_xHigherPriorityTaskWoken;
 /* USER CODE END Variables */
 osThreadId aliveHandle;
 osThreadId adc1ConversionHandle;
@@ -257,11 +256,11 @@ void MX_FREERTOS_Init(void) {
   startAcquisitionEventHandle = osMessageCreate(osMessageQ(startAcquisitionEvent), NULL);
 
   /* definition and creation of canFifo0Queue */
-  osMessageQDef(canFifo0Queue, 8, CAN_RxPacket_t);
+  osMessageQDef(canFifo0Queue, 32, CAN_RxPacket_t);
   canFifo0QueueHandle = osMessageCreate(osMessageQ(canFifo0Queue), NULL);
 
   /* definition and creation of canFifo1Queue */
-  osMessageQDef(canFifo1Queue, 8, CAN_RxPacket_t);
+  osMessageQDef(canFifo1Queue, 32, CAN_RxPacket_t);
   canFifo1QueueHandle = osMessageCreate(osMessageQ(canFifo1Queue), NULL);
 
   /* definition and creation of CAN_SendDataQueue */
@@ -294,31 +293,31 @@ void MX_FREERTOS_Init(void) {
   digitalAuxManagerHandle = osThreadCreate(osThread(digitalAuxManager), NULL);
 
   /* definition and creation of autogearManager */
-  osThreadDef(autogearManager, autogearManagerTask, osPriorityAboveNormal, 0, 128);
+  osThreadDef(autogearManager, autogearManagerTask, osPriorityLow, 0, 128);
   autogearManagerHandle = osThreadCreate(osThread(autogearManager), NULL);
 
   /* definition and creation of USB_OvercurrentManager */
-  osThreadDef(USB_OvercurrentManager, USB_OvercurrentManagerTask, osPriorityAboveNormal, 0, 128);
+  osThreadDef(USB_OvercurrentManager, USB_OvercurrentManagerTask, osPriorityLow, 0, 128);
   USB_OvercurrentManagerHandle = osThreadCreate(osThread(USB_OvercurrentManager), NULL);
 
   /* definition and creation of SendStates */
-  osThreadDef(SendStates, SendStatesFunc, osPriorityNormal, 0, 128);
+  osThreadDef(SendStates, SendStatesFunc, osPriorityBelowNormal, 0, 128);
   SendStatesHandle = osThreadCreate(osThread(SendStates), NULL);
 
   /* definition and creation of SendData */
-  osThreadDef(SendData, SendDataFunc, osPriorityNormal, 0, 128);
+  osThreadDef(SendData, SendDataFunc, osPriorityBelowNormal, 0, 128);
   SendDataHandle = osThreadCreate(osThread(SendData), NULL);
 
   /* definition and creation of ReceiveTelem */
-  osThreadDef(ReceiveTelem, ReceiveTelemFunc, osPriorityAboveNormal, 0, 128);
+  osThreadDef(ReceiveTelem, ReceiveTelemFunc, osPriorityNormal, 0, 128);
   ReceiveTelemHandle = osThreadCreate(osThread(ReceiveTelem), NULL);
 
   /* definition and creation of SendError */
-  osThreadDef(SendError, SendErrorFunc, osPriorityAboveNormal, 0, 128);
+  osThreadDef(SendError, SendErrorFunc, osPriorityNormal, 0, 128);
   SendErrorHandle = osThreadCreate(osThread(SendError), NULL);
 
   /* definition and creation of SendFollowingData */
-  osThreadDef(SendFollowingData, SendFollowingDataFunc, osPriorityNormal, 0, 128);
+  osThreadDef(SendFollowingData, SendFollowingDataFunc, osPriorityBelowNormal, 0, 128);
   SendFollowingDataHandle = osThreadCreate(osThread(SendFollowingData), NULL);
 
   /* definition and creation of saveUsb */
@@ -330,7 +329,7 @@ void MX_FREERTOS_Init(void) {
   usbManagerHandle = osThreadCreate(osThread(usbManager), NULL);
 
   /* definition and creation of startAcquisitionStateMachine */
-  osThreadDef(startAcquisitionStateMachine, startAcquisitionStateMachineTask, osPriorityBelowNormal, 0, 128);
+  osThreadDef(startAcquisitionStateMachine, startAcquisitionStateMachineTask, osPriorityNormal, 0, 128);
   startAcquisitionStateMachineHandle = osThreadCreate(osThread(startAcquisitionStateMachine), NULL);
 
   /* definition and creation of canFifo0Unpack */
@@ -342,11 +341,11 @@ void MX_FREERTOS_Init(void) {
   canFifo1UnpackHandle = osThreadCreate(osThread(canFifo1Unpack), NULL);
 
   /* definition and creation of sendDebugData */
-  osThreadDef(sendDebugData, sendDebugDataTask, osPriorityNormal, 0, 512);
+  osThreadDef(sendDebugData, sendDebugDataTask, osPriorityBelowNormal, 0, 512);
   sendDebugDataHandle = osThreadCreate(osThread(sendDebugData), NULL);
 
   /* definition and creation of CAN_SendManager */
-  osThreadDef(CAN_SendManager, CAN_SendManagerTask, osPriorityAboveNormal, 0, 512);
+  osThreadDef(CAN_SendManager, CAN_SendManagerTask, osPriorityNormal, 0, 512);
   CAN_SendManagerHandle = osThreadCreate(osThread(CAN_SendManager), NULL);
 
   /* definition and creation of automaticStartAcquisitionMonitoring */
@@ -510,11 +509,11 @@ void SendStatesFunc(void const * argument)
 	
 	/* Infinite loop */
   for(;;) {
-    xSemaphoreTake(sendStateSemaphoreHandle, portMAX_DELAY); 														/* Unlock when timer callback is called */
+    xSemaphoreTake(sendStateSemaphoreHandle, portMAX_DELAY);																				/* Unlock when timer callback is called */
 		strToSenLen = encodeString(DATA_StateBuffer, strToSend, BUFFER_STATE_LEN, STATE_MESSAGE_ID); 		/* Get the encoded string */		
-		xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);								/* Lock if DMA is in use */
-		xQueueSend(Usart1TxModeQueueHandle, (void *)&normalTxModeFlag, (TickType_t)0); 			/* Add flag to queue */
-		HAL_UART_Transmit_DMA(&huart1, strToSend, strToSenLen); 														/* Transmit state message */
+		xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);														/* Lock if DMA is in use */
+		xQueueSend(Usart1TxModeQueueHandle, (void *)&normalTxModeFlag, (TickType_t)0); 									/* Add flag to queue */
+		HAL_UART_Transmit_DMA(&huart1, strToSend, strToSenLen); 																				/* Transmit state message */
   }
   /* USER CODE END SendStatesFunc */
 }
@@ -607,16 +606,16 @@ void SendErrorFunc(void const * argument)
 void SendFollowingDataFunc(void const * argument)
 {
   /* USER CODE BEGIN SendFollowingDataFunc */
-	uint8_t normalTxModeFlag = NORMAL_MODE_TX_FLAG; 																				     /* Setting flag identifier to put later into the queue */
+	uint8_t normalTxModeFlag = NORMAL_MODE_TX_FLAG;			/* Setting flag identifier to put later into the queue */
   uint8_t strToSend[BUFFER_BLOCK_LEN/2+10];
 	uint16_t strToSenLen;
 	
 	/* Infinite loop */
   for(;;) {
-    xSemaphoreTake(sendFollowingDataSemaphoreHandle, portMAX_DELAY); 											    /* Unlock when first part tx is completed, unlocked from tx complete callback */
-		xQueueSend(Usart1TxModeQueueHandle, (void *)&normalTxModeFlag, (TickType_t)0); 				    /* Add flag to queue */
+    xSemaphoreTake(sendFollowingDataSemaphoreHandle, portMAX_DELAY); 									/* Unlock when first part tx is completed, unlocked from tx complete callback */
+		xQueueSend(Usart1TxModeQueueHandle, (void *)&normalTxModeFlag, (TickType_t)0); 		/* Add flag to queue */
 		strToSenLen = encodeString(DATA_BlockBuffer[DATA_BlockReadIndex] + HALF_DATA_INDEX, strToSend, HALF_DATA_INDEX, SECOND_DATA_MESSAGE_ID); 		/* Get the encoded string */
-		HAL_UART_Transmit_DMA(&huart1, strToSend + 1, strToSenLen); 														  /* Transmit first half of data message */
+		HAL_UART_Transmit_DMA(&huart1, strToSend + 1, strToSenLen); 											/* Transmit first half of data message */
   }
   /* USER CODE END SendFollowingDataFunc */
 }
@@ -808,7 +807,7 @@ void GPSUnboxingFunc(void const * argument)
 {
   /* USER CODE BEGIN GPSUnboxingFunc */
 	GPS_Init();																					/* GPS init */
-	HAL_UART_Receive_DMA(&huart2, &GPS_FirstChar, 1);		/* Start UART RX */
+	HAL_UART_Receive_IT(&huart2, &GPS_FirstChar, 1);		/* Start UART RX */
   
 	/* Infinite loop */
   for(;;) {
