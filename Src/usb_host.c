@@ -166,7 +166,7 @@ extern inline void USB_EventHandler(uint8_t USB_Event)
 {	
 	switch(USB_Event) {
 		case DISCONNECTION_EVENT:
-			f_mount(NULL, (TCHAR const *)"", 1);
+			//f_mount(NULL, (TCHAR const *)"", 1);
 			DATA_ResetAcquisitionStateMachine();
 			FATFS_UnLinkDriver(USBHPath);
 			DATA_ResetUsbReadyState();			/* Update of the status packet */
@@ -293,15 +293,14 @@ static void USBH_UserProcess  (USBH_HandleTypeDef *phost, uint8_t id)
     case HOST_USER_DISCONNECTION:
       Appli_state = APPLICATION_DISCONNECT;
 			USB_ISR_Event = DISCONNECTION_EVENT;
-			xQueueSendFromISR(usbEventQueueHandle, &USB_ISR_Event, &USB_EventHigherPriorityTaskWoken);
-			portYIELD_FROM_ISR(USB_EventHigherPriorityTaskWoken); 
+			DATA_ResetAcquisitionStateMachine();
+			DATA_ResetUsbReadyState();			/* Update of the status packet */
 			break;
       
     case HOST_USER_CLASS_ACTIVE:
       Appli_state = APPLICATION_READY;
 			USB_ISR_Event = CONNECTED_EVENT;
-			xQueueSendFromISR(usbEventQueueHandle, &USB_ISR_Event, &USB_EventHigherPriorityTaskWoken);
-			portYIELD_FROM_ISR(USB_EventHigherPriorityTaskWoken); 
+			DATA_SetUsbReadyState();		/* Update of the status packet */
 			break;
 
     case HOST_USER_CONNECTION:
