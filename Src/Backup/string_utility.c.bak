@@ -251,6 +251,19 @@ extern inline void uint32ToString(uint32_t i, uint8_t *s, uint8_t size)
 }
 
 
+extern inline uint8_t getByteFromString(uint8_t char1, uint8_t char2)
+{
+  uint8_t byte;
+  uint8_t temp;
+  
+  temp = char1 - '0';
+  byte = temp * 10;
+  temp = char2 - '0';
+  byte = byte + temp;
+  return byte;
+}
+
+
 static inline uint16_t power(uint16_t base, uint16_t num)
 {
   uint16_t result = base;

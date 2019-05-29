@@ -321,11 +321,11 @@ void MX_FREERTOS_Init(void) {
   SendFollowingDataHandle = osThreadCreate(osThread(SendFollowingData), NULL);
 
   /* definition and creation of saveUsb */
-  osThreadDef(saveUsb, saveUsbTask, osPriorityRealtime, 0, 512);
+  osThreadDef(saveUsb, saveUsbTask, osPriorityLow, 0, 512);
   saveUsbHandle = osThreadCreate(osThread(saveUsb), NULL);
 
   /* definition and creation of usbManager */
-  osThreadDef(usbManager, usbManagerTask, osPriorityAboveNormal, 0, 512);
+  osThreadDef(usbManager, usbManagerTask, osPriorityBelowNormal, 0, 512);
   usbManagerHandle = osThreadCreate(osThread(usbManager), NULL);
 
   /* definition and creation of startAcquisitionStateMachine */
@@ -375,6 +375,7 @@ void MX_FREERTOS_Init(void) {
 /* USER CODE END Header_aliveTask */
 void aliveTask(void const * argument)
 {
+
   /* USER CODE BEGIN aliveTask */
 	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET); 			/* Green LED off as default */
 	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET); 		/* Yellow LED off as default */
@@ -827,10 +828,10 @@ void GPSUnboxingFunc(void const * argument)
 void updateTimestampTask(void const * argument)
 {
   /* USER CODE BEGIN updateTimestampFromRtcTask */
+  resetActualTimestamp();			/* Reset the timestamp struct */
 	rtcPeripheralInit();				/* RTC peripheral init only */
-	resetRtcTime();							/* RTC time values reset */
-	resetRtcDate();							/* RTC date values reset */
-	resetActualTimestamp();			/* Reset the timestamp struct */
+	//resetRtcTime();						/* RTC time values reset */
+	//resetRtcDate();						/* RTC date values reset */
 	
 	/* Infinite loop */
   for(;;) {

@@ -325,7 +325,7 @@ void MX_FREERTOS_Init(void) {
   saveUsbHandle = osThreadCreate(osThread(saveUsb), NULL);
 
   /* definition and creation of usbManager */
-  osThreadDef(usbManager, usbManagerTask, osPriorityAboveNormal, 0, 512);
+  osThreadDef(usbManager, usbManagerTask, osPriorityBelowNormal, 0, 512);
   usbManagerHandle = osThreadCreate(osThread(usbManager), NULL);
 
   /* definition and creation of startAcquisitionStateMachine */
@@ -828,7 +828,7 @@ void GPSUnboxingFunc(void const * argument)
 void updateTimestampTask(void const * argument)
 {
   /* USER CODE BEGIN updateTimestampFromRtcTask */
-	resetActualTimestamp();			/* Reset the timestamp struct */
+  resetActualTimestamp();			/* Reset the timestamp struct */
 	rtcPeripheralInit();				/* RTC peripheral init only */
 	//resetRtcTime();						/* RTC time values reset */
 	//resetRtcDate();						/* RTC date values reset */
@@ -845,6 +845,8 @@ void updateTimestampTask(void const * argument)
   }
   /* USER CODE END updateTimestampFromRtcTask */
 }
+
+
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
 

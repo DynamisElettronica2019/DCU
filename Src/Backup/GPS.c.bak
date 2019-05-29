@@ -365,6 +365,9 @@ static inline void GPS_RMC_conversion(uint8_t * buffer)
 						i = i + 4;	
 					}
 					break;
+				case 7:
+					/*empty filed*/
+					break;
 				
 				case 8:		/* DATE */
 					GPS_OutputRMC.UTC_date.day = (uint8_t)(GPS_StrToInt(0, buffer[i], buffer[i+1]));
@@ -404,6 +407,14 @@ static inline void GPS_VTG_conversion(uint8_t * buffer)
 					GPS_OutputVTG.reference = buffer[i];
 					break;
 				
+				case 2:
+					/*empty filed*/
+					break;
+				
+				case 3: 
+					/*empty filed*/
+					break;
+				
 				case 4: 	/* SPEED OVER GROUD(KNOTS) */
 					/* Speed greater than 9 knot */
 					if(buffer[i+1] != '.' ) {
@@ -423,8 +434,8 @@ static inline void GPS_VTG_conversion(uint8_t * buffer)
 					break;
 				
 				case 6:		/* SPEED OVER GROUND (KM/H) */	
-					GPS_SpeedConversion(buffer);		/* Conversion and saving of speed */
-					GPS_SpeedSave(buffer); 					/* Saving into CSV data buffer and increment buffer index! */
+					GPS_SpeedConversion(buffer, i);		/* Conversion and saving of speed */
+					GPS_SpeedSave(buffer, &i); 					/* Saving into CSV data buffer and increment buffer index! */
 					break;
 				
 				case 7:		/* UNIT */
@@ -459,63 +470,63 @@ static inline float GPS_minuts_conversion(uint8_t decimi, uint8_t  centesimi, ui
 	return	result;
 }
 
-static inline void GPS_SpeedConversion(uint8_t *buffer)
+static inline void GPS_SpeedConversion(uint8_t *buffer, uint8_t index)
 {
 	/* Speed between 10 and 100 km/h */
-	if(buffer[i+1] != '.' && buffer[i+2] == '.') {
-		GPS_OutputVTG.speed2.unit = ((uint8_t)GPS_StrToInt(0, buffer[i], buffer[i+1]));
-		GPS_OutputVTG.speed2.decimal = GPS_speed_decimal_conversion(buffer[i+3], buffer[i+4], buffer[i+5]) * 1000;
+	if(buffer[index+1] != '.' && buffer[index+2] == '.') {
+		GPS_OutputVTG.speed2.unit = ((uint8_t)GPS_StrToInt(0, buffer[index], buffer[index+1]));
+		GPS_OutputVTG.speed2.decimal = GPS_speed_decimal_conversion(buffer[index+3], buffer[index+4], buffer[index+5]) * 1000;
 	}
 	
 	/* Speed greater than 100 km/h */
-	else if(buffer[i + 2] != '.' && buffer[i+1] != '.') {
-		GPS_OutputVTG.speed2.unit = ((uint8_t)GPS_StrToInt(buffer[i], buffer[i+1], buffer[i+2]));
-		GPS_OutputVTG.speed2.decimal = GPS_speed_decimal_conversion(buffer[i+4], buffer[i+5], buffer[i+6]) * 1000;
+	else if(buffer[index + 2] != '.' && buffer[index+1] != '.') {
+		GPS_OutputVTG.speed2.unit = ((uint8_t)GPS_StrToInt(buffer[i], buffer[index+1], buffer[index+2]));
+		GPS_OutputVTG.speed2.decimal = GPS_speed_decimal_conversion(buffer[index+4], buffer[index+5], buffer[index+6]) * 1000;
 	}
 	
 	/* Speed under 10 km/h*/
 	else {
-		GPS_OutputVTG.speed2.unit = buffer[i] - 48;
-		GPS_OutputVTG.speed2.decimal = GPS_speed_decimal_conversion(buffer[i+ 2],buffer[i+ 3],buffer[i+ 4]) * 1000;
+		GPS_OutputVTG.speed2.unit = buffer[index] - 48;
+		GPS_OutputVTG.speed2.decimal = GPS_speed_decimal_conversion(buffer[index+ 2],buffer[index + 3],buffer[index + 4]) * 1000;
 	}
 }
 
-static inline void GPS_SpeedSave(uint8_t *buffer)
+static inline void GPS_SpeedSave(uint8_t *buffer, uint8_t *index)
 {
 	/* Speed between 10 and 100 km/h */
-	if((buffer[i+1] != '.') && (buffer[i+2] == '.')) {
+	if((buffer[*index+1] != '.') && (buffer[*index+2] == '.')) {
 		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX] = '0';
-		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+1] = buffer[i];
-		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+2] = buffer[i+1];
-		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+3] = buffer[i+2];
-		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+4] = buffer[i+3];
-		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+5] = buffer[i+4];
-		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+6] = buffer[i+5];
-		i = i + 5; 
+		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+1] = buffer[*index];
+		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+2] = buffer[*index+1];
+		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+3] = buffer[*index+2];
+		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+4] = buffer[*index+3];
+		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+5] = buffer[*index+4];
+		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+6] = buffer[*index+5];
+		*index = *index +5;
 	}
 	
 	/* Speed greater than 100 km/h */
-	else if(buffer[i + 2] != '.' && buffer[i+1] != '.') {
-		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX] = buffer[i];
-		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+1] = buffer[i+1];
-		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+2] = buffer[i+2];
-		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+3] = buffer[i+3];
-		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+4] = buffer[i+4];
-		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+5] = buffer[i+5];
-		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+6] = buffer[i+6];
-		i = i + 6; 
+	else if((buffer[*index + 2] != '.') && (buffer[*index +1] != '.')) {
+		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX] = buffer[*index];
+		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+1] = buffer[*index+1];
+		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+2] = buffer[*index+2];
+		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+3] = buffer[*index+3];
+		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+4] = buffer[*index+4];
+		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+5] = buffer[*index+5];
+		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+6] = buffer[*index+6];
+		*index = *index + 6; 
 	}
 	
 	/* Speed under 10 km/h*/
 	else {
 		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX] = '0';
 		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+1] = '0';
-		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+2] = buffer[i];
-		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+3] = buffer[i+1];
-		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+4] = buffer[i+2];
-		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+5] = buffer[i+3];
-		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+6] = buffer[i+4];
-		i = i + 4;	
+		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+2] = buffer[*index];
+		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+3] = buffer[*index+1];
+		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+4] = buffer[*index+2];
+		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+5] = buffer[*index+3];
+		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+6] = buffer[*index+4];
+		*index = *index + 4;	
 	}
 }
 
