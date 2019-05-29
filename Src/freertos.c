@@ -277,7 +277,7 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of alive */
-  osThreadDef(alive, aliveTask, osPriorityLow, 0, 128);
+  osThreadDef(alive, aliveTask, osPriorityIdle, 0, 128);
   aliveHandle = osThreadCreate(osThread(alive), NULL);
 
   /* definition and creation of adc1Conversion */
@@ -325,7 +325,7 @@ void MX_FREERTOS_Init(void) {
   saveUsbHandle = osThreadCreate(osThread(saveUsb), NULL);
 
   /* definition and creation of usbManager */
-  osThreadDef(usbManager, usbManagerTask, osPriorityBelowNormal, 0, 512);
+  osThreadDef(usbManager, usbManagerTask, osPriorityLow, 0, 512);
   usbManagerHandle = osThreadCreate(osThread(usbManager), NULL);
 
   /* definition and creation of startAcquisitionStateMachine */

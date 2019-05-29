@@ -321,7 +321,7 @@ void MX_FREERTOS_Init(void) {
   SendFollowingDataHandle = osThreadCreate(osThread(SendFollowingData), NULL);
 
   /* definition and creation of saveUsb */
-  osThreadDef(saveUsb, saveUsbTask, osPriorityLow, 0, 512);
+  osThreadDef(saveUsb, saveUsbTask, osPriorityRealtime, 0, 512);
   saveUsbHandle = osThreadCreate(osThread(saveUsb), NULL);
 
   /* definition and creation of usbManager */
@@ -845,6 +845,7 @@ void updateTimestampTask(void const * argument)
   }
   /* USER CODE END updateTimestampFromRtcTask */
 }
+
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
