@@ -1411,7 +1411,7 @@ void BNO085_init(void){
 	BNO085_FlushI2C(&myIMU);
 	HAL_Delay(50);*/
 	
-		/*Enable sensor reports functions*/
+	/*Enable sensor reports functions*/
 	BNO085_Command_EnableFullCalibration(&myIMU);
 	BNO085_UpdateSensorReading(&myIMU);
 	

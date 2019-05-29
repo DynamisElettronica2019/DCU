@@ -27,6 +27,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */     
 
+#include "tim.h"
 #include "BNO085.h"
 
 /* USER CODE END Includes */
@@ -49,13 +50,6 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 extern BNO085 myIMU;
-extern TIM_HandleTypeDef htim7;
-BaseType_t IMUHigherPriorityTaskWoken = pdFALSE;
-
-uint8_t stat = 1; /*only for debug*/
-int addr = 0;
-
-
 /* USER CODE END Variables */
 osThreadId aliveHandle;
 osThreadId IMUUnboxTaskHandle;
@@ -102,6 +96,7 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+	xSemaphoreTake(IMUSemHandle, portMAX_DELAY);     /* Start with the task locked */
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
@@ -110,13 +105,12 @@ void MX_FREERTOS_Init(void) {
   aliveHandle = osThreadCreate(osThread(alive), NULL);
 
   /* definition and creation of IMUUnboxTask */
-  osThreadDef(IMUUnboxTask, IMUUnboxFunc, osPriorityIdle, 0, 512);
+  osThreadDef(IMUUnboxTask, IMUUnboxFunc, osPriorityNormal, 0, 512);
   IMUUnboxTaskHandle = osThreadCreate(osThread(IMUUnboxTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
-
 }
 
 /* USER CODE BEGIN Header_aliveTask */
@@ -135,9 +129,16 @@ void aliveTask(void const * argument)
   MX_USB_HOST_Init();
 
   /* USER CODE BEGIN aliveTask */
+	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
+	HAL_TIM_Base_Start_IT(&htim5);
+	HAL_TIM_Base_Start_IT(&htim6);
+	HAL_TIM_Base_Start_IT(&htim7);
+	
   /* Infinite loop */
   for(;;) {
-    HAL_GPIO_TogglePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin);
+    HAL_GPIO_TogglePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin);
 		osDelay(250);
   }
   /* USER CODE END aliveTask */
@@ -152,20 +153,13 @@ void aliveTask(void const * argument)
 /* USER CODE END Header_IMUUnboxFunc */
 void IMUUnboxFunc(void const * argument)
 {
-  /* USER CODE BEGIN IMUUnboxFunc */
-	while (stat != 0){
-		stat = HAL_I2C_IsDeviceReady(&hi2c4,addr, 10, 1000); /*only for debug*/
-		addr++;
-		HAL_Delay(50);
-	}
+  /* USER CODE BEGIN IMUUnboxFunc */	
 	BNO085_init();
-	HAL_TIM_Base_Start_IT(&htim7);
+	
   /* Infinite loop */
-  for(;;)
-  {
-		xSemaphoreTake(IMUSemHandle, portMAX_DELAY);	/*tries to take semaphore*/
-		BNO085_UpdateSensorReading(&myIMU);						/*should fill myIMU fileds with new data, right?*/
-    osDelay(1);
+  for(;;) {
+		xSemaphoreTake(IMUSemHandle, portMAX_DELAY);		/* Try to take semaphore */
+		BNO085_UpdateSensorReading(&myIMU);							/* Should fill myIMU struct with new data */
   }
   /* USER CODE END IMUUnboxFunc */
 }

@@ -57,6 +57,9 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOD, ETH_nRST_Pin|LED_YELLOW_Pin|LED_RED_Pin|LED_GREEN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(IMU_nRESET_GPIO_Port, IMU_nRESET_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(USB_5V_ENABLE_GPIO_Port, USB_5V_ENABLE_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : PtPin */
@@ -78,6 +81,13 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = IMU_nRESET_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(IMU_nRESET_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PAPin PAPin */
   GPIO_InitStruct.Pin = AUTOGEAR_SWTICH_MCU_Pin|USB_OVERCURRENT_Pin;

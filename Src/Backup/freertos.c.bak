@@ -154,9 +154,9 @@ void IMUUnboxFunc(void const * argument)
 {
   /* USER CODE BEGIN IMUUnboxFunc */
 	while (stat != 0){
-	stat = HAL_I2C_IsDeviceReady(&hi2c4,addr, 10, 1000); /*only for debug*/
-	addr++;
-	HAL_Delay(50);
+		stat = HAL_I2C_IsDeviceReady(&hi2c4,addr, 10, 1000); /*only for debug*/
+		addr++;
+		HAL_Delay(50);
 	}
 	BNO085_init();
 	HAL_TIM_Base_Start_IT(&htim7);
