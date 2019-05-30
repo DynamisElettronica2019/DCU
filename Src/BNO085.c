@@ -1,9 +1,12 @@
 #include "BNO085.h"
 #include "id_can.h"
+#include "cmsis_os.h"
+
 
 
 /*global variables*/
 BNO085 myIMU;
+uint8_t simogein;
 
 /*MATH FUNCTIONS*/
 
@@ -144,127 +147,126 @@ BNO085 BNO085_CreateIMU (I2C_HandleTypeDef *hi2cx, uint8_t address, GPIO_TypeDef
 /*SHTP Basic Operations Functions*/
 
 /*Complete reset of the sensor*/
-void BNO085_HardReset(BNO085 *myIMU)
+void BNO085_HardReset(void)
 {
-	HAL_GPIO_WritePin(myIMU->reset_GPIOx, myIMU->reset_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(myIMU->boot_GPIOx, myIMU->nBOOT_Pin, GPIO_PIN_SET);
-	HAL_Delay(250);
-	HAL_GPIO_WritePin(myIMU->reset_GPIOx, myIMU->reset_Pin, GPIO_PIN_RESET);
-	HAL_Delay(500);
-	HAL_GPIO_WritePin(myIMU->reset_GPIOx, myIMU->reset_Pin, GPIO_PIN_SET);
-	HAL_Delay(500);
-	//BNO085_SoftReset(myIMU);
+	HAL_GPIO_WritePin(myIMU.reset_GPIOx, myIMU.reset_Pin, GPIO_PIN_SET);
+	osDelay(250);
+	HAL_GPIO_WritePin(myIMU.reset_GPIOx, myIMU.reset_Pin, GPIO_PIN_RESET);
+	osDelay(500);
+	HAL_GPIO_WritePin(myIMU.reset_GPIOx, myIMU.reset_Pin, GPIO_PIN_SET);
+	osDelay(500);
+//	BNO085_SoftReset();
 	return;
 }
 
-void BNO085_SoftReset(BNO085 *myIMU)
+void BNO085_SoftReset(void)
 {
 	uint8_t i=0;
 	
 	while (i<23)
 	{
-		myIMU->sensorsEnabled[i]=0;
+		myIMU.sensorsEnabled[i]=0;
 		i++;
 	}
 	
-	myIMU->BNO085_Send_Buffer[0]=5;
-	myIMU->BNO085_Send_Buffer[1]=0;
-	myIMU->BNO085_Send_Buffer[2]=CHANNEL_EXECUTABLE;
-	myIMU->BNO085_Send_Buffer[3]=myIMU->sequenceNumber[CHANNEL_EXECUTABLE];
-	myIMU->sequenceNumber[CHANNEL_EXECUTABLE]++;
-	myIMU->BNO085_Send_Buffer[4]=1;
-	HAL_I2C_Master_Transmit(myIMU->hi2cx, myIMU->address, myIMU->BNO085_Send_Buffer, 5, 100);
-	HAL_Delay(50);
-	BNO085_FlushI2C(myIMU);
-	HAL_Delay(50);
-	BNO085_FlushI2C(myIMU);
+	myIMU.BNO085_Send_Buffer[0]=5;
+	myIMU.BNO085_Send_Buffer[1]=0;
+	myIMU.BNO085_Send_Buffer[2]=CHANNEL_EXECUTABLE;
+	myIMU.BNO085_Send_Buffer[3]=myIMU.sequenceNumber[CHANNEL_EXECUTABLE];
+	myIMU.sequenceNumber[CHANNEL_EXECUTABLE]++;
+	myIMU.BNO085_Send_Buffer[4]=1;
+	HAL_I2C_Master_Transmit(myIMU.hi2cx, myIMU.address, myIMU.BNO085_Send_Buffer, 5, 100);
+	osDelay(50);
+	BNO085_FlushI2C();
+	osDelay(50);
+	BNO085_FlushI2C();
 	return;
 }
 
-void BNO085_FlushI2C(BNO085 *myIMU)
+void BNO085_FlushI2C(void)
 {
 	uint16_t packetLength;
-	packetLength = BNO085_DataAvailable(myIMU);
+	packetLength = BNO085_DataAvailable();
 	while(packetLength!=0)
 	{
-		BNO085_ReceiveData(myIMU, packetLength);
-		packetLength = BNO085_DataAvailable(myIMU);
+		BNO085_ReceiveData(packetLength);
+		packetLength = BNO085_DataAvailable();
 	}
 	return;
 }
 
-uint16_t BNO085_DataAvailable(BNO085 *myIMU)
+uint16_t BNO085_DataAvailable(void)
 {
 	uint16_t dataLength;
-	HAL_I2C_Master_Receive(myIMU->hi2cx, myIMU->address, myIMU->BNO085_Receive_Buffer, 4, 1000);
-	dataLength = ((uint16_t)myIMU->BNO085_Receive_Buffer[1] << 8 | myIMU->BNO085_Receive_Buffer[0]);
+	HAL_I2C_Master_Receive(myIMU.hi2cx, myIMU.address, myIMU.BNO085_Receive_Buffer, 4, 1000);
+	dataLength = ((uint16_t)myIMU.BNO085_Receive_Buffer[1] << 8 | myIMU.BNO085_Receive_Buffer[0]);
 	dataLength &= ~(1 << 15);
 	return dataLength;
 }
 
-void BNO085_ReceiveData(BNO085 *myIMU, uint16_t length)
+void BNO085_ReceiveData(uint16_t length)
 {
 	if (length>BNO085_BUFFER_LENGTH)
 	{
 		length=BNO085_BUFFER_LENGTH;
 	}
-	HAL_I2C_Master_Receive(myIMU->hi2cx, myIMU->address, myIMU->BNO085_Receive_Buffer, length, 1000);
+	HAL_I2C_Master_Receive(myIMU.hi2cx, myIMU.address, myIMU.BNO085_Receive_Buffer, length, 1000);
 	return;
 }
 
-uint8_t BNO085_IsAlive(BNO085 *myIMU)
+uint8_t BNO085_IsAlive(void)
 {
 	uint8_t status;
-	status = HAL_I2C_IsDeviceReady(myIMU->hi2cx,myIMU->address,10,1000);
+	status = HAL_I2C_IsDeviceReady(myIMU.hi2cx,myIMU.address,10,1000);
 	return status;
 }
 
-uint8_t BNO085_SetFeatureCommand(BNO085 *myIMU, uint8_t sensorID, uint16_t timeBetweenReports, uint32_t configWord)
+uint8_t BNO085_SetFeatureCommand(uint8_t sensorID, uint16_t timeBetweenReports, uint32_t configWord)
 {
 	long microsBetweenReports = (long)timeBetweenReports * 1000L;
 	uint16_t dataLength;
-	myIMU->BNO085_Send_Buffer[0]=21;
-	myIMU->BNO085_Send_Buffer[1]=0;
-	myIMU->BNO085_Send_Buffer[2]=CHANNEL_CONTROL;
-	myIMU->BNO085_Send_Buffer[3]=myIMU->sequenceNumber[CHANNEL_CONTROL];
-	myIMU->sequenceNumber[CHANNEL_CONTROL]++;
+	myIMU.BNO085_Send_Buffer[0]=21;
+	myIMU.BNO085_Send_Buffer[1]=0;
+	myIMU.BNO085_Send_Buffer[2]=CHANNEL_CONTROL;
+	myIMU.BNO085_Send_Buffer[3]=myIMU.sequenceNumber[CHANNEL_CONTROL];
+	myIMU.sequenceNumber[CHANNEL_CONTROL]++;
 	
-	myIMU->BNO085_Send_Buffer[4]=SHTP_SET_FEATURE_COMMAND;
-	myIMU->BNO085_Send_Buffer[5]=sensorID;
-	myIMU->BNO085_Send_Buffer[6]=0;
-	myIMU->BNO085_Send_Buffer[7]=0;
+	myIMU.BNO085_Send_Buffer[4]=SHTP_SET_FEATURE_COMMAND;
+	myIMU.BNO085_Send_Buffer[5]=sensorID;
+	myIMU.BNO085_Send_Buffer[6]=0;
+	myIMU.BNO085_Send_Buffer[7]=0;
 	
-	myIMU->BNO085_Send_Buffer[8]=0;
-	myIMU->BNO085_Send_Buffer[9]=(microsBetweenReports >> 0) & 0xFF;
-	myIMU->BNO085_Send_Buffer[10]=(microsBetweenReports >> 8) & 0xFF;
-	myIMU->BNO085_Send_Buffer[11]=(microsBetweenReports >> 16) & 0xFF;
+	myIMU.BNO085_Send_Buffer[8]=0;
+	myIMU.BNO085_Send_Buffer[9]=(microsBetweenReports >> 0) & 0xFF;
+	myIMU.BNO085_Send_Buffer[10]=(microsBetweenReports >> 8) & 0xFF;
+	myIMU.BNO085_Send_Buffer[11]=(microsBetweenReports >> 16) & 0xFF;
 	
-	myIMU->BNO085_Send_Buffer[12]=(microsBetweenReports >> 24) & 0xFF;
-	myIMU->BNO085_Send_Buffer[13]=0;
-	myIMU->BNO085_Send_Buffer[14]=0;
-	myIMU->BNO085_Send_Buffer[15]=0;
+	myIMU.BNO085_Send_Buffer[12]=(microsBetweenReports >> 24) & 0xFF;
+	myIMU.BNO085_Send_Buffer[13]=0;
+	myIMU.BNO085_Send_Buffer[14]=0;
+	myIMU.BNO085_Send_Buffer[15]=0;
 	
-	myIMU->BNO085_Send_Buffer[16]=0;
-	myIMU->BNO085_Send_Buffer[17]=(configWord >> 0) & 0xFF;
-	myIMU->BNO085_Send_Buffer[18]=(configWord >> 8) & 0xFF;
-	myIMU->BNO085_Send_Buffer[19]=(configWord >> 16) & 0xFF;
+	myIMU.BNO085_Send_Buffer[16]=0;
+	myIMU.BNO085_Send_Buffer[17]=(configWord >> 0) & 0xFF;
+	myIMU.BNO085_Send_Buffer[18]=(configWord >> 8) & 0xFF;
+	myIMU.BNO085_Send_Buffer[19]=(configWord >> 16) & 0xFF;
 	
-	myIMU->BNO085_Send_Buffer[20]=(configWord >> 24) & 0xFF;
+	myIMU.BNO085_Send_Buffer[20]=(configWord >> 24) & 0xFF;
 	
-	HAL_I2C_Master_Transmit(myIMU->hi2cx, myIMU->address, myIMU->BNO085_Send_Buffer,21, 1000);
+	HAL_I2C_Master_Transmit(myIMU.hi2cx, myIMU.address, myIMU.BNO085_Send_Buffer,21, 1000);
 	
 	/*Receive sensor activation report. ReceiveBuffer[4] = 0xFC, ReceiveBuffer[5]=SENSOR_ID*/
-	while (myIMU->sensorsEnabled[sensorID]==0)
+	while (myIMU.sensorsEnabled[sensorID]==0)
 	{
-	dataLength = BNO085_DataAvailable(myIMU);
+	dataLength = BNO085_DataAvailable();
 	while (dataLength==0)
 	{
-		dataLength = BNO085_DataAvailable(myIMU);
+		dataLength = BNO085_DataAvailable();
 	}
-	BNO085_ReceiveData(myIMU, dataLength);
-	if (myIMU->BNO085_Receive_Buffer[4]== SHTP_SET_FEATURE_RESPONSE)
+	BNO085_ReceiveData(dataLength);
+	if (myIMU.BNO085_Receive_Buffer[4]== SHTP_SET_FEATURE_RESPONSE)
 	{
-		myIMU->sensorsEnabled[myIMU->BNO085_Receive_Buffer[5]]=1;
+		myIMU.sensorsEnabled[myIMU.BNO085_Receive_Buffer[5]]=1;
 	}
 	}
 	return 1;
@@ -272,130 +274,130 @@ uint8_t BNO085_SetFeatureCommand(BNO085 *myIMU, uint8_t sensorID, uint16_t timeB
 
 /*Enable sensor reports functions*/
 
-void BNO085_EnableAccelerometer(BNO085 *myIMU, uint16_t timeBetweenReports)
+void BNO085_EnableAccelerometer(uint16_t timeBetweenReports)
 {
-	BNO085_SetFeatureCommand(myIMU, ID_ACCELEROMETER, timeBetweenReports, 0);
+	BNO085_SetFeatureCommand(ID_ACCELEROMETER, timeBetweenReports, 0);
 	return;
 }
 
-void BNO085_EnableGyroscope(BNO085 *myIMU, uint16_t timeBetweenReports)
+void BNO085_EnableGyroscope(uint16_t timeBetweenReports)
 {
-	BNO085_SetFeatureCommand(myIMU, ID_GYROSCOPE, timeBetweenReports, 0);
+	BNO085_SetFeatureCommand(ID_GYROSCOPE, timeBetweenReports, 0);
 	return;
 }
 
-void BNO085_EnableMagnetometer(BNO085 *myIMU, uint16_t timeBetweenReports)
+void BNO085_EnableMagnetometer(uint16_t timeBetweenReports)
 {
-	BNO085_SetFeatureCommand(myIMU, ID_MAGNETOMETER, timeBetweenReports, 0);
+	BNO085_SetFeatureCommand(ID_MAGNETOMETER, timeBetweenReports, 0);
 	return;
 }
 
-void BNO085_EnableLinearAcc(BNO085 *myIMU, uint16_t timeBetweenReports)
+void BNO085_EnableLinearAcc(uint16_t timeBetweenReports)
 {
-	BNO085_SetFeatureCommand(myIMU, ID_LINEAR_ACCELERATION, timeBetweenReports, 0);
+	BNO085_SetFeatureCommand(ID_LINEAR_ACCELERATION, timeBetweenReports, 0);
 	return;
 }
 
-void BNO085_EnableAbsoluteRotationVector(BNO085 *myIMU, uint16_t timeBetweenReports)
+void BNO085_EnableAbsoluteRotationVector(uint16_t timeBetweenReports)
 {
-	BNO085_SetFeatureCommand(myIMU, ID_ROTATION_VECTOR, timeBetweenReports, 0);
+	BNO085_SetFeatureCommand(ID_ROTATION_VECTOR, timeBetweenReports, 0);
 	return;
 }
 
-void BNO085_EnableGravity(BNO085 *myIMU, uint16_t timeBetweenReports)
+void BNO085_EnableGravity(uint16_t timeBetweenReports)
 {
-	BNO085_SetFeatureCommand(myIMU, ID_GRAVITY, timeBetweenReports, 0);
+	BNO085_SetFeatureCommand(ID_GRAVITY, timeBetweenReports, 0);
 	return;
 }
 
-void BNO085_EnableRelativeRotationVector(BNO085 *myIMU, uint16_t timeBetweenReports)
+void BNO085_EnableRelativeRotationVector(uint16_t timeBetweenReports)
 {
-	BNO085_SetFeatureCommand(myIMU, ID_GAME_ROTATION_VECTOR, timeBetweenReports, 0);
+	BNO085_SetFeatureCommand(ID_GAME_ROTATION_VECTOR, timeBetweenReports, 0);
 	return;
 }
 
-void BNO085_EnableGeoRotation(BNO085 *myIMU, uint16_t timeBetweenReports)
+void BNO085_EnableGeoRotation(uint16_t timeBetweenReports)
 {
-	BNO085_SetFeatureCommand(myIMU, ID_GEO_ROTATION_VECTOR, timeBetweenReports, 0);
+	BNO085_SetFeatureCommand(ID_GEO_ROTATION_VECTOR, timeBetweenReports, 0);
 	return;
 }
 
-void BNO085_EnableRawAccelerometer(BNO085 *myIMU, uint16_t timeBetweenReports)
+void BNO085_EnableRawAccelerometer(uint16_t timeBetweenReports)
 {
-	BNO085_SetFeatureCommand(myIMU, ID_RAW_ACCELEROMETER, timeBetweenReports, 0);
+	BNO085_SetFeatureCommand(ID_RAW_ACCELEROMETER, timeBetweenReports, 0);
 	return;
 }
-void BNO085_EnableRawGyroscope(BNO085 *myIMU, uint16_t timeBetweenReports)
+void BNO085_EnableRawGyroscope(uint16_t timeBetweenReports)
 {
-	BNO085_SetFeatureCommand(myIMU, ID_RAW_GYROSCOPE, timeBetweenReports, 0);
+	BNO085_SetFeatureCommand(ID_RAW_GYROSCOPE, timeBetweenReports, 0);
 	return;
 }
-void BNO085_EnableRawMagnetometer(BNO085 *myIMU, uint16_t timeBetweenReports)
+void BNO085_EnableRawMagnetometer(uint16_t timeBetweenReports)
 {
-	BNO085_SetFeatureCommand(myIMU, ID_RAW_MAGNETOMETER, timeBetweenReports, 0);
+	BNO085_SetFeatureCommand(ID_RAW_MAGNETOMETER, timeBetweenReports, 0);
 	return;
 }
 
 /*Sensor reading functions*/
 
-void BNO085_UpdateSensorReading(BNO085 *myIMU)
+void BNO085_UpdateSensorReading()
 {
 	uint16_t length;
-	length = BNO085_DataAvailable(myIMU);
+	length = BNO085_DataAvailable();
 	
 	while (length==0)
 	{
-			length = BNO085_DataAvailable(myIMU);
+			length = BNO085_DataAvailable();
 	}
-	BNO085_ReceiveData(myIMU, length);
+	BNO085_ReceiveData(length);
 
 	/*Handle sensor reports*/
-	if (myIMU->BNO085_Receive_Buffer[2]==CHANNEL_REPORTS && myIMU->BNO085_Receive_Buffer[4]==SHTP_BASE_TIMESTAMP)
+	if (myIMU.BNO085_Receive_Buffer[2]==CHANNEL_REPORTS && myIMU.BNO085_Receive_Buffer[4]==SHTP_BASE_TIMESTAMP)
 	{
-		switch (myIMU->BNO085_Receive_Buffer[9])
+		switch (myIMU.BNO085_Receive_Buffer[9])
 		{
 			case ID_ACCELEROMETER:
-				myIMU->sensor_readings.acceleration = BNO085_GetAcceleration(myIMU);
+				myIMU.sensor_readings.acceleration = BNO085_GetAcceleration();
 			break;
 			
 			case ID_GYROSCOPE:
-				myIMU->sensor_readings.angular = BNO085_GetAngularRate(myIMU);
+				myIMU.sensor_readings.angular = BNO085_GetAngularRate();
 			break;
 			
 			case ID_MAGNETOMETER:
-				myIMU->sensor_readings.magneticField = BNO085_GetMagnetometer(myIMU);
+				myIMU.sensor_readings.magneticField = BNO085_GetMagnetometer();
 			break;
 			
 			case ID_LINEAR_ACCELERATION:
-				myIMU->sensor_readings.linearAcceleration = BNO085_GetLinearAcceleration(myIMU);
+				myIMU.sensor_readings.linearAcceleration = BNO085_GetLinearAcceleration();
 			break;
 			
 			case ID_ROTATION_VECTOR:
-				myIMU->sensor_readings.absoluteOrientation = BNO085_GetAbsoluteOrientation(myIMU);
+				myIMU.sensor_readings.absoluteOrientation = BNO085_GetAbsoluteOrientation();
 			break;
 			
 			case ID_GRAVITY:
-				myIMU->sensor_readings.gravity = BNO085_GetGravity(myIMU);
+				myIMU.sensor_readings.gravity = BNO085_GetGravity();
 			break;
 			
 			case ID_GAME_ROTATION_VECTOR:
-				myIMU->sensor_readings.relativeOrientation = BNO085_GetRelativeOrientation(myIMU);
+				myIMU.sensor_readings.relativeOrientation = BNO085_GetRelativeOrientation();
 			break;
 			
 			case ID_GEO_ROTATION_VECTOR:
-				myIMU->sensor_readings.geoOrientation = BNO085_GetGeoOrientation(myIMU);
+				myIMU.sensor_readings.geoOrientation = BNO085_GetGeoOrientation();
 			break;
 
 			case ID_RAW_ACCELEROMETER:
-				myIMU->sensor_readings.rawAccelerometer = BNO085_GetRawAccelerometer(myIMU);
+				myIMU.sensor_readings.rawAccelerometer = BNO085_GetRawAccelerometer();
 			break;
 
 			case ID_RAW_GYROSCOPE:
-				myIMU->sensor_readings.rawGyroscope = BNO085_GetRawGyroscope(myIMU);
+				myIMU.sensor_readings.rawGyroscope = BNO085_GetRawGyroscope();
 			break;
 									
 			case ID_RAW_MAGNETOMETER:
-				myIMU->sensor_readings.rawMagnetometer = BNO085_GetRawMagnetometer(myIMU);
+				myIMU.sensor_readings.rawMagnetometer = BNO085_GetRawMagnetometer();
 			break;
 	
 			default:
@@ -406,16 +408,16 @@ void BNO085_UpdateSensorReading(BNO085 *myIMU)
 	}
 	
 	/*Handle product ID response*/
-	if (myIMU->BNO085_Receive_Buffer[2]==CHANNEL_CONTROL && myIMU->BNO085_Receive_Buffer[4]==SHTP_PRODUCT_ID_RESPONSE)
+	if (myIMU.BNO085_Receive_Buffer[2]==CHANNEL_CONTROL && myIMU.BNO085_Receive_Buffer[4]==SHTP_PRODUCT_ID_RESPONSE)
 	{
-		BNO085_GetProductID(myIMU, 20);
+		BNO085_GetProductID(20);
 		return;
 	}
 	
 	/*Handle command responses*/
-	if (myIMU->BNO085_Receive_Buffer[2]==CHANNEL_CONTROL && myIMU->BNO085_Receive_Buffer[4]==SHTP_COMMAND_RESPONSE)
+	if (myIMU.BNO085_Receive_Buffer[2]==CHANNEL_CONTROL && myIMU.BNO085_Receive_Buffer[4]==SHTP_COMMAND_RESPONSE)
 	{
-		BNO085_GetCommandResponse(myIMU, length);
+		BNO085_GetCommandResponse(length);
 		return;
 	}
 	
@@ -424,7 +426,7 @@ void BNO085_UpdateSensorReading(BNO085 *myIMU)
 
 /*Sensor report parsing functions*/
 
-motionDataType BNO085_GetAcceleration(BNO085 *myIMU)
+motionDataType BNO085_GetAcceleration(void)
 {
 	motionDataType accelerationData;
 	uint8_t status;
@@ -432,24 +434,24 @@ motionDataType BNO085_GetAcceleration(BNO085 *myIMU)
 	uint16_t dataRawY;
 	uint16_t dataRawZ;
 	
-	accelerationData.sequenceNumber=myIMU->BNO085_Receive_Buffer[10];
+	accelerationData.sequenceNumber=myIMU.BNO085_Receive_Buffer[10];
 	
-	status=(myIMU->BNO085_Receive_Buffer[11])&0x03;
+	status=(myIMU.BNO085_Receive_Buffer[11])&0x03;
 	accelerationData.status=status;
 	
-	dataRawX = ((((uint16_t)myIMU->BNO085_Receive_Buffer[14]) << 8) | myIMU->BNO085_Receive_Buffer[13]);
+	dataRawX = ((((uint16_t)myIMU.BNO085_Receive_Buffer[14]) << 8) | myIMU.BNO085_Receive_Buffer[13]);
 	accelerationData.X =qToFloat(dataRawX,8);
 	
-	dataRawY = ((((uint16_t)myIMU->BNO085_Receive_Buffer[16]) << 8) | myIMU->BNO085_Receive_Buffer[15]);
+	dataRawY = ((((uint16_t)myIMU.BNO085_Receive_Buffer[16]) << 8) | myIMU.BNO085_Receive_Buffer[15]);
 	accelerationData.Y =qToFloat(dataRawY,8);
 	
-	dataRawZ = ((((uint16_t)myIMU->BNO085_Receive_Buffer[18]) << 8) | myIMU->BNO085_Receive_Buffer[17]);
+	dataRawZ = ((((uint16_t)myIMU.BNO085_Receive_Buffer[18]) << 8) | myIMU.BNO085_Receive_Buffer[17]);
 	accelerationData.Z =qToFloat(dataRawZ,8);
 	
 	return accelerationData;
 }
 
-motionDataType BNO085_GetAngularRate(BNO085 *myIMU)
+motionDataType BNO085_GetAngularRate(void)
 {
 	motionDataType angularRateData;
 	
@@ -458,24 +460,24 @@ motionDataType BNO085_GetAngularRate(BNO085 *myIMU)
 	uint16_t dataRawY;
 	uint16_t dataRawZ;
 	
-	angularRateData.sequenceNumber=myIMU->BNO085_Receive_Buffer[10];
+	angularRateData.sequenceNumber=myIMU.BNO085_Receive_Buffer[10];
 	
-	status=(myIMU->BNO085_Receive_Buffer[11])&0x03;
+	status=(myIMU.BNO085_Receive_Buffer[11])&0x03;
 	angularRateData.status=status;
 	
-	dataRawX = ((((uint16_t)myIMU->BNO085_Receive_Buffer[14]) << 8) | myIMU->BNO085_Receive_Buffer[13]);
+	dataRawX = ((((uint16_t)myIMU.BNO085_Receive_Buffer[14]) << 8) | myIMU.BNO085_Receive_Buffer[13]);
 	angularRateData.X =qToFloat(dataRawX,9);
 	
-	dataRawY = ((((uint16_t)myIMU->BNO085_Receive_Buffer[16]) << 8) | myIMU->BNO085_Receive_Buffer[15]);
+	dataRawY = ((((uint16_t)myIMU.BNO085_Receive_Buffer[16]) << 8) | myIMU.BNO085_Receive_Buffer[15]);
 	angularRateData.Y =qToFloat(dataRawY,9);
 	
-	dataRawZ = ((((uint16_t)myIMU->BNO085_Receive_Buffer[18]) << 8) | myIMU->BNO085_Receive_Buffer[17]);
+	dataRawZ = ((((uint16_t)myIMU.BNO085_Receive_Buffer[18]) << 8) | myIMU.BNO085_Receive_Buffer[17]);
 	angularRateData.Z =qToFloat(dataRawZ,9);
 
 	return angularRateData;
 }
 
-motionDataType BNO085_GetMagnetometer(BNO085 *myIMU)
+motionDataType BNO085_GetMagnetometer(void)
 {
 	motionDataType magneticFieldData;
 	
@@ -484,24 +486,24 @@ motionDataType BNO085_GetMagnetometer(BNO085 *myIMU)
 	uint16_t dataRawY;
 	uint16_t dataRawZ;
 	
-	magneticFieldData.sequenceNumber=myIMU->BNO085_Receive_Buffer[10];
+	magneticFieldData.sequenceNumber=myIMU.BNO085_Receive_Buffer[10];
 	
-	status=(myIMU->BNO085_Receive_Buffer[11])&0x03;
+	status=(myIMU.BNO085_Receive_Buffer[11])&0x03;
 	magneticFieldData.status=status;
 	
-	dataRawX = ((((uint16_t)myIMU->BNO085_Receive_Buffer[14]) << 8) | myIMU->BNO085_Receive_Buffer[13]);
+	dataRawX = ((((uint16_t)myIMU.BNO085_Receive_Buffer[14]) << 8) | myIMU.BNO085_Receive_Buffer[13]);
 	magneticFieldData.X =qToFloat(dataRawX,4);
 	
-	dataRawY = ((((uint16_t)myIMU->BNO085_Receive_Buffer[16]) << 8) | myIMU->BNO085_Receive_Buffer[15]);
+	dataRawY = ((((uint16_t)myIMU.BNO085_Receive_Buffer[16]) << 8) | myIMU.BNO085_Receive_Buffer[15]);
 	magneticFieldData.Y =qToFloat(dataRawY,4);
 	
-	dataRawZ = ((((uint16_t)myIMU->BNO085_Receive_Buffer[18]) << 8) | myIMU->BNO085_Receive_Buffer[17]);
+	dataRawZ = ((((uint16_t)myIMU.BNO085_Receive_Buffer[18]) << 8) | myIMU.BNO085_Receive_Buffer[17]);
 	magneticFieldData.Z =qToFloat(dataRawZ,4);
 
 	return magneticFieldData;
 }
 
-motionDataType BNO085_GetLinearAcceleration(BNO085 *myIMU)
+motionDataType BNO085_GetLinearAcceleration(void)
 {
 	motionDataType linearAccData;
 	uint8_t status;
@@ -509,23 +511,23 @@ motionDataType BNO085_GetLinearAcceleration(BNO085 *myIMU)
 	uint16_t dataRawY;
 	uint16_t dataRawZ;
 	
-	linearAccData.sequenceNumber=myIMU->BNO085_Receive_Buffer[10];
+	linearAccData.sequenceNumber=myIMU.BNO085_Receive_Buffer[10];
 	
-	status=(myIMU->BNO085_Receive_Buffer[11])&0x03;
+	status=(myIMU.BNO085_Receive_Buffer[11])&0x03;
 	linearAccData.status=status;
 	
-	dataRawX = ((((uint16_t)myIMU->BNO085_Receive_Buffer[14]) << 8) | myIMU->BNO085_Receive_Buffer[13]);
+	dataRawX = ((((uint16_t)myIMU.BNO085_Receive_Buffer[14]) << 8) | myIMU.BNO085_Receive_Buffer[13]);
 	linearAccData.X =qToFloat(dataRawX,8);
 	
-	dataRawY = ((((uint16_t)myIMU->BNO085_Receive_Buffer[16]) << 8) | myIMU->BNO085_Receive_Buffer[15]);
+	dataRawY = ((((uint16_t)myIMU.BNO085_Receive_Buffer[16]) << 8) | myIMU.BNO085_Receive_Buffer[15]);
 	linearAccData.Y =qToFloat(dataRawY,8);
 	
-	dataRawZ = ((((uint16_t)myIMU->BNO085_Receive_Buffer[18]) << 8) | myIMU->BNO085_Receive_Buffer[17]);
+	dataRawZ = ((((uint16_t)myIMU.BNO085_Receive_Buffer[18]) << 8) | myIMU.BNO085_Receive_Buffer[17]);
 	linearAccData.Z =qToFloat(dataRawZ,8);
 	return linearAccData;
 }
 
-orientationDataType BNO085_GetAbsoluteOrientation(BNO085 *myIMU)
+orientationDataType BNO085_GetAbsoluteOrientation(void)
 {
 	orientationDataType absoluteOrientation;
 	quaternionType absoluteQuaternion;
@@ -538,10 +540,10 @@ orientationDataType BNO085_GetAbsoluteOrientation(BNO085 *myIMU)
 	
 	uint8_t status;
 	
-	quaternionI=((((uint16_t)myIMU->BNO085_Receive_Buffer[14]) << 8)| myIMU->BNO085_Receive_Buffer[13]);
-	quaternionJ=((((uint16_t)myIMU->BNO085_Receive_Buffer[16]) << 8)| myIMU->BNO085_Receive_Buffer[15]);
-	quaternionK=((((uint16_t)myIMU->BNO085_Receive_Buffer[18]) << 8)| myIMU->BNO085_Receive_Buffer[17]);
-	quaternionR=((((uint16_t)myIMU->BNO085_Receive_Buffer[20]) << 8)| myIMU->BNO085_Receive_Buffer[19]);
+	quaternionI=((((uint16_t)myIMU.BNO085_Receive_Buffer[14]) << 8)| myIMU.BNO085_Receive_Buffer[13]);
+	quaternionJ=((((uint16_t)myIMU.BNO085_Receive_Buffer[16]) << 8)| myIMU.BNO085_Receive_Buffer[15]);
+	quaternionK=((((uint16_t)myIMU.BNO085_Receive_Buffer[18]) << 8)| myIMU.BNO085_Receive_Buffer[17]);
+	quaternionR=((((uint16_t)myIMU.BNO085_Receive_Buffer[20]) << 8)| myIMU.BNO085_Receive_Buffer[19]);
 	
 	absoluteQuaternion.qi=qToFloat(quaternionI,14);
 	absoluteQuaternion.qj=qToFloat(quaternionJ,14);
@@ -550,19 +552,19 @@ orientationDataType BNO085_GetAbsoluteOrientation(BNO085 *myIMU)
 	
 	absoluteOrientation.orientation=quaternionToEuler(absoluteQuaternion);
 	
-	status = myIMU->BNO085_Receive_Buffer[11]&0x03;
+	status = myIMU.BNO085_Receive_Buffer[11]&0x03;
 	absoluteOrientation.status = status;
 
-	absoluteOrientation.sequenceNumber=myIMU->BNO085_Receive_Buffer[10];
+	absoluteOrientation.sequenceNumber=myIMU.BNO085_Receive_Buffer[10];
 	
-	accuracy = ((((uint16_t)myIMU->BNO085_Receive_Buffer[22]) << 8)| myIMU->BNO085_Receive_Buffer[21]);
+	accuracy = ((((uint16_t)myIMU.BNO085_Receive_Buffer[22]) << 8)| myIMU.BNO085_Receive_Buffer[21]);
 	accuracy=qToFloat(accuracy,12);
 	absoluteOrientation.accuracy=radToDeg(accuracy);
 	
 	return absoluteOrientation;
 }
 
-motionDataType BNO085_GetGravity(BNO085 *myIMU)
+motionDataType BNO085_GetGravity(void)
 {
 	motionDataType gravityData;
 	uint8_t status;
@@ -570,23 +572,23 @@ motionDataType BNO085_GetGravity(BNO085 *myIMU)
 	uint16_t dataRawY;
 	uint16_t dataRawZ;
 	
-	gravityData.sequenceNumber=myIMU->BNO085_Receive_Buffer[10];
+	gravityData.sequenceNumber=myIMU.BNO085_Receive_Buffer[10];
 	
-	status=(myIMU->BNO085_Receive_Buffer[11])&0x03;
+	status=(myIMU.BNO085_Receive_Buffer[11])&0x03;
 	gravityData.status=status;
 	
-	dataRawX = ((((uint16_t)myIMU->BNO085_Receive_Buffer[14]) << 8) | myIMU->BNO085_Receive_Buffer[13]);
+	dataRawX = ((((uint16_t)myIMU.BNO085_Receive_Buffer[14]) << 8) | myIMU.BNO085_Receive_Buffer[13]);
 	gravityData.X =qToFloat(dataRawX,8);
 	
-	dataRawY = ((((uint16_t)myIMU->BNO085_Receive_Buffer[16]) << 8) | myIMU->BNO085_Receive_Buffer[15]);
+	dataRawY = ((((uint16_t)myIMU.BNO085_Receive_Buffer[16]) << 8) | myIMU.BNO085_Receive_Buffer[15]);
 	gravityData.Y =qToFloat(dataRawY,8);
 	
-	dataRawZ = ((((uint16_t)myIMU->BNO085_Receive_Buffer[18]) << 8) | myIMU->BNO085_Receive_Buffer[17]);
+	dataRawZ = ((((uint16_t)myIMU.BNO085_Receive_Buffer[18]) << 8) | myIMU.BNO085_Receive_Buffer[17]);
 	gravityData.Z =qToFloat(dataRawZ,8);
 	return gravityData;
 }
 
-orientationDataType BNO085_GetRelativeOrientation(BNO085 *myIMU)
+orientationDataType BNO085_GetRelativeOrientation(void)
 {
 	orientationDataType relativeOrientation;
 	quaternionType relativeQuaternion;
@@ -598,10 +600,10 @@ orientationDataType BNO085_GetRelativeOrientation(BNO085 *myIMU)
 	
 	uint8_t status;
 	
-	quaternionI=((((uint16_t)myIMU->BNO085_Receive_Buffer[14]) << 8)| myIMU->BNO085_Receive_Buffer[13]);
-	quaternionJ=((((uint16_t)myIMU->BNO085_Receive_Buffer[16]) << 8)| myIMU->BNO085_Receive_Buffer[15]);
-	quaternionK=((((uint16_t)myIMU->BNO085_Receive_Buffer[18]) << 8)| myIMU->BNO085_Receive_Buffer[17]);
-	quaternionR=((((uint16_t)myIMU->BNO085_Receive_Buffer[20]) << 8)| myIMU->BNO085_Receive_Buffer[19]);
+	quaternionI=((((uint16_t)myIMU.BNO085_Receive_Buffer[14]) << 8)| myIMU.BNO085_Receive_Buffer[13]);
+	quaternionJ=((((uint16_t)myIMU.BNO085_Receive_Buffer[16]) << 8)| myIMU.BNO085_Receive_Buffer[15]);
+	quaternionK=((((uint16_t)myIMU.BNO085_Receive_Buffer[18]) << 8)| myIMU.BNO085_Receive_Buffer[17]);
+	quaternionR=((((uint16_t)myIMU.BNO085_Receive_Buffer[20]) << 8)| myIMU.BNO085_Receive_Buffer[19]);
 	
 	relativeQuaternion.qi=qToFloat(quaternionI,14);
 	relativeQuaternion.qj=qToFloat(quaternionJ,14);
@@ -610,15 +612,15 @@ orientationDataType BNO085_GetRelativeOrientation(BNO085 *myIMU)
 	
 	relativeOrientation.orientation=quaternionToEuler(relativeQuaternion);
 	
-	status = myIMU->BNO085_Receive_Buffer[11]&0x03;
+	status = myIMU.BNO085_Receive_Buffer[11]&0x03;
 	relativeOrientation.status = status;
 
-	relativeOrientation.sequenceNumber=myIMU->BNO085_Receive_Buffer[10];
+	relativeOrientation.sequenceNumber=myIMU.BNO085_Receive_Buffer[10];
 	
 	return relativeOrientation;
 }
 
-orientationDataType BNO085_GetGeoOrientation(BNO085 *myIMU)
+orientationDataType BNO085_GetGeoOrientation(void)
 {
 	orientationDataType geoOrientation;
 	quaternionType geoQuaternion;
@@ -631,10 +633,10 @@ orientationDataType BNO085_GetGeoOrientation(BNO085 *myIMU)
 	
 	uint8_t status;
 	
-	quaternionI=((((uint16_t)myIMU->BNO085_Receive_Buffer[14]) << 8)| myIMU->BNO085_Receive_Buffer[13]);
-	quaternionJ=((((uint16_t)myIMU->BNO085_Receive_Buffer[16]) << 8)| myIMU->BNO085_Receive_Buffer[15]);
-	quaternionK=((((uint16_t)myIMU->BNO085_Receive_Buffer[18]) << 8)| myIMU->BNO085_Receive_Buffer[17]);
-	quaternionR=((((uint16_t)myIMU->BNO085_Receive_Buffer[20]) << 8)| myIMU->BNO085_Receive_Buffer[19]);
+	quaternionI=((((uint16_t)myIMU.BNO085_Receive_Buffer[14]) << 8)| myIMU.BNO085_Receive_Buffer[13]);
+	quaternionJ=((((uint16_t)myIMU.BNO085_Receive_Buffer[16]) << 8)| myIMU.BNO085_Receive_Buffer[15]);
+	quaternionK=((((uint16_t)myIMU.BNO085_Receive_Buffer[18]) << 8)| myIMU.BNO085_Receive_Buffer[17]);
+	quaternionR=((((uint16_t)myIMU.BNO085_Receive_Buffer[20]) << 8)| myIMU.BNO085_Receive_Buffer[19]);
 	
 	geoQuaternion.qi=qToFloat(quaternionI,14);
 	geoQuaternion.qj=qToFloat(quaternionJ,14);
@@ -643,19 +645,19 @@ orientationDataType BNO085_GetGeoOrientation(BNO085 *myIMU)
 	
 	geoOrientation.orientation=quaternionToEuler(geoQuaternion);
 	
-	status = myIMU->BNO085_Receive_Buffer[11]&0x03;
+	status = myIMU.BNO085_Receive_Buffer[11]&0x03;
 	geoOrientation.status = status;
 
-	geoOrientation.sequenceNumber=myIMU->BNO085_Receive_Buffer[10];
+	geoOrientation.sequenceNumber=myIMU.BNO085_Receive_Buffer[10];
 	
-	accuracy = ((((uint16_t)myIMU->BNO085_Receive_Buffer[22]) << 8)| myIMU->BNO085_Receive_Buffer[21]);
+	accuracy = ((((uint16_t)myIMU.BNO085_Receive_Buffer[22]) << 8)| myIMU.BNO085_Receive_Buffer[21]);
 	accuracy=qToFloat(accuracy,12);
 	geoOrientation.accuracy=radToDeg(accuracy);
 	
 	return geoOrientation;
 }
 
-rawSensorsDataType BNO085_GetRawAccelerometer(BNO085 *myIMU)
+rawSensorsDataType BNO085_GetRawAccelerometer(void)
 {
 	rawSensorsDataType rawAccelerometerData;
 	uint8_t status;
@@ -663,23 +665,23 @@ rawSensorsDataType BNO085_GetRawAccelerometer(BNO085 *myIMU)
 	uint16_t dataRawY;
 	uint16_t dataRawZ;
 	
-	rawAccelerometerData.sequenceNumber=myIMU->BNO085_Receive_Buffer[10];
+	rawAccelerometerData.sequenceNumber=myIMU.BNO085_Receive_Buffer[10];
 	
-	status=(myIMU->BNO085_Receive_Buffer[11])&0x03;
+	status=(myIMU.BNO085_Receive_Buffer[11])&0x03;
 	rawAccelerometerData.status=status;
 	
-	dataRawX = ((((uint16_t)myIMU->BNO085_Receive_Buffer[14]) << 8) | myIMU->BNO085_Receive_Buffer[13]);
+	dataRawX = ((((uint16_t)myIMU.BNO085_Receive_Buffer[14]) << 8) | myIMU.BNO085_Receive_Buffer[13]);
 	rawAccelerometerData.X = dataRawX;
 	
-	dataRawY = ((((uint16_t)myIMU->BNO085_Receive_Buffer[16]) << 8) | myIMU->BNO085_Receive_Buffer[15]);
+	dataRawY = ((((uint16_t)myIMU.BNO085_Receive_Buffer[16]) << 8) | myIMU.BNO085_Receive_Buffer[15]);
 	rawAccelerometerData.Y = dataRawY;
 	
-	dataRawZ = ((((uint16_t)myIMU->BNO085_Receive_Buffer[18]) << 8) | myIMU->BNO085_Receive_Buffer[17]);
+	dataRawZ = ((((uint16_t)myIMU.BNO085_Receive_Buffer[18]) << 8) | myIMU.BNO085_Receive_Buffer[17]);
 	rawAccelerometerData.Z = dataRawZ;
 	return rawAccelerometerData;
 }
 
-rawSensorsDataType BNO085_GetRawGyroscope(BNO085 *myIMU)
+rawSensorsDataType BNO085_GetRawGyroscope(void)
 {
 	rawSensorsDataType rawGyroscopeData;
 	uint8_t status;
@@ -687,23 +689,23 @@ rawSensorsDataType BNO085_GetRawGyroscope(BNO085 *myIMU)
 	uint16_t dataRawY;
 	uint16_t dataRawZ;
 	
-	rawGyroscopeData.sequenceNumber=myIMU->BNO085_Receive_Buffer[10];
+	rawGyroscopeData.sequenceNumber=myIMU.BNO085_Receive_Buffer[10];
 	
-	status=(myIMU->BNO085_Receive_Buffer[11])&0x03;
+	status=(myIMU.BNO085_Receive_Buffer[11])&0x03;
 	rawGyroscopeData.status=status;
 	
-	dataRawX = ((((uint16_t)myIMU->BNO085_Receive_Buffer[14]) << 8) | myIMU->BNO085_Receive_Buffer[13]);
+	dataRawX = ((((uint16_t)myIMU.BNO085_Receive_Buffer[14]) << 8) | myIMU.BNO085_Receive_Buffer[13]);
 	rawGyroscopeData.X = dataRawX;
 	
-	dataRawY = ((((uint16_t)myIMU->BNO085_Receive_Buffer[16]) << 8) | myIMU->BNO085_Receive_Buffer[15]);
+	dataRawY = ((((uint16_t)myIMU.BNO085_Receive_Buffer[16]) << 8) | myIMU.BNO085_Receive_Buffer[15]);
 	rawGyroscopeData.Y = dataRawY;
 	
-	dataRawZ = ((((uint16_t)myIMU->BNO085_Receive_Buffer[18]) << 8) | myIMU->BNO085_Receive_Buffer[17]);
+	dataRawZ = ((((uint16_t)myIMU.BNO085_Receive_Buffer[18]) << 8) | myIMU.BNO085_Receive_Buffer[17]);
 	rawGyroscopeData.Z = dataRawZ;
 	return rawGyroscopeData;
 }
 
-rawSensorsDataType BNO085_GetRawMagnetometer(BNO085 *myIMU)
+rawSensorsDataType BNO085_GetRawMagnetometer(void)
 {
 	rawSensorsDataType rawMagnetometerData;
 	uint8_t status;
@@ -711,18 +713,18 @@ rawSensorsDataType BNO085_GetRawMagnetometer(BNO085 *myIMU)
 	uint16_t dataRawY;
 	uint16_t dataRawZ;
 	
-	rawMagnetometerData.sequenceNumber=myIMU->BNO085_Receive_Buffer[10];
+	rawMagnetometerData.sequenceNumber=myIMU.BNO085_Receive_Buffer[10];
 	
-	status=(myIMU->BNO085_Receive_Buffer[11])&0x03;
+	status=(myIMU.BNO085_Receive_Buffer[11])&0x03;
 	rawMagnetometerData.status=status;
 	
-	dataRawX = ((((uint16_t)myIMU->BNO085_Receive_Buffer[14]) << 8) | myIMU->BNO085_Receive_Buffer[13]);
+	dataRawX = ((((uint16_t)myIMU.BNO085_Receive_Buffer[14]) << 8) | myIMU.BNO085_Receive_Buffer[13]);
 	rawMagnetometerData.X = dataRawX;
 	
-	dataRawY = ((((uint16_t)myIMU->BNO085_Receive_Buffer[16]) << 8) | myIMU->BNO085_Receive_Buffer[15]);
+	dataRawY = ((((uint16_t)myIMU.BNO085_Receive_Buffer[16]) << 8) | myIMU.BNO085_Receive_Buffer[15]);
 	rawMagnetometerData.Y = dataRawY;
 	
-	dataRawZ = ((((uint16_t)myIMU->BNO085_Receive_Buffer[18]) << 8) | myIMU->BNO085_Receive_Buffer[17]);
+	dataRawZ = ((((uint16_t)myIMU.BNO085_Receive_Buffer[18]) << 8) | myIMU.BNO085_Receive_Buffer[17]);
 	rawMagnetometerData.Z = dataRawZ;
 	return rawMagnetometerData;
 }
@@ -742,13 +744,13 @@ void BNO085_Product_ID_Request (BNO085 *myIMU)
 	return;
 }
 
-void BNO085_GetProductID(BNO085 *myIMU, uint16_t length)
+void BNO085_GetProductID(uint16_t length)
 {
 	int count=0;
 	
 	while (count<length)
 	{
-		myIMU->BNO085_Product_ID_Buffer[count]=myIMU->BNO085_Receive_Buffer[count];
+		myIMU.BNO085_Product_ID_Buffer[count]=myIMU.BNO085_Receive_Buffer[count];
 		count++;
 	}
 	return;
@@ -992,31 +994,31 @@ void BNO085_Command_SaveDCD(BNO085 *myIMU)
 	HAL_I2C_Master_Transmit(myIMU->hi2cx, myIMU->address, myIMU->BNO085_Send_Buffer,16, 1000);
 }
 
-void BNO085_Command_ConfigureCalibration(BNO085 *myIMU, uint8_t accelerometer, uint8_t gyroscope, uint8_t magnetometer, uint8_t planar)
+void BNO085_Command_ConfigureCalibration(uint8_t accelerometer, uint8_t gyroscope, uint8_t magnetometer, uint8_t planar)
 {
-	myIMU->BNO085_Send_Buffer[0]=16;
-	myIMU->BNO085_Send_Buffer[1]=0;
-	myIMU->BNO085_Send_Buffer[2]=CHANNEL_CONTROL;
-	myIMU->BNO085_Send_Buffer[3]=myIMU->sequenceNumber[CHANNEL_CONTROL];
-	myIMU->sequenceNumber[CHANNEL_CONTROL]++;
+	myIMU.BNO085_Send_Buffer[0]=16;
+	myIMU.BNO085_Send_Buffer[1]=0;
+	myIMU.BNO085_Send_Buffer[2]=CHANNEL_CONTROL;
+	myIMU.BNO085_Send_Buffer[3]=myIMU.sequenceNumber[CHANNEL_CONTROL];
+	myIMU.sequenceNumber[CHANNEL_CONTROL]++;
 		
-	myIMU->BNO085_Send_Buffer[4]=SHTP_COMMAND_REQUEST;
-	myIMU->BNO085_Send_Buffer[5]=myIMU->commandSequenceNumber;
-	myIMU->commandSequenceNumber++;
-	myIMU->BNO085_Send_Buffer[6]=SHTP_COMMAND_ID_ME_CALIBRATION;
-	myIMU->BNO085_Send_Buffer[7]=accelerometer;
+	myIMU.BNO085_Send_Buffer[4]=SHTP_COMMAND_REQUEST;
+	myIMU.BNO085_Send_Buffer[5]=myIMU.commandSequenceNumber;
+	myIMU.commandSequenceNumber++;
+	myIMU.BNO085_Send_Buffer[6]=SHTP_COMMAND_ID_ME_CALIBRATION;
+	myIMU.BNO085_Send_Buffer[7]=accelerometer;
 		
-	myIMU->BNO085_Send_Buffer[8]=gyroscope;
-	myIMU->BNO085_Send_Buffer[9]=magnetometer;
-	myIMU->BNO085_Send_Buffer[10]=0;
-	myIMU->BNO085_Send_Buffer[11]=planar;
+	myIMU.BNO085_Send_Buffer[8]=gyroscope;
+	myIMU.BNO085_Send_Buffer[9]=magnetometer;
+	myIMU.BNO085_Send_Buffer[10]=0;
+	myIMU.BNO085_Send_Buffer[11]=planar;
 
-	myIMU->BNO085_Send_Buffer[12]=0;
-	myIMU->BNO085_Send_Buffer[13]=0;
-	myIMU->BNO085_Send_Buffer[14]=0;
-	myIMU->BNO085_Send_Buffer[15]=0;
+	myIMU.BNO085_Send_Buffer[12]=0;
+	myIMU.BNO085_Send_Buffer[13]=0;
+	myIMU.BNO085_Send_Buffer[14]=0;
+	myIMU.BNO085_Send_Buffer[15]=0;
 	
-	HAL_I2C_Master_Transmit(myIMU->hi2cx, myIMU->address, myIMU->BNO085_Send_Buffer,16, 1000);
+	HAL_I2C_Master_Transmit(myIMU.hi2cx, myIMU.address, myIMU.BNO085_Send_Buffer,16, 1000);
 }
 
 void BNO085_Command_GetCalibrationStatus(BNO085 *myIMU)
@@ -1045,14 +1047,14 @@ void BNO085_Command_GetCalibrationStatus(BNO085 *myIMU)
 	
 	HAL_I2C_Master_Transmit(myIMU->hi2cx, myIMU->address, myIMU->BNO085_Send_Buffer,16, 1000);
 }
-void BNO085_Command_EnableFullCalibration(BNO085 *myIMU)
+void BNO085_Command_EnableFullCalibration(void)
 {
-	BNO085_Command_ConfigureCalibration(myIMU,1,1,1,1);
+	BNO085_Command_ConfigureCalibration(1,1,1,1);
 	return;
 }
 void BNO085_Command_DisableFullCalibration(BNO085 *myIMU)
 {
-	BNO085_Command_ConfigureCalibration(myIMU,0,0,0,0);
+	BNO085_Command_ConfigureCalibration(0,0,0,0);
 	return;
 }
 
@@ -1163,7 +1165,7 @@ void BNO085_Command_ClearResetDCD(BNO085 *myIMU)
 	HAL_I2C_Master_Transmit(myIMU->hi2cx, myIMU->address, myIMU->BNO085_Send_Buffer,16, 1000);
 }	
 
-void BNO085_GetCommandResponse(BNO085 *myIMU, uint16_t length)
+void BNO085_GetCommandResponse(uint16_t length)
 {
 	int count=0;
 	
@@ -1174,7 +1176,7 @@ void BNO085_GetCommandResponse(BNO085 *myIMU, uint16_t length)
 	
 	while (count<length)
 	{
-		myIMU->BNO085_Command_Buffer[count]=myIMU->BNO085_Receive_Buffer[count];
+		myIMU.BNO085_Command_Buffer[count]=myIMU.BNO085_Receive_Buffer[count];
 		count++;
 	}
 	
@@ -1194,10 +1196,10 @@ uint8_t BNO085_FRS_PerformWriteOperation (BNO085 *myIMU, uint16_t wordsToWrite, 
 
 	while (initializeResponse!=0)
 	{
-		dataLength = BNO085_DataAvailable(myIMU);
+		dataLength = BNO085_DataAvailable();
 		while (dataLength==0)
 		{
-			dataLength = BNO085_DataAvailable(myIMU);
+			dataLength = BNO085_DataAvailable();
 			trials++;
 			if (trials>MAX_TRIALS) return 0x02;
 		}
@@ -1205,7 +1207,7 @@ uint8_t BNO085_FRS_PerformWriteOperation (BNO085 *myIMU, uint16_t wordsToWrite, 
 		trials++;
 		if (trials>MAX_TRIALS) return 0x02;
 		
-		BNO085_ReceiveData(myIMU, dataLength);
+		BNO085_ReceiveData(dataLength);
 		if (myIMU->BNO085_Receive_Buffer[4] == SHTP_FRS_WRITE_RESPONSE_ID)
 		{
 			initializeResponse=0;
@@ -1230,21 +1232,21 @@ uint8_t BNO085_FRS_PerformWriteOperation (BNO085 *myIMU, uint16_t wordsToWrite, 
 		
 		while (currentWriteResponse!=0)
 		{
-			dataLength = BNO085_DataAvailable(myIMU);
+			dataLength = BNO085_DataAvailable();
 			
 			trials++;
 			if (trials>MAX_TRIALS) return 0x02;
 			
 			while (dataLength==0)
 			{
-				dataLength = BNO085_DataAvailable(myIMU);
+				dataLength = BNO085_DataAvailable();
 				
 				trials++;
 				if (trials>MAX_TRIALS) return 0x02;
 			
 			}
 			
-			BNO085_ReceiveData(myIMU, dataLength);
+			BNO085_ReceiveData(dataLength);
 			if (myIMU->BNO085_Receive_Buffer[4] == SHTP_FRS_WRITE_RESPONSE_ID)
 			{
 				currentWriteResponse=0;
@@ -1337,7 +1339,7 @@ uint8_t BNO085_FRS_ReadRequest (BNO085 *myIMU, uint16_t offset, uint16_t FRSType
 	counter = 0;
 	while (counter<numberOfWords)
 	{
-		dataLength = BNO085_DataAvailable(myIMU);
+		dataLength = BNO085_DataAvailable();
 		
 		trials++;
 		if (trials>MAX_TRIALS) return 0x02;
@@ -1348,10 +1350,10 @@ uint8_t BNO085_FRS_ReadRequest (BNO085 *myIMU, uint16_t offset, uint16_t FRSType
 			trials++;
 			if (trials>MAX_TRIALS) return 0x02;
 			
-			dataLength = BNO085_DataAvailable(myIMU);
+			dataLength = BNO085_DataAvailable();
 		}
 		
-		BNO085_ReceiveData(myIMU, dataLength);
+		BNO085_ReceiveData(dataLength);
 		if (myIMU->BNO085_Receive_Buffer[4] == SHTP_FRS_READ_RESPONSE_ID)
 		{
 			status = myIMU->BNO085_Receive_Buffer[5] & 0x07;
@@ -1399,32 +1401,32 @@ uint8_t BNO085_FRS_RequestOrientation(BNO085* myIMU)
 
 void BNO085_init(void){
 	
-	myIMU = BNO085_CreateIMU(&hi2c4, BNO085_ADDRESS, GPIOC, RESET_IMU_Pin, NULL, NULL); /*last fields are NULL because nboot pin is not connected*/
-	uint8_t BNO085 = BNO085_IsAlive(&myIMU);
+	myIMU = BNO085_CreateIMU(&hi2c4, BNO085_ADDRESS, GPIOC, RESET_IMU_Pin, LED_YELLOW_GPIO_Port, LED_YELLOW_Pin); /*last fields are NULL because nboot pin is not connected*/
+	simogein = BNO085_IsAlive();
 
 	
-	BNO085_HardReset(&myIMU);
-	
-	/*HAL_Delay(50);
-	BNO085_FlushI2C(&myIMU);
-	HAL_Delay(50);
-	BNO085_FlushI2C(&myIMU);
-	HAL_Delay(50);*/
-	
-	/*Enable sensor reports functions*/
-	BNO085_Command_EnableFullCalibration(&myIMU);
-	BNO085_UpdateSensorReading(&myIMU);
-	
-	BNO085_EnableAccelerometer (&myIMU, 10);
-	BNO085_EnableGyroscope (&myIMU, 10);
-	BNO085_EnableMagnetometer(&myIMU, 10);
-	BNO085_EnableLinearAcc(&myIMU, 10);
-	BNO085_EnableAbsoluteRotationVector(&myIMU, 10);
-	BNO085_EnableGravity(&myIMU, 10);
-	BNO085_EnableRelativeRotationVector(&myIMU, 10);
-	BNO085_EnableGeoRotation(&myIMU, 20);
-	BNO085_EnableRawAccelerometer(&myIMU, 10);
-	BNO085_EnableRawGyroscope(&myIMU, 10);
-	BNO085_EnableRawMagnetometer(&myIMU, 10);
+	BNO085_HardReset();
+//	
+//	osDelay(50);
+//	BNO085_FlushI2C();
+//	osDelay(50);
+//	BNO085_FlushI2C();
+//	osDelay(50);
+//	
+//	/*Enable sensor reports functions*/
+//	BNO085_Command_EnableFullCalibration();
+//	//BNO085_UpdateSensorReading();
+//	
+//	BNO085_EnableAccelerometer (10);
+//	BNO085_EnableGyroscope (10);
+//	BNO085_EnableMagnetometer(10);
+//	BNO085_EnableLinearAcc(10);
+//	BNO085_EnableAbsoluteRotationVector(10);
+//	BNO085_EnableGravity(10);
+//	BNO085_EnableRelativeRotationVector(10);
+//	BNO085_EnableGeoRotation(20);
+//	BNO085_EnableRawAccelerometer(10);
+//	BNO085_EnableRawGyroscope(10);
+//	BNO085_EnableRawMagnetometer(10);
 	
 }

@@ -160,51 +160,51 @@ int16_t floatToQ (double realToConvert, uint8_t qPoint);
 BNO085 BNO085_CreateIMU (I2C_HandleTypeDef *hi2cx, uint8_t address, GPIO_TypeDef *reset_GPIOx, uint16_t reset_Pin, GPIO_TypeDef *boot_GPIOx, uint16_t nBOOT_Pin);
 
 /*BNO085 SHTP comunication functions*/
-uint8_t BNO085_IsAlive(BNO085 *myIMU);
-void BNO085_HardReset(BNO085 *myIMU);
-void BNO085_SoftReset(BNO085 *myIMU);
-void BNO085_FlushI2C(BNO085 *myIMU);
-uint8_t BNO085_SetFeatureCommand(BNO085 *myIMU, uint8_t sensorID, uint16_t timeBetweenReports, uint32_t configWord);
-uint16_t BNO085_DataAvailable(BNO085 *myIMU);
-void BNO085_ReceiveData(BNO085 *myIMU, uint16_t length);
+uint8_t BNO085_IsAlive(void);
+void BNO085_HardReset(void);
+void BNO085_SoftReset(void);
+void BNO085_FlushI2C(void);
+uint8_t BNO085_SetFeatureCommand(uint8_t sensorID, uint16_t timeBetweenReports, uint32_t configWord);
+uint16_t BNO085_DataAvailable(void);
+void BNO085_ReceiveData(uint16_t length);
 
 /*BNO085 Enable calibrated sensor reports functions*/
-void BNO085_EnableAccelerometer(BNO085 *myIMU, uint16_t timeBetweenReports);
-void BNO085_EnableGyroscope(BNO085 *myIMU, uint16_t timeBetweenReports);
-void BNO085_EnableMagnetometer(BNO085 *myIMU, uint16_t timeBetweenReports);
+void BNO085_EnableAccelerometer(uint16_t timeBetweenReports);
+void BNO085_EnableGyroscope(uint16_t timeBetweenReports);
+void BNO085_EnableMagnetometer( uint16_t timeBetweenReports);
 
-void BNO085_EnableLinearAcc(BNO085 *myIMU, uint16_t timeBetweenReports);
-void BNO085_EnableAbsoluteRotationVector(BNO085 *myIMU, uint16_t timeBetweenReports);
-void BNO085_EnableGravity(BNO085 *myIMU, uint16_t timeBetweenReports);
-void BNO085_EnableRelativeRotationVector(BNO085 *myIMU, uint16_t timeBetweenReports);
-void BNO085_EnableGeoRotation(BNO085 *myIMU, uint16_t timeBetweenReports);
+void BNO085_EnableLinearAcc(uint16_t timeBetweenReports);
+void BNO085_EnableAbsoluteRotationVector(uint16_t timeBetweenReports);
+void BNO085_EnableGravity(uint16_t timeBetweenReports);
+void BNO085_EnableRelativeRotationVector(uint16_t timeBetweenReports);
+void BNO085_EnableGeoRotation(uint16_t timeBetweenReports);
 
-void BNO085_EnableRawAccelerometer(BNO085 *myIMU, uint16_t timeBetweenReports);
-void BNO085_EnableRawGyroscope(BNO085 *myIMU, uint16_t timeBetweenReports);
-void BNO085_EnableRawMagnetometer(BNO085 *myIMU, uint16_t timeBetweenReports);
+void BNO085_EnableRawAccelerometer(uint16_t timeBetweenReports);
+void BNO085_EnableRawGyroscope(uint16_t timeBetweenReports);
+void BNO085_EnableRawMagnetometer(uint16_t timeBetweenReports);
 
 /*Update sensor reading*/
-void BNO085_UpdateSensorReading(BNO085 *myIMU);
+void BNO085_UpdateSensorReading(void);
 	
 /*Get separated sensor readings*/
-motionDataType BNO085_GetAcceleration(BNO085 *myIMU);
-motionDataType BNO085_GetAngularRate(BNO085 *myIMU);
-motionDataType BNO085_GetMagnetometer(BNO085 *myIMU);
+motionDataType BNO085_GetAcceleration(void);
+motionDataType BNO085_GetAngularRate(void);
+motionDataType BNO085_GetMagnetometer(void);
 
-motionDataType BNO085_GetLinearAcceleration(BNO085 *myIMU);
-orientationDataType BNO085_GetAbsoluteOrientation(BNO085 *myIMU);
-motionDataType BNO085_GetGravity(BNO085 *myIMU);
-orientationDataType BNO085_GetRelativeOrientation(BNO085 *myIMU);
-orientationDataType BNO085_GetGeoOrientation(BNO085 *myIMU);
+motionDataType BNO085_GetLinearAcceleration(void);
+orientationDataType BNO085_GetAbsoluteOrientation(void);
+motionDataType BNO085_GetGravity(void);
+orientationDataType BNO085_GetRelativeOrientation(void);
+orientationDataType BNO085_GetGeoOrientation(void);
 
-rawSensorsDataType BNO085_GetRawAccelerometer(BNO085 *myIMU);
-rawSensorsDataType BNO085_GetRawGyroscope(BNO085 *myIMU);
-rawSensorsDataType BNO085_GetRawMagnetometer(BNO085 *myIMU);
+rawSensorsDataType BNO085_GetRawAccelerometer(void);
+rawSensorsDataType BNO085_GetRawGyroscope(void);
+rawSensorsDataType BNO085_GetRawMagnetometer(void);
 
 /*Product ID request*/
 void BNO085_Product_ID_Request (BNO085 *myIMU);
 
-void BNO085_GetProductID(BNO085 *myIMU, uint16_t length);
+void BNO085_GetProductID(uint16_t length);
 
 /*Command functions*/
 void BNO085_Command_RequestErrorReport(BNO085 *myIMU, uint8_t severity);
@@ -220,9 +220,9 @@ void BNO085_Command_Initialize(BNO085 *myIMU);
 
 void BNO085_Command_SaveDCD(BNO085 *myIMU);
 
-void BNO085_Command_EnableFullCalibration(BNO085 *myIMU);
+void BNO085_Command_EnableFullCalibration(void);
 void BNO085_Command_DisableFullCalibration(BNO085 *myIMU);
-void BNO085_Command_ConfigureCalibration(BNO085 *myIMU, uint8_t accelerometer, uint8_t gyroscope, uint8_t magnetometer, uint8_t planar);
+void BNO085_Command_ConfigureCalibration(uint8_t accelerometer, uint8_t gyroscope, uint8_t magnetometer, uint8_t planar);
 void BNO085_Command_GetCalibrationStatus(BNO085 *myIMU);
 
 void BNO085_Command_EnableAutoSaveDCD(BNO085 *myIMU);
@@ -233,7 +233,7 @@ void BNO085_Command_GetOscType(BNO085 *myIMU);
 void BNO085_Command_ClearResetDCD(BNO085 *myIMU);
 
 /*Command parsing*/
-void BNO085_GetCommandResponse(BNO085 *myIMU, uint16_t length);
+void BNO085_GetCommandResponse(uint16_t length);
 
 /*FRS basic communication*/
 uint8_t BNO085_FRS_PerformWriteOperation (BNO085 *myIMU, uint16_t wordsToWrite, uint16_t FRSType, uint16_t initialOffset);

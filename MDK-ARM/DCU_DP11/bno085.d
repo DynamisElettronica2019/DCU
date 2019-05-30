@@ -1,6 +1,6 @@
 dcu_dp11\bno085.o: ..\Src\BNO085.c
 dcu_dp11\bno085.o: ../Inc/BNO085.h
-dcu_dp11\bno085.o: C:\Keil_v5\ARM\ARM_Compiler_5.06u6\Bin\..\include\stdint.h
+dcu_dp11\bno085.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 dcu_dp11\bno085.o: ../Inc/i2c.h
 dcu_dp11\bno085.o: ../Inc/main.h
 dcu_dp11\bno085.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal.h
@@ -17,7 +17,7 @@ dcu_dp11\bno085.o: ../Drivers/CMSIS/Include/mpu_armv7.h
 dcu_dp11\bno085.o: ../Drivers/CMSIS/Device/ST/STM32F7xx/Include/system_stm32f7xx.h
 dcu_dp11\bno085.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal.h
 dcu_dp11\bno085.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
-dcu_dp11\bno085.o: C:\Keil_v5\ARM\ARM_Compiler_5.06u6\Bin\..\include\stddef.h
+dcu_dp11\bno085.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
 dcu_dp11\bno085.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_rcc_ex.h
 dcu_dp11\bno085.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_exti.h
 dcu_dp11\bno085.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_gpio.h
@@ -44,5 +44,19 @@ dcu_dp11\bno085.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart.h
 dcu_dp11\bno085.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart_ex.h
 dcu_dp11\bno085.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_hcd.h
 dcu_dp11\bno085.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_usb.h
-dcu_dp11\bno085.o: C:\Keil_v5\ARM\ARM_Compiler_5.06u6\Bin\..\include\math.h
+dcu_dp11\bno085.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
 dcu_dp11\bno085.o: ../Inc/id_can.h
+dcu_dp11\bno085.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
+dcu_dp11\bno085.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+dcu_dp11\bno085.o: ../Inc/FreeRTOSConfig.h
+dcu_dp11\bno085.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+dcu_dp11\bno085.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+dcu_dp11\bno085.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+dcu_dp11\bno085.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM7/r0p1/portmacro.h
+dcu_dp11\bno085.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+dcu_dp11\bno085.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+dcu_dp11\bno085.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
+dcu_dp11\bno085.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h
+dcu_dp11\bno085.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
+dcu_dp11\bno085.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
+dcu_dp11\bno085.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h

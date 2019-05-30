@@ -49,6 +49,15 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
+
+uint8_t buffer [6];
+	uint8_t received [6];
+	uint8_t k = 0;
+	uint8_t add = 0;
+	
+	uint8_t tx = 255;
+	uint8_t rx = 255;
+	
 extern BNO085 myIMU;
 /* USER CODE END Variables */
 osThreadId aliveHandle;
@@ -87,7 +96,7 @@ void MX_FREERTOS_Init(void) {
   IMUSemHandle = osSemaphoreCreate(osSemaphore(IMUSem), 1);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
-  xSemaphoreTake(IMUSemHandle, portMAX_DELAY);
+	
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -105,12 +114,13 @@ void MX_FREERTOS_Init(void) {
   aliveHandle = osThreadCreate(osThread(alive), NULL);
 
   /* definition and creation of IMUUnboxTask */
-  osThreadDef(IMUUnboxTask, IMUUnboxFunc, osPriorityNormal, 0, 512);
+  osThreadDef(IMUUnboxTask, IMUUnboxFunc, osPriorityNormal, 0, 2048);
   IMUUnboxTaskHandle = osThreadCreate(osThread(IMUUnboxTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
+
 }
 
 /* USER CODE BEGIN Header_aliveTask */
@@ -153,14 +163,53 @@ void aliveTask(void const * argument)
 /* USER CODE END Header_IMUUnboxFunc */
 void IMUUnboxFunc(void const * argument)
 {
-  /* USER CODE BEGIN IMUUnboxFunc */	
-	BNO085_init();
+  /* USER CODE BEGIN IMUUnboxFunc */
+	
+		//BNO085_init();
+	
+		HAL_GPIO_WritePin(myIMU.reset_GPIOx, myIMU.reset_Pin, GPIO_PIN_SET);
+		osDelay(250);
+		HAL_GPIO_WritePin(myIMU.reset_GPIOx, myIMU.reset_Pin, GPIO_PIN_RESET);
+		osDelay(500);
+		HAL_GPIO_WritePin(myIMU.reset_GPIOx, myIMU.reset_Pin, GPIO_PIN_SET);
+		osDelay(500);
+	
+	
+	while(1) {
+		buffer[0] = 6;
+		buffer[1] = 0;
+		buffer[2] = CHANNEL_CONTROL;
+		buffer[3] = k;
+		k++;
+		buffer[4] = SHTP_PRODUCT_ID_REQUEST;
+		buffer[5] = 0;
+		tx = HAL_I2C_Master_Transmit(&hi2c4, 0x96, buffer, 6, 1000);
+		rx = HAL_I2C_Master_Receive(&hi2c4, 0x96, received, 6, 1000);
+		osDelay(50);
+	}
+	
+	
+	
+	
+//	
+//	myIMU->BNO085_Send_Buffer[0]=6;
+//	myIMU->BNO085_Send_Buffer[1]=0;
+//	myIMU->BNO085_Send_Buffer[2]=CHANNEL_CONTROL;
+//	myIMU->BNO085_Send_Buffer[3]=myIMU->sequenceNumber[CHANNEL_CONTROL];
+//	myIMU->sequenceNumber[CHANNEL_CONTROL]++;
+//	
+//	myIMU->BNO085_Send_Buffer[4]= SHTP_PRODUCT_ID_REQUEST;
+//	myIMU->BNO085_Send_Buffer[5]= 0;
+//	
+//	HAL_I2C_Master_Transmit(myIMU->hi2cx, myIMU->address, myIMU->BNO085_Send_Buffer,6, 1000);
+	
 	
   /* Infinite loop */
-  for(;;) {
-		xSemaphoreTake(IMUSemHandle, portMAX_DELAY);		/* Try to take semaphore */
-		BNO085_UpdateSensorReading(&myIMU);							/* Should fill myIMU struct with new data */
-  }
+//  for(;;) {
+////		xSemaphoreTake(IMUSemHandle, portMAX_DELAY);		/* Try to take semaphore */
+////		BNO085_UpdateSensorReading();							/* Should fill myIMU struct with new data */
+////		osDelay(1);
+//  }
   /* USER CODE END IMUUnboxFunc */
 }
 

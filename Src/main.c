@@ -82,7 +82,8 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 
-  /* USER CODE END 1 */  
+  /* USER CODE END 1 */
+  
 
   /* Enable I-Cache---------------------------------------------------------*/
   SCB_EnableICache();
@@ -235,8 +236,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE BEGIN Callback 1 */
 	
 	if (htim->Instance == TIM7) {
-		xSemaphoreGiveFromISR(IMUSemHandle, &IMU_xHigherPriorityTaskWoken);
-		portYIELD_FROM_ISR(IMU_xHigherPriorityTaskWoken);
+//		xSemaphoreGiveFromISR(IMUSemHandle, &IMU_xHigherPriorityTaskWoken);
+//		portYIELD_FROM_ISR(IMU_xHigherPriorityTaskWoken);
   }
 
   /* USER CODE END Callback 1 */
