@@ -294,16 +294,16 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			CAN_ReceivedPacketsCounter[GCU_DEBUG_1_ID_COUNTER_INDEX]++;
 			intToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][GCU_TEMP_CSV_INDEX], 2);
 			intToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][GCU_CURR_CSV_INDEX], 3);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][H2O_PUMP_CURRENT_CSV_INDEX], 5);
-			intToStringUnsigned(data4, &DATA_BlockBuffer[DATA_BlockWriteIndex][FUEL_PUMP_CURRENT_CSV_INDEX], 5);
+			decimalToStringUnsigned((uint16_t)data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][H2O_PUMP_CURRENT_CSV_INDEX], 2, 1);		/* Taking into account the division by 10 */
+			decimalToStringUnsigned((uint16_t)data4, &DATA_BlockBuffer[DATA_BlockWriteIndex][FUEL_PUMP_CURRENT_CSV_INDEX], 2, 1);		/* Taking into account the division by 10 */
 			break;
 		
 		case GCU_DEBUG_2_ID:
 			CAN_ReceivedPacketsCounter[GCU_DEBUG_2_ID_COUNTER_INDEX]++;
-			intToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][GEARMOTOR_CURRENT_CSV_INDEX], 5);
-			intToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][CLUTCH_CURRENT_CSV_INDEX], 5);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][FAN_SX_CURRENT_CSV_INDEX], 5);
-			intToStringUnsigned(data4, &DATA_BlockBuffer[DATA_BlockWriteIndex][FAN_DX_CURRENT_CSV_INDEX], 5);
+			decimalToStringUnsigned((uint16_t)data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][GEARMOTOR_CURRENT_CSV_INDEX], 2, 1);		/* Taking into account the division by 10 */
+			decimalToStringUnsigned((uint16_t)data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][CLUTCH_CURRENT_CSV_INDEX], 2, 1);			/* Taking into account the division by 10 */
+			decimalToStringUnsigned((uint16_t)data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][FAN_SX_CURRENT_CSV_INDEX], 2, 1);			/* Taking into account the division by 10 */
+			decimalToStringUnsigned((uint16_t)data4, &DATA_BlockBuffer[DATA_BlockWriteIndex][FAN_DX_CURRENT_CSV_INDEX], 2, 1);			/* Taking into account the division by 10 */
 			break;
 		
 		default:

@@ -9,9 +9,9 @@
 #define NUMBER_OF_RECEIVED_PACKETS														(uint8_t)25
 #define NUMBER_OF_ACQUIRED_CHANNELS														(uint8_t)91
 #define BUFFER_STATE_LEN 																			(uint8_t)9
-#define BUFFER_BLOCK_LEN 																			(uint16_t)583
+#define BUFFER_BLOCK_LEN 																			(uint16_t)577
 #define BUFFER_POINTERS_NUMBER 																(uint8_t)2
-#define CLOSE_FILE_INTERVAL																		(uint32_t)120000
+#define CLOSE_FILE_INTERVAL																		(uint32_t)60000
 
 /* Packet position in CAN data packet counter vector */
 #define EFI_HALL_WHEEL_ID_COUNTER_INDEX 											(uint8_t)0
@@ -138,19 +138,19 @@
 #define GCU_TEMP_CSV_INDEX 																		(uint16_t)507
 #define GCU_CURR_CSV_INDEX 																		(uint16_t)510
 #define H2O_PUMP_CURRENT_CSV_INDEX 														(uint16_t)514
-#define FUEL_PUMP_CURRENT_CSV_INDEX 													(uint16_t)520
-#define GEARMOTOR_CURRENT_CSV_INDEX 													(uint16_t)526
-#define CLUTCH_CURRENT_CSV_INDEX 															(uint16_t)532
-#define FAN_SX_CURRENT_CSV_INDEX 															(uint16_t)538
-#define FAN_DX_CURRENT_CSV_INDEX 															(uint16_t)544
-#define DCU_TEMP_CSV_INDEX 																		(uint16_t)550
-#define DCU_CURRENT_CSV_INDEX 																(uint16_t)553
-#define XBEE_CURRENT_CSV_INDEX 																(uint16_t)558
-#define DUC_3V3_CURRENT_CSV_INDEX 														(uint16_t)562
-#define DCU_12V_VOLTAGE_CSV_INDEX 														(uint16_t)566
-#define DCU_5V_VOLTAGE_CSV_INDEX 															(uint16_t)572
-#define DCU_3V3_VOLTAGE_CSV_INDEX 														(uint16_t)577
-#define END_CSV_INDEX 																				(uint16_t)582
+#define FUEL_PUMP_CURRENT_CSV_INDEX 													(uint16_t)519
+#define GEARMOTOR_CURRENT_CSV_INDEX 													(uint16_t)524
+#define CLUTCH_CURRENT_CSV_INDEX 															(uint16_t)529
+#define FAN_SX_CURRENT_CSV_INDEX 															(uint16_t)534
+#define FAN_DX_CURRENT_CSV_INDEX 															(uint16_t)539
+#define DCU_TEMP_CSV_INDEX 																		(uint16_t)544
+#define DCU_CURRENT_CSV_INDEX 																(uint16_t)547
+#define XBEE_CURRENT_CSV_INDEX 																(uint16_t)552
+#define DUC_3V3_CURRENT_CSV_INDEX 														(uint16_t)556
+#define DCU_12V_VOLTAGE_CSV_INDEX 														(uint16_t)560
+#define DCU_5V_VOLTAGE_CSV_INDEX 															(uint16_t)566
+#define DCU_3V3_VOLTAGE_CSV_INDEX 														(uint16_t)571
+#define END_CSV_INDEX 																				(uint16_t)576
 
 /* Data separator position in CSV file */
 #define HALL_EFFECT_FR_CSV_SEPARATOR													(HALL_EFFECT_FR_CSV_INDEX - 1)
