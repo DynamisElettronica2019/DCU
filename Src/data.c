@@ -20,8 +20,20 @@ uint8_t EFI_IsAlive = EFI_IS_ALIVE_RESET;
 uint8_t acquisitionState = ACQUISITION_OFF_STATE;
 uint8_t DATA_BlockBuffer [BUFFER_POINTERS_NUMBER][BUFFER_BLOCK_LEN];
 uint8_t DATA_StateBuffer [BUFFER_STATE_LEN];
+uint8_t DATA_RawCalibrationData [CALIBRATION_BUFFER_DATA_NUMBER];
 BaseType_t EFI_IsAlive_xHigherPriorityTaskWoken = pdFALSE;
 extern uint8_t DATA_BlockWriteIndex;
+extern float DATA_LOAD_CELL_FR_CalibrationOffset;
+extern float DATA_LOAD_CELL_FL_CalibrationOffset;
+extern float DATA_LOAD_CELL_RR_CalibrationOffset;
+extern float DATA_LOAD_CELL_RL_CalibrationOffset;
+extern float DATA_LINEAR_FR_CalibrationOffset;
+extern float DATA_LINEAR_FL_CalibrationOffset;
+extern float DATA_LINEAR_RR_CalibrationOffset;
+extern float DATA_LINEAR_RL_CalibrationOffset;
+extern float DATA_APPS_ZeroCalibrationOffset;
+extern float DATA_APPS_FullCalibrationOffset;
+extern float DATA_STEER_ANGLE_CalibrationOffset;
 extern uint32_t CAN_ReceivedPacketsCounter [NUMBER_OF_ACQUIRED_CHANNELS];
 extern osSemaphoreId automaticStartAcquisitionSemaphoreHandle;
 extern osMessageQId startAcquisitionEventHandle;
@@ -30,9 +42,6 @@ extern osMessageQId ErrorQueueHandle;
 
 extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 {	
-	uint8_t startAquisitionEvent = ACQUISITION_IDLE_REQUEST;
-	BaseType_t startAcquisition_xHigherPriorityTaskWoken = pdFALSE;
-	
 	/* Get the four 16 bit data from the 8 bit CAN messages */
 	data1 = (unpackedData->packetData[0] << 8) | unpackedData->packetData[1]; 		/* First data in the packet */
 	data2 = (unpackedData->packetData[2] << 8) | unpackedData->packetData[3]; 		/* Second data in the packet */
@@ -132,25 +141,19 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 		/* SW ID range */
 		
 		case SW_ACQUISITION_DCU_ID:
-			if(data1 == SW_ACQUISITION_CAN_REQUEST) {
-				if(data2 == SW_START_ACQUISITION_CAN_REQUEST) {
-					startAquisitionEvent = ACQUISITION_ON_TELEMETRY_REQUEST;		/* Start acquisition */
-					xQueueSendFromISR(startAcquisitionEventHandle, &startAquisitionEvent, &startAcquisition_xHigherPriorityTaskWoken);
-				}
-				else if(data2 == SW_STOP_ACQUISITION_CAN_REQUEST) {
-					startAquisitionEvent = ACQUISITION_OFF_TELEMETRY_REQUEST;		/* Stop acquisition */
-					xQueueSendFromISR(startAcquisitionEventHandle, &startAquisitionEvent, &startAcquisition_xHigherPriorityTaskWoken);
-				}
-			}
+			DATA_SW_CAN_Management(data1, data2);
 			break;
 		
 		/* DAU ID range */
 		
 		case DAU_FR_ID:
 			CAN_ReceivedPacketsCounter[DAU_FR_ID_COUNTER_INDEX]++;
-			fData1 = LINEAR_DataConversion((uint16_t)data1) * 100.0f;			/* Taking into account the division by 100 */
-			fData2 = LOAD_CELL_DataConversion((int16_t)data2);
-			fData3 = BPS_DataConversion((uint16_t)data3) * 100.0f;				/* Taking into account the division by 100 */
+			DATA_RawCalibrationData[LINEAR_FR_CALIBRATION_INDEX] = data1;
+			DATA_RawCalibrationData[LOAD_CELL_FR_CALIBRATION_INDEX] = data2;
+			DATA_RawCalibrationData[APPS_CALIBRATION_INDEX] = data4;
+			fData1 = LINEAR_FR_DataConversion((uint16_t)data1) * 100.0f;		/* Taking into account the division by 100 */
+			fData2 = LOAD_CELL_FR_DataConversion((int16_t)data2);
+			fData3 = BPS_DataConversion((uint16_t)data3) * 100.0f;					/* Taking into account the division by 100 */
 			fData4 = APPS_DataConversion((uint16_t)data4);
 			decimalToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[DATA_BlockWriteIndex][LINEARE_FR_CSV_INDEX], 2, 2);
 			intToString((int16_t)fData2, &DATA_BlockBuffer[DATA_BlockWriteIndex][LOAD_CELL_FR_CSV_INDEX], 4);
@@ -160,8 +163,11 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 		
 		case DAU_FL_ID:
 			CAN_ReceivedPacketsCounter[DAU_FL_ID_COUNTER_INDEX]++;
-			fData1 = LINEAR_DataConversion((uint16_t)data1) * 100.0f;									/* Taking into account the division by 100 */
-			fData2 = LOAD_CELL_DataConversion((int16_t)data2);
+			DATA_RawCalibrationData[LINEAR_FL_CALIBRATION_INDEX] = data1;
+			DATA_RawCalibrationData[LOAD_CELL_FL_CALIBRATION_INDEX] = data2;
+			DATA_RawCalibrationData[STEER_ANGLE_CALIBRATION_INDEX] = data4;
+			fData1 = LINEAR_FL_DataConversion((uint16_t)data1) * 100.0f;							/* Taking into account the division by 100 */
+			fData2 = LOAD_CELL_FL_DataConversion((int16_t)data2);
 			fData3 = BPS_DataConversion((uint16_t)data3) * 100.0f;										/* Taking into account the division by 100 */
 			fData4 = STEERING_WHEEL_ANGLE_DataConversion((int16_t)data4) * 10.0f; 		/* Taking into account the division by 10 */
 			decimalToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[DATA_BlockWriteIndex][LINEARE_FL_CSV_INDEX], 2, 2);
@@ -172,10 +178,14 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 		
 		case DAU_REAR_ID:
 			CAN_ReceivedPacketsCounter[DAU_REAR_ID_COUNTER_INDEX]++;
-			fData1 = LINEAR_DataConversion((uint16_t)data1) * 100.0f;			/* Taking into account the division by 100 */
-			fData2 = LOAD_CELL_DataConversion((int16_t)data2);
-			fData3 = LINEAR_DataConversion((uint16_t)data3) * 100.0f;			/* Taking into account the division by 100 */
-			fData4 = LOAD_CELL_DataConversion((int16_t)data4);
+			DATA_RawCalibrationData[LINEAR_RL_CALIBRATION_INDEX] = data1;
+			DATA_RawCalibrationData[LOAD_CELL_RL_CALIBRATION_INDEX] = data2;
+			DATA_RawCalibrationData[LINEAR_RR_CALIBRATION_INDEX] = data3;
+			DATA_RawCalibrationData[LOAD_CELL_RR_CALIBRATION_INDEX] = data4;
+			fData1 = LINEAR_RL_DataConversion((uint16_t)data1) * 100.0f;			/* Taking into account the division by 100 */
+			fData2 = LOAD_CELL_RL_DataConversion((int16_t)data2);
+			fData3 = LINEAR_RR_DataConversion((uint16_t)data3) * 100.0f;			/* Taking into account the division by 100 */
+			fData4 = LOAD_CELL_RR_DataConversion((int16_t)data4);
 			decimalToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[DATA_BlockWriteIndex][LINEARE_RL_CSV_INDEX], 2, 2);
 			intToString((int16_t)fData2, &DATA_BlockBuffer[DATA_BlockWriteIndex][LOAD_CELL_RL_CSV_INDEX], 4);
 			decimalToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[DATA_BlockWriteIndex][LINEARE_RR_CSV_INDEX], 2, 2);
@@ -184,10 +194,10 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 		
 		case DAU_FL_IR_ID:
 			CAN_ReceivedPacketsCounter[DAU_FL_IR_ID_COUNTER_INDEX]++;
-			fData1 = IR_DataConversion((uint16_t)data1);
-			fData2 = IR_DataConversion((uint16_t)data2);
-			fData3 = IR_DataConversion((uint16_t)data3);
-			fData4 = IR_DataConversion((uint16_t)data4);
+			fData1 = IR_WHEEL_FL_DataConversion((uint16_t)data1);
+			fData2 = IR_WHEEL_FL_DataConversion((uint16_t)data2);
+			fData3 = IR_WHEEL_FL_DataConversion((uint16_t)data3);
+			fData4 = IR_BRAKE_FL_DataConversion((uint16_t)data4);
 			intToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[DATA_BlockWriteIndex][IR1_FL_CSV_INDEX], 3);
 			intToStringUnsigned((uint16_t)fData2, &DATA_BlockBuffer[DATA_BlockWriteIndex][IR2_FL_CSV_INDEX], 3);
 			intToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[DATA_BlockWriteIndex][IR3_FL_CSV_INDEX], 3);
@@ -196,10 +206,10 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 		
 		case DAU_FR_IR_ID:
 			CAN_ReceivedPacketsCounter[DAU_FR_IR_ID_COUNTER_INDEX]++;
-			fData1 = IR_DataConversion((uint16_t)data1);
-			fData2 = IR_DataConversion((uint16_t)data2);
-			fData3 = IR_DataConversion((uint16_t)data3);
-			fData4 = IR_DataConversion((uint16_t)data4);
+			fData1 = IR_WHEEL_FR_DataConversion((uint16_t)data1);
+			fData2 = IR_WHEEL_FR_DataConversion((uint16_t)data2);
+			fData3 = IR_WHEEL_FR_DataConversion((uint16_t)data3);
+			fData4 = IR_BRAKE_FR_DataConversion((uint16_t)data4);
 			intToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[DATA_BlockWriteIndex][IR1_FR_CSV_INDEX], 3);
 			intToStringUnsigned((uint16_t)fData2, &DATA_BlockBuffer[DATA_BlockWriteIndex][IR2_FR_CSV_INDEX], 3);
 			intToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[DATA_BlockWriteIndex][IR3_FR_CSV_INDEX], 3);
@@ -208,10 +218,10 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 		
 		case DAU_REAR_IR_RL_ID:
 			CAN_ReceivedPacketsCounter[DAU_REAR_IR_RL_ID_COUNTER_INDEX]++;
-			fData1 = IR_DataConversion((uint16_t)data1);
-			fData2 = IR_DataConversion((uint16_t)data2);
-			fData3 = IR_DataConversion((uint16_t)data3);
-			fData4 = IR_DataConversion((uint16_t)data4);
+			fData1 = IR_WHEEL_RL_DataConversion((uint16_t)data1);
+			fData2 = IR_WHEEL_RL_DataConversion((uint16_t)data2);
+			fData3 = IR_WHEEL_RL_DataConversion((uint16_t)data3);
+			fData4 = IR_BRAKE_RL_DataConversion((uint16_t)data4);
 			intToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[DATA_BlockWriteIndex][IR1_RL_CSV_INDEX], 3);
 			intToStringUnsigned((uint16_t)fData2, &DATA_BlockBuffer[DATA_BlockWriteIndex][IR2_RL_CSV_INDEX], 3);
 			intToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[DATA_BlockWriteIndex][IR3_RL_CSV_INDEX], 3);
@@ -220,10 +230,10 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 		
 		case DAU_REAR_IR_RR_ID:
 			CAN_ReceivedPacketsCounter[DAU_REAR_IR_RR_ID_COUNTER_INDEX]++;
-			fData1 = IR_DataConversion((uint16_t)data1);
-			fData2 = IR_DataConversion((uint16_t)data2);
-			fData3 = IR_DataConversion((uint16_t)data3);
-			fData4 = IR_DataConversion((uint16_t)data4);
+			fData1 = IR_WHEEL_RR_DataConversion((uint16_t)data1);
+			fData2 = IR_WHEEL_RR_DataConversion((uint16_t)data2);
+			fData3 = IR_WHEEL_RR_DataConversion((uint16_t)data3);
+			fData4 = IR_BRAKE_RR_DataConversion((uint16_t)data4);
 			intToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[DATA_BlockWriteIndex][IR1_RR_CSV_INDEX], 3);
 			intToStringUnsigned((uint16_t)fData2, &DATA_BlockBuffer[DATA_BlockWriteIndex][IR2_RR_CSV_INDEX], 3);
 			intToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[DATA_BlockWriteIndex][IR3_RR_CSV_INDEX], 3);
@@ -665,4 +675,64 @@ extern void DATA_ResetStateBuffer(void)
 	DATA_StateBuffer[6] = '0';
 	DATA_StateBuffer[7] = ';';
 	DATA_StateBuffer[8] = '0';
+}
+
+static inline void DATA_SW_CAN_Management(uint8_t data1, uint8_t data2)
+{
+	uint8_t startAquisitionEvent = ACQUISITION_IDLE_REQUEST;
+	BaseType_t startAcquisition_xHigherPriorityTaskWoken = pdFALSE;
+	
+	switch(data1) {
+		case SW_ACQUISITION_CAN_REQUEST:
+			if(data2 == SW_START_ACQUISITION_CAN_REQUEST) {
+				startAquisitionEvent = ACQUISITION_ON_TELEMETRY_REQUEST;		/* Start acquisition */
+				xQueueSendFromISR(startAcquisitionEventHandle, &startAquisitionEvent, &startAcquisition_xHigherPriorityTaskWoken);
+			}
+			else if(data2 == SW_STOP_ACQUISITION_CAN_REQUEST) {
+				startAquisitionEvent = ACQUISITION_OFF_TELEMETRY_REQUEST;		/* Stop acquisition */
+				xQueueSendFromISR(startAcquisitionEventHandle, &startAquisitionEvent, &startAcquisition_xHigherPriorityTaskWoken);
+			}
+			break;
+		
+		case SW_CALIBRATIONS_CAN_REQUEST:
+			switch(data2) {
+				case SW_APPS_ZERO_CALIBRATION_REQUEST:
+					DATA_APPS_ZeroCalibrationOffset = DATA_BlockBuffer[DATA_BlockWriteIndex][APPS_CSV_INDEX];
+					CAN_SW_SendAck(APPS_ZERO_CALIBRATION_DONE);
+					break;
+				
+				case SW_APPS_FULL_CALIBRATION_REQUEST:
+					DATA_APPS_FullCalibrationOffset = DATA_BlockBuffer[DATA_BlockWriteIndex][APPS_CSV_INDEX];
+					CAN_SW_SendAck(APPS_FULL_CALIBRATION_DONE);
+					break;
+				
+				case SW_STEER_ANGLE_CALIBRATION_REQUEST:
+					DATA_STEER_ANGLE_CalibrationOffset = DATA_BlockBuffer[DATA_BlockWriteIndex][STEERING_WHEEL_ANGLE_CSV_INDEX];
+					CAN_SW_SendAck(STEER_ANGLE_CALIBRATION_DONE);
+					break;
+				
+				case SW_LINEAR_CALIBRATION_REQUEST:
+					DATA_LINEAR_FR_CalibrationOffset = DATA_BlockBuffer[DATA_BlockWriteIndex][LINEARE_FR_CSV_INDEX];
+					DATA_LINEAR_FL_CalibrationOffset = DATA_BlockBuffer[DATA_BlockWriteIndex][LINEARE_FL_CSV_INDEX];
+					DATA_LINEAR_RR_CalibrationOffset = DATA_BlockBuffer[DATA_BlockWriteIndex][LINEARE_RR_CSV_INDEX];
+					DATA_LINEAR_RL_CalibrationOffset = DATA_BlockBuffer[DATA_BlockWriteIndex][LINEARE_RL_CSV_INDEX];
+					CAN_SW_SendAck(LINEAR_CALIBRATION_DONE);
+					break;
+				
+				case SW_LOAD_CELL_CALIBRATION_REQUEST:
+					DATA_LOAD_CELL_FR_CalibrationOffset = DATA_BlockBuffer[DATA_BlockWriteIndex][LOAD_CELL_FR_CSV_INDEX];
+					DATA_LOAD_CELL_FL_CalibrationOffset = DATA_BlockBuffer[DATA_BlockWriteIndex][LOAD_CELL_FL_CSV_INDEX];
+					DATA_LOAD_CELL_RR_CalibrationOffset = DATA_BlockBuffer[DATA_BlockWriteIndex][LOAD_CELL_RR_CSV_INDEX];
+					DATA_LOAD_CELL_RL_CalibrationOffset = DATA_BlockBuffer[DATA_BlockWriteIndex][LOAD_CELL_RL_CSV_INDEX];
+					CAN_SW_SendAck(LOAD_CELL_CALIBRATION_DONE);
+					break;
+				
+				default:
+					break;
+			}
+			break;
+			
+		default:
+			break;
+	}
 }

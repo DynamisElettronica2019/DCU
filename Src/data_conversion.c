@@ -1,6 +1,18 @@
 #include <stdint.h>
 #include "data_conversion.h"
 
+int16_t DATA_LOAD_CELL_FR_CalibrationOffset = 0;		/* [LSB signed] */
+int16_t DATA_LOAD_CELL_FL_CalibrationOffset = 0;		/* [LSB signed] */
+int16_t DATA_LOAD_CELL_RR_CalibrationOffset = 0;		/* [LSB signed] */
+int16_t DATA_LOAD_CELL_RL_CalibrationOffset = 0;		/* [LSB signed] */
+uint16_t DATA_LINEAR_FR_CalibrationOffset = 0;			/* [LSB] */
+uint16_t DATA_LINEAR_FL_CalibrationOffset = 0;			/* [LSB] */
+uint16_t DATA_LINEAR_RR_CalibrationOffset = 0;			/* [LSB] */
+uint16_t DATA_LINEAR_RL_CalibrationOffset = 0;			/* [LSB] */
+uint16_t DATA_APPS_ZeroCalibrationOffset = 0;				/* [LSB] */
+uint16_t DATA_APPS_FullCalibrationOffset = 1;				/* [LSB] */
+int16_t DATA_STEER_ANGLE_CalibrationOffset = 0;			/* [LSB signed] */
+	
 
 extern inline float EFI_TEMPERATURE_DataConversion(uint16_t input)
 {
@@ -76,22 +88,87 @@ extern inline float FUEL_LEVEL_DataConversion(uint16_t input)
 	return temp1;
 }
 
-extern inline float LOAD_CELL_DataConversion(int16_t input)
+extern inline float LOAD_CELL_FR_DataConversion(int16_t input)
 { 
 	float temp;
 	
-	temp = (float)input / 4095.0f;
-	temp = temp - 0.5f;
-	temp = temp * (4448.0f / (0.002f * 50.4f));
+	temp = (float)(input - DATA_LOAD_CELL_FR_CalibrationOffset);
+	temp = temp * (VREF_DAU_FR/4095);
+	temp = temp * 4448.0f;
+	temp = temp - ((VREF_DAU_FR/2) * 4448.0f);
+	temp = temp - LOAD_CELL_FR_OFFEST;
 	return temp;
 }
 
-extern inline float LINEAR_DataConversion(uint16_t input)
+extern inline float LOAD_CELL_FL_DataConversion(int16_t input)
+{ 
+	float temp;
+	
+	temp = (float)(input - DATA_LOAD_CELL_FL_CalibrationOffset);
+	temp = temp * (VREF_DAU_FL/4095);
+	temp = temp * 4448.0f;
+	temp = temp - ((VREF_DAU_FL/2) * 4448.0f);
+	temp = temp - LOAD_CELL_FL_OFFEST;
+	return temp;
+}
+
+extern inline float LOAD_CELL_RR_DataConversion(int16_t input)
+{ 
+	float temp;
+	
+	temp = (float)(input - DATA_LOAD_CELL_RR_CalibrationOffset);
+	temp = temp * (VREF_DAU_RR/4095);
+	temp = temp * 4448.0f;
+	temp = temp - ((VREF_DAU_RR/2) * 4448.0f);
+	temp = temp - LOAD_CELL_RR_OFFEST;
+	return temp;
+}
+
+extern inline float LOAD_CELL_RL_DataConversion(int16_t input)
+{ 
+	float temp;
+	
+	temp = (float)(input - DATA_LOAD_CELL_RL_CalibrationOffset);
+	temp = temp * (VREF_DAU_RL/4095);
+	temp = temp * 4448.0f;
+	temp = temp - ((VREF_DAU_RL/2) * 4448.0f);
+	temp = temp - LOAD_CELL_RL_OFFEST;
+	return temp;
+}
+
+extern inline float LINEAR_FR_DataConversion(uint16_t input)
 {
 	float temp;
 	
-	temp = (float)input * (50.0f / 4095.0f);
-	temp = temp * 100.0f;
+	temp = (float)(input - DATA_LINEAR_FR_CalibrationOffset);
+	temp = temp * (50.0f / 4095.0f);
+  return temp;
+}
+
+extern inline float LINEAR_FL_DataConversion(uint16_t input)
+{
+	float temp;
+	
+	temp = (float)(input - DATA_LINEAR_FL_CalibrationOffset);
+	temp = temp * (50.0f / 4095.0f);
+  return temp;
+}
+
+extern inline float LINEAR_RR_DataConversion(uint16_t input)
+{
+	float temp;
+	
+	temp = (float)(input - DATA_LINEAR_RR_CalibrationOffset);
+	temp = temp * (50.0f / 4095.0f);
+  return temp;
+}
+
+extern inline float LINEAR_RL_DataConversion(uint16_t input)
+{
+	float temp;
+	
+	temp = (float)(input - DATA_LINEAR_RL_CalibrationOffset);
+	temp = temp * (50.0f / 4095.0f);
   return temp;
 }
 
@@ -99,9 +176,8 @@ extern inline float BPS_DataConversion(uint16_t input)
 {
 	float temp;
 	
-	temp = (float)input * (5.0f / 4095.0f);
-	temp = temp - 0.5f;
-	temp = temp * 37.5f * 10.0f;
+	temp = (float)input * 0.045787546f;
+	temp = temp - 18.75f;
 	return temp;
 }
 
@@ -109,8 +185,9 @@ extern inline float APPS_DataConversion(uint16_t input)
 {
 	float temp;
 	
-	temp = 1425.0f - (float)input;
-	temp = temp / 4.36f;
+	temp = (float)((input - DATA_APPS_ZeroCalibrationOffset) / (DATA_APPS_FullCalibrationOffset - DATA_APPS_ZeroCalibrationOffset));
+	temp = temp * 0.030525031f;
+	temp = temp - 12.5f;
   return temp;
 }
 
@@ -118,19 +195,89 @@ extern inline float STEERING_WHEEL_ANGLE_DataConversion(int16_t input)
 {
 	float temp;
 	
-	temp = (float)input * (5.0f / 4095.0f);
-	temp = temp * 90.0f;
+	temp = (float)(input - DATA_STEER_ANGLE_CalibrationOffset);
+	temp = temp * 0.10989011f;
 	temp = temp - 225.0f;
 	return temp;
 }
 
-extern inline float IR_DataConversion(uint16_t input)
+extern inline float IR_BRAKE_FL_DataConversion(uint16_t input)
 {
 	float temp;
 	
-	temp = (float)input * (5.0f / 4095.0f);
-	temp = temp - 0.4f;
+	temp = (float)input * (VREF_DAU_FL/4095);
+	temp = temp / 0.005f;
+	temp = temp - 100.0f;
+	return temp;
+}
+
+extern inline float IR_BRAKE_FR_DataConversion(uint16_t input)
+{
+	float temp;
+	
+	temp = (float)input * (VREF_DAU_FR/4095);
+	temp = temp / 0.005f;
+	temp = temp - 100.0f;
+	return temp;
+}
+
+extern inline float IR_BRAKE_RR_DataConversion(uint16_t input)
+{
+	float temp;
+	
+	temp = (float)input * (VREF_DAU_RR/4095);
+	temp = temp / 0.005f;
+	temp = temp - 100.0f;
+	return temp;
+}
+
+extern inline float IR_BRAKE_RL_DataConversion(uint16_t input)
+{
+	float temp;
+	
+	temp = (float)input * (VREF_DAU_RL/4095);
+	temp = temp / 0.005f;
+	temp = temp - 100.0f;
+	return temp;
+}
+
+extern inline float IR_WHEEL_FR_DataConversion(uint16_t input)
+{
+	float temp;
+	
+	temp = (float)input * (VREF_DAU_FR/4095);
 	temp = temp / 0.03f;
+	temp = temp - 13.33333333f;
+	return temp;
+}
+
+extern inline float IR_WHEEL_FL_DataConversion(uint16_t input)
+{
+	float temp;
+	
+	temp = (float)input * (VREF_DAU_FL/4095);
+	temp = temp / 0.03f;
+	temp = temp - 13.33333333f;
+	return temp;
+}
+
+extern inline float IR_WHEEL_RR_DataConversion(uint16_t input)
+{
+	float temp;
+	
+	temp = (float)input * (VREF_DAU_RR/4095);
+	temp = temp / 0.03f;
+	temp = temp - 13.33333333f;
+	return temp;
+}
+
+extern inline float IR_WHEEL_RL_DataConversion(uint16_t input)
+{
+	float temp;
+	
+	temp = (float)input * (VREF_DAU_RL/4095);
+	temp = temp / 0.03f;
+	temp = temp - 13.33333333f;
 	return temp;
 }
 

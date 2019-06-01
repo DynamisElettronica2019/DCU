@@ -35,6 +35,7 @@ CAN_TxPacket_t CAN_AutogearPacket;
 CAN_TxPacket_t CAN_DebugPacket1Packet;
 CAN_TxPacket_t CAN_DebugPacket2Packet;
 CAN_TxPacket_t CAN_AcquisitionStatePacket;
+uint32_t packetMailbox;
 BaseType_t CAN_SendxHigherPriorityTaskWoken = pdFALSE;
 BaseType_t CAN_Rx0xHigherPriorityTaskWoken = pdFALSE;
 BaseType_t CAN_Rx1xHigherPriorityTaskWoken = pdFALSE;
@@ -162,8 +163,6 @@ extern inline void CAN_SendPackets(void)
 
 extern inline void CAN_SendDebugPackets(void)
 {
-	uint32_t packetMailbox;
-	
 	if(DATA_GetAcquisitionState() == STATE_ON) {
 		toSW_AcquisitionState = TO_SW_ACQUISITION_IS_ON;
 	}
@@ -194,26 +193,26 @@ extern inline void CAN_SendDebugPackets(void)
 	//xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_DebugPacket2Packet, 10/portTICK_PERIOD_MS);
 	
 	/* DCU_ACQUISITION_SW_ID */
-	CAN_AcquisitionStatePacket.packetData[1] = toSW_AcquisitionState;
+	CAN_AcquisitionStatePacket.packetData[3] = toSW_AcquisitionState;
 	HAL_CAN_AddTxMessage(&hcan1, &CAN_AcquisitionStatePacket.packetHeader, CAN_AcquisitionStatePacket.packetData, &packetMailbox);
 	//xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_AcquisitionStatePacket, 10/portTICK_PERIOD_MS);
 }
 
 extern inline void CAN_SendAutogearPacket(void)
 {
-	uint32_t packetMailbox;
-	
 	if(HAL_GPIO_ReadPin(AUTOGEAR_SWTICH_MCU_GPIO_Port, AUTOGEAR_SWTICH_MCU_Pin) == GPIO_PIN_RESET) {
-		CAN_AutogearPacket.packetData[0] = 0;
-		CAN_AutogearPacket.packetData[1] = 1;
-		CAN_AutogearPacket.packetHeader.StdId = DCU_AUTOGEARSHIFT_GCU_ID;
-		CAN_AutogearPacket.packetHeader.RTR = CAN_RTR_DATA;
-		CAN_AutogearPacket.packetHeader.IDE = CAN_ID_STD;
-		CAN_AutogearPacket.packetHeader.DLC = 2;
-		CAN_AutogearPacket.packetHeader.TransmitGlobalTime = DISABLE;
 		//xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_AutogearPacket, 10/portTICK_PERIOD_MS);		/* Add CAN message to queue */
 		HAL_CAN_AddTxMessage(&hcan1, &CAN_AutogearPacket.packetHeader, CAN_AutogearPacket.packetData, &packetMailbox);
 	}
+}
+
+extern inline void CAN_SW_SendAck(uint16_t ackValue)
+{
+	CAN_AcquisitionStatePacket.packetData[1] = 2;
+	CAN_AcquisitionStatePacket.packetData[3] = ackValue;
+	HAL_CAN_AddTxMessage(&hcan1, &CAN_AcquisitionStatePacket.packetHeader, CAN_AcquisitionStatePacket.packetData, &packetMailbox);
+	CAN_AcquisitionStatePacket.packetData[1] = 1;
+	//xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_AutogearPacket, 10/portTICK_PERIOD_MS);		/* Add CAN message to queue */
 }
 
 extern void CAN_PacketCounterReset(void)
@@ -270,9 +269,20 @@ static void CAN_PacketInit(void)
 	CAN_AcquisitionStatePacket.packetHeader.StdId = DCU_ACQUISITION_SW_ID;
 	CAN_AcquisitionStatePacket.packetHeader.RTR = CAN_RTR_DATA;
 	CAN_AcquisitionStatePacket.packetHeader.IDE = CAN_ID_STD;
-	CAN_AcquisitionStatePacket.packetHeader.DLC = 2;
+	CAN_AcquisitionStatePacket.packetHeader.DLC = 4;
 	CAN_AcquisitionStatePacket.packetHeader.TransmitGlobalTime = DISABLE;
 	CAN_AcquisitionStatePacket.packetData[0] = 0;
+	CAN_AcquisitionStatePacket.packetData[1] = 1;
+	CAN_AcquisitionStatePacket.packetData[2] = 0;
+	
+	 /* DCU_AUTOGEARSHIFT_GCU_ID*/
+	CAN_AutogearPacket.packetData[0] = 0;
+	CAN_AutogearPacket.packetData[1] = 1;
+	CAN_AutogearPacket.packetHeader.StdId = DCU_AUTOGEARSHIFT_GCU_ID;
+	CAN_AutogearPacket.packetHeader.RTR = CAN_RTR_DATA;
+	CAN_AutogearPacket.packetHeader.IDE = CAN_ID_STD;
+	CAN_AutogearPacket.packetHeader.DLC = 2;
+	CAN_AutogearPacket.packetHeader.TransmitGlobalTime = DISABLE;
 }
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)

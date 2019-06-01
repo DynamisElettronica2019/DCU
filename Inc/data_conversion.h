@@ -18,6 +18,16 @@
 #define ANALOG_AUX_2_VOLTAGE_GAIN						1.56f
 #define ANALOG_AUX_3_VOLTAGE_GAIN						1.56f
 
+#define LOAD_CELL_FR_OFFEST 								0.0f 	/* [N] */
+#define LOAD_CELL_FL_OFFEST 								0.0f	/* [N] */
+#define LOAD_CELL_RR_OFFEST 								0.0f	/* [N] */
+#define LOAD_CELL_RL_OFFEST 								0.0f	/* [N] */
+#define VREF_DAU_FR  												5.0f	/* [V] */
+#define VREF_DAU_FL  												5.0f	/* [V] */
+#define VREF_DAU_RR  												5.0f	/* [V] */
+#define VREF_DAU_RL  												5.0f	/* [V] */
+
+
 extern inline float EFI_TEMPERATURE_DataConversion(uint16_t input);
 extern inline float T_H20_ENGINE_DataConversion(uint16_t input);
 extern inline float BATTERY_VOLTAGE_DataConversion(uint16_t input);
@@ -27,12 +37,25 @@ extern inline float EXHAUST_TEMPERATURE_DataConversion(uint16_t input);
 extern inline float SLIP_DataCoversion(int16_t input);
 extern inline float H20_PUMP_DUTY_CYCLE_DataConversion(uint16_t input);
 extern inline float FUEL_LEVEL_DataConversion(uint16_t input);
-extern inline float LINEAR_DataConversion(uint16_t input);
-extern inline float LOAD_CELL_DataConversion(int16_t input);
+extern inline float LOAD_CELL_FR_DataConversion(int16_t input);
+extern inline float LOAD_CELL_FL_DataConversion(int16_t input);
+extern inline float LOAD_CELL_RR_DataConversion(int16_t input);
+extern inline float LOAD_CELL_RL_DataConversion(int16_t input);
+extern inline float LINEAR_FR_DataConversion(uint16_t input);
+extern inline float LINEAR_FL_DataConversion(uint16_t input);
+extern inline float LINEAR_RR_DataConversion(uint16_t input);
+extern inline float LINEAR_RL_DataConversion(uint16_t input);
 extern inline float BPS_DataConversion(uint16_t input);
 extern inline float APPS_DataConversion(uint16_t input);
 extern inline float STEERING_WHEEL_ANGLE_DataConversion(int16_t input);
-extern inline float IR_DataConversion(uint16_t input);
+extern inline float IR_WHEEL_FR_DataConversion(uint16_t input);
+extern inline float IR_WHEEL_FL_DataConversion(uint16_t input);
+extern inline float IR_WHEEL_RR_DataConversion(uint16_t input);
+extern inline float IR_WHEEL_RL_DataConversion(uint16_t input);
+extern inline float IR_BRAKE_FR_DataConversion(uint16_t input);
+extern inline float IR_BRAKE_FL_DataConversion(uint16_t input);
+extern inline float IR_BRAKE_RR_DataConversion(uint16_t input);
+extern inline float IR_BRAKE_RL_DataConversion(uint16_t input);
 extern inline uint16_t DCU_MainCurrentSenseConversion(uint32_t rawData);
 extern inline uint16_t DCU_CurrentSenseConversion(uint32_t rawData);
 extern inline uint16_t DCU_XbeeCurrentSenseConversion(uint32_t rawData);

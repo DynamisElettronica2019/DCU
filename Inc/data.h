@@ -263,6 +263,40 @@
 #define DCU_3V3_VOLTAGE_CSV_SEPARATOR 												(DCU_3V3_VOLTAGE_CSV_INDEX - 1)
 #define END_CSV_SEPARATOR																			(END_CSV_INDEX - 1)
 
+/* Calibration buffer index */
+#define CALIBRATION_BUFFER_DATA_NUMBER												(uint8_t)10
+#define APPS_CALIBRATION_INDEX 																(uint8_t)0
+#define STEER_ANGLE_CALIBRATION_INDEX 												(uint8_t)1
+#define LINEAR_FL_CALIBRATION_INDEX														(uint8_t)2
+#define LINEAR_FR_CALIBRATION_INDEX 													(uint8_t)3
+#define LINEAR_RR_CALIBRATION_INDEX 													(uint8_t)4
+#define LINEAR_RL_CALIBRATION_INDEX 													(uint8_t)5
+#define LOAD_CELL_FL_CALIBRATION_INDEX 												(uint8_t)6
+#define LOAD_CELL_FR_CALIBRATION_INDEX 												(uint8_t)7
+#define LOAD_CELL_RR_CALIBRATION_INDEX 												(uint8_t)8
+#define LOAD_CELL_RL_CALIBRATION_INDEX 												(uint8_t)9
+
+/* Calibration SW ack */
+#define APPS_ZERO_CALIBRATION_DONE 														(uint8_t)1
+#define APPS_FULL_CALIBRATION_DONE 														(uint8_t)2
+#define STEER_ANGLE_CALIBRATION_DONE 													(uint8_t)3
+#define LINEAR_CALIBRATION_DONE 															(uint8_t)4
+#define LOAD_CELL_CALIBRATION_DONE 														(uint8_t)5
+
+#define SW_ACQUISITION_CAN_REQUEST 														(uint16_t)1
+#define SW_START_ACQUISITION_CAN_REQUEST 											(uint16_t)1
+#define TO_SW_ACQUISITION_IS_OFF															(uint16_t)2
+#define SW_STOP_ACQUISITION_CAN_REQUEST 											(uint8_t)2
+#define TO_SW_ACQUISITION_IS_ON																(uint8_t)1
+#define SW_CALIBRATIONS_CAN_REQUEST 													(uint8_t)2
+#define SW_APPS_ZERO_CALIBRATION_REQUEST 											(uint8_t)1
+#define SW_APPS_FULL_CALIBRATION_REQUEST 											(uint8_t)2
+#define SW_STEER_ANGLE_CALIBRATION_REQUEST 										(uint8_t)3
+#define SW_LINEAR_CALIBRATION_REQUEST 												(uint8_t)4
+#define SW_LOAD_CELL_CALIBRATION_REQUEST 											(uint8_t)5
+#define EFI_IS_ALIVE_RESET 																		(uint8_t)0
+#define EFI_IS_ALIVE_SET 																			(uint8_t)1
+
 #define ACQUISITION_OFF_STATE 																(uint8_t)'1'
 #define ACQUISITION_ON_FROM_SW_STATE													(uint8_t)'2'
 #define ACQUISITION_ON_FROM_TELEMETRY_STATE 									(uint8_t)'3'
@@ -277,14 +311,6 @@
 #define ACQUISITION_OFF_AUTO_REQUEST 													(uint8_t)'C'
 #define ACQUISITION_OFF_DEBUG_REQUEST 												(uint8_t)'D'
 #define ACQUISITION_IDLE_REQUEST															(uint8_t)'E'
-
-#define SW_ACQUISITION_CAN_REQUEST 														(uint16_t)1
-#define SW_START_ACQUISITION_CAN_REQUEST 											(uint16_t)1
-#define TO_SW_ACQUISITION_IS_OFF															(uint16_t)2
-#define SW_STOP_ACQUISITION_CAN_REQUEST 											(uint8_t)2
-#define TO_SW_ACQUISITION_IS_ON																(uint8_t)1
-#define EFI_IS_ALIVE_RESET 																		(uint8_t)0
-#define EFI_IS_ALIVE_SET 																			(uint8_t)1
 
 #define STATE_ON 																							(uint8_t)'1'
 #define STATE_OFF																							(uint8_t)'0'
@@ -314,5 +340,6 @@ extern inline void DATA_ResetAcquisitionState(void);
 extern inline void DATA_ResetTelemetryState(void);
 extern void DATA_PacketReset(void);
 extern void DATA_ResetStateBuffer(void);
+static inline void DATA_SW_CAN_Management(uint8_t byte1, uint8_t byte2);
 
 #endif

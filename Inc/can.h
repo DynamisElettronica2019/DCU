@@ -53,6 +53,7 @@ extern void CAN_Start(void);
 extern inline void CAN_SendPackets(void);
 extern inline void CAN_SendDebugPackets(void);
 extern inline void CAN_SendAutogearPacket(void);
+extern inline void CAN_SW_SendAck(uint16_t ackValue);
 extern void CAN_PacketCounterReset(void);
 static void CAN_FilterConfig(void);
 static void CAN_PacketInit(void);
