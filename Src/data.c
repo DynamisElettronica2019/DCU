@@ -19,7 +19,7 @@ uint8_t DATA_BlockReadIndex = 0;
 uint8_t EFI_IsAlive = EFI_IS_ALIVE_RESET;
 uint8_t acquisitionState = ACQUISITION_OFF_STATE;
 uint8_t DATA_BlockBuffer [BUFFER_POINTERS_NUMBER][BUFFER_BLOCK_LEN];
-uint8_t DATA_StateBuffer [BUFFER_STATE_LEN] = "0;0;0;0;0";
+uint8_t DATA_StateBuffer [BUFFER_STATE_LEN];
 BaseType_t EFI_IsAlive_xHigherPriorityTaskWoken = pdFALSE;
 extern uint8_t DATA_BlockWriteIndex;
 extern uint32_t CAN_ReceivedPacketsCounter [NUMBER_OF_ACQUIRED_CHANNELS];
@@ -652,4 +652,17 @@ extern void DATA_PacketReset(void)
 		DATA_BlockBuffer[j][END_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 		DATA_BlockBuffer[j][END_CSV_INDEX] = END_LINE;
 	}
+}
+
+extern void DATA_ResetStateBuffer(void)
+{
+	DATA_StateBuffer[0] = '0';
+	DATA_StateBuffer[1] = ';';
+	DATA_StateBuffer[2] = '0';
+	DATA_StateBuffer[3] = ';';
+	DATA_StateBuffer[4] = '0';
+	DATA_StateBuffer[5] = ';';
+	DATA_StateBuffer[6] = '0';
+	DATA_StateBuffer[7] = ';';
+	DATA_StateBuffer[8] = '0';
 }

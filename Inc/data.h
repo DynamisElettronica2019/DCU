@@ -313,5 +313,6 @@ extern inline void DATA_ResetUsbReadyState(void);
 extern inline void DATA_ResetAcquisitionState(void);
 extern inline void DATA_ResetTelemetryState(void);
 extern void DATA_PacketReset(void);
+extern void DATA_ResetStateBuffer(void);
 
 #endif

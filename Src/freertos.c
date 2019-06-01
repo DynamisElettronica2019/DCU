@@ -385,7 +385,6 @@ void aliveTask(void const * argument)
 	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET); 					/* Red LED off as default */
 	HAL_TIM_Base_Start_IT(&htim5); 		/* Start timer 5 (1 Hz) in interrupt mode */
 	HAL_TIM_Base_Start_IT(&htim6); 		/* Start timer 6 (10 Hz) in interrupt mode */
-	HAL_TIM_Base_Start_IT(&htim7); 		/* Start timer 7 (100 Hz) in interrupt mode */
   
 	/* Infinite loop */
   for(;;) {
@@ -509,7 +508,8 @@ void SendStatesFunc(void const * argument)
 	uint8_t strToSend[BUFFER_STATE_LEN/2+5];
 	uint16_t strToSenLen;
 	
-	DATA_SetTelemetryState();			/* Start telemetry as default */
+	DATA_ResetStateBuffer();		/* Reset state buffer: all off */
+	DATA_SetTelemetryState();		/* Start telemetry as default */
 	
 	/* Infinite loop */
   for(;;) {
@@ -653,8 +653,6 @@ void usbManagerTask(void const * argument)
 {
   /* USER CODE BEGIN usbManageTask */
 	uint8_t USB_Event;
-	
-
 	
   /* Infinite loop */
   for(;;) {
