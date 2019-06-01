@@ -145,7 +145,8 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 /* USER CODE BEGIN 1 */
 
 extern void CAN_Start(void)
-{	
+{
+	CAN_PacketInit();
 	CAN_FilterConfig();
 	HAL_CAN_ActivateNotification(&hcan1, CAN_IT_TX_MAILBOX_EMPTY);
 	HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
@@ -179,13 +180,8 @@ extern inline void CAN_SendDebugPackets(void)
 	CAN_DebugPacket1Packet.packetData[5] = (uint8_t)((uint16_t)(ADC_BufferConvertedDebug[XBEE_CURRENT_SENSE_POSITION]) & 0x00FF);
 	CAN_DebugPacket1Packet.packetData[6] = (uint8_t)(((uint16_t)(ADC_BufferConvertedDebug[DCU_CURRENT_SENSE_POSITION]) >> 8) & 0x00FF);
 	CAN_DebugPacket1Packet.packetData[7] = (uint8_t)((uint16_t)(ADC_BufferConvertedDebug[DCU_CURRENT_SENSE_POSITION]) & 0x00FF);
-	CAN_DebugPacket1Packet.packetHeader.StdId = DCU_DEBUG_1_ID;
-	CAN_DebugPacket1Packet.packetHeader.RTR = CAN_RTR_DATA;
-	CAN_DebugPacket1Packet.packetHeader.IDE = CAN_ID_STD;
-	CAN_DebugPacket1Packet.packetHeader.DLC = 8;
-	CAN_DebugPacket1Packet.packetHeader.TransmitGlobalTime = DISABLE;
-	//xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_DebugPacket1Packet, 10/portTICK_PERIOD_MS);
 	HAL_CAN_AddTxMessage(&hcan1, &CAN_DebugPacket1Packet.packetHeader, CAN_DebugPacket1Packet.packetData, &packetMailbox);
+	//xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_DebugPacket1Packet, 10/portTICK_PERIOD_MS);
 	
 	/* DCU_DEBUG_2_ID */
 	CAN_DebugPacket2Packet.packetData[0] = (uint8_t)(((uint16_t)(ADC_BufferConvertedDebug[_12V_POST_DIODES_SENSE_POSITION]) >> 8) & 0x00FF);
@@ -194,24 +190,13 @@ extern inline void CAN_SendDebugPackets(void)
 	CAN_DebugPacket2Packet.packetData[3] = (uint8_t)((uint16_t)(ADC_BufferConvertedDebug[_5V_DCU_POSITION]) & 0x00FF);
 	CAN_DebugPacket2Packet.packetData[4] = (uint8_t)(((uint16_t)(ADC_BufferConvertedDebug[_3V3_MCU_POSITION]) >> 8) & 0x00FF);
 	CAN_DebugPacket2Packet.packetData[5] = (uint8_t)((uint16_t)(ADC_BufferConvertedDebug[_3V3_MCU_POSITION]) & 0x00FF);
-	CAN_DebugPacket2Packet.packetHeader.StdId = DCU_DEBUG_2_ID;
-	CAN_DebugPacket2Packet.packetHeader.RTR = CAN_RTR_DATA;
-	CAN_DebugPacket2Packet.packetHeader.IDE = CAN_ID_STD;
-	CAN_DebugPacket2Packet.packetHeader.DLC = 6;
-	CAN_DebugPacket2Packet.packetHeader.TransmitGlobalTime = DISABLE;
-	//xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_DebugPacket2Packet, 10/portTICK_PERIOD_MS);
 	HAL_CAN_AddTxMessage(&hcan1, &CAN_DebugPacket2Packet.packetHeader, CAN_DebugPacket2Packet.packetData, &packetMailbox);
+	//xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_DebugPacket2Packet, 10/portTICK_PERIOD_MS);
 	
 	/* DCU_ACQUISITION_SW_ID */
-	CAN_AcquisitionStatePacket.packetData[0] = 0;
 	CAN_AcquisitionStatePacket.packetData[1] = toSW_AcquisitionState;
-	CAN_AcquisitionStatePacket.packetHeader.StdId = DCU_ACQUISITION_SW_ID;
-	CAN_AcquisitionStatePacket.packetHeader.RTR = CAN_RTR_DATA;
-	CAN_AcquisitionStatePacket.packetHeader.IDE = CAN_ID_STD;
-	CAN_AcquisitionStatePacket.packetHeader.DLC = 2;
-	CAN_AcquisitionStatePacket.packetHeader.TransmitGlobalTime = DISABLE;
+	HAL_CAN_AddTxMessage(&hcan1, &CAN_AcquisitionStatePacket.packetHeader, CAN_AcquisitionStatePacket.packetData, &packetMailbox);
 	//xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_AcquisitionStatePacket, 10/portTICK_PERIOD_MS);
-	HAL_CAN_AddTxMessage(&hcan1, &CAN_AcquisitionStatePacket.packetHeader, CAN_AcquisitionStatePacket.packetData, &packetMailbox);	
 }
 
 extern inline void CAN_SendAutogearPacket(void)
@@ -263,6 +248,31 @@ static void CAN_FilterConfig(void)
   CAN_FilterConfigHeader.FilterActivation = ENABLE;	
   CAN_FilterConfigHeader.SlaveStartFilterBank = 14;
 	HAL_CAN_ConfigFilter(&hcan1, &CAN_FilterConfigHeader);
+}
+
+static void CAN_PacketInit(void)
+{
+	/* DCU_DEBUG_1_ID */
+	CAN_DebugPacket1Packet.packetHeader.StdId = DCU_DEBUG_1_ID;
+	CAN_DebugPacket1Packet.packetHeader.RTR = CAN_RTR_DATA;
+	CAN_DebugPacket1Packet.packetHeader.IDE = CAN_ID_STD;
+	CAN_DebugPacket1Packet.packetHeader.DLC = 8;
+	CAN_DebugPacket1Packet.packetHeader.TransmitGlobalTime = DISABLE;
+	
+	/* DCU_DEBUG_2_ID */
+	CAN_DebugPacket2Packet.packetHeader.StdId = DCU_DEBUG_2_ID;
+	CAN_DebugPacket2Packet.packetHeader.RTR = CAN_RTR_DATA;
+	CAN_DebugPacket2Packet.packetHeader.IDE = CAN_ID_STD;
+	CAN_DebugPacket2Packet.packetHeader.DLC = 6;
+	CAN_DebugPacket2Packet.packetHeader.TransmitGlobalTime = DISABLE;
+	
+	/* DCU_ACQUISITION_SW_ID */
+	CAN_AcquisitionStatePacket.packetHeader.StdId = DCU_ACQUISITION_SW_ID;
+	CAN_AcquisitionStatePacket.packetHeader.RTR = CAN_RTR_DATA;
+	CAN_AcquisitionStatePacket.packetHeader.IDE = CAN_ID_STD;
+	CAN_AcquisitionStatePacket.packetHeader.DLC = 2;
+	CAN_AcquisitionStatePacket.packetHeader.TransmitGlobalTime = DISABLE;
+	CAN_AcquisitionStatePacket.packetData[0] = 0;
 }
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)

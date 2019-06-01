@@ -45,6 +45,8 @@ uint8_t USB_Day;
 uint8_t USB_Hours;
 uint8_t USB_Minutes;
 uint8_t USB_Seconds;
+uint8_t DATA_openTentativesNumber = 0;
+uint8_t DATA_closeTentativesNumber = 0;
 uint32_t len;
 UINT bytesWritten;
 FRESULT openResult;
@@ -129,17 +131,22 @@ extern inline void USB_OpenFile(void)
 	uint8_t errorLetter = USB_OPEN_FILE_ERROR;
 	
 	if((DATA_GetAcquisitionState() == STATE_OFF) && (DATA_GetUsbReadyState() == STATE_ON)){
-		USB_GetFilename(); 		/* Set filename based on actual date and time */
-		openResult = f_open(&USBHFile, USB_Filename, FA_CREATE_ALWAYS | FA_WRITE);
-		
-		if(openResult == FR_OK) {
-			USB_WriteLen(fileHeader);
-			USB_WriteLen(channelNameHeader);
-			HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
-			DATA_SetAcquisitionState();				/* Update of the status packet */
-			resetDataTimestamp();							/* Reset data timestamp private variable */
-			HAL_TIM_Base_Start_IT(&htim7); 		/* Start timer 7 (100 Hz) in interrupt mode */
+		if(DATA_openTentativesNumber <= OPEN_FILE_TENTATIVES_NUMBER) {
+			USB_GetFilename(); 		/* Set filename based on actual date and time */
+			openResult = f_open(&USBHFile, USB_Filename, FA_CREATE_ALWAYS | FA_WRITE);
+			DATA_openTentativesNumber++;
+			
+			if(openResult == FR_OK) {
+				USB_WriteLen(fileHeader);
+				USB_WriteLen(channelNameHeader);
+				DATA_SetAcquisitionState();				/* Update of the status packet */
+				resetDataTimestamp();							/* Reset data timestamp private variable */
+				HAL_TIM_Base_Start_IT(&htim7); 		/* Start timer 7 (100 Hz) in interrupt mode */
+				DATA_openTentativesNumber = 0;
+				HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
+			}
 		}
+		
 		else {
 			xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
 		}
@@ -151,14 +158,19 @@ extern inline void USB_CloseFile(void)
 	uint8_t errorLetter = USB_CLOSE_FILE_ERROR;
 	
 	if((DATA_GetAcquisitionState() == STATE_ON) && (DATA_GetUsbReadyState() == STATE_ON)) {
-		closeResult = f_close(&USBHFile);
-		
-		if(closeResult == FR_OK) {
-			HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
-			HAL_TIM_Base_Stop_IT(&htim7); 		/* Stop timer 7 (100 Hz) */
-			DATA_ResetAcquisitionState();			/* Update of the status packet */
-			DATA_PacketReset();								/* Reset the data saving buffer */
+		if(DATA_closeTentativesNumber < CLOSE_FILE_TENTATIVES_NUMBER) {
+			closeResult = f_close(&USBHFile);
+			DATA_closeTentativesNumber++;
+			
+			if(closeResult == FR_OK) {
+				HAL_TIM_Base_Stop_IT(&htim7); 		/* Stop timer 7 (100 Hz) */
+				DATA_ResetAcquisitionState();			/* Update of the status packet */
+				DATA_PacketReset();								/* Reset the data saving buffer */
+				DATA_closeTentativesNumber = 0;
+				HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
+			}
 		}
+		
 		else {
 			xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
 		}

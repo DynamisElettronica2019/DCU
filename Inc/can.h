@@ -55,6 +55,7 @@ extern inline void CAN_SendDebugPackets(void);
 extern inline void CAN_SendAutogearPacket(void);
 extern void CAN_PacketCounterReset(void);
 static void CAN_FilterConfig(void);
+static void CAN_PacketInit(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

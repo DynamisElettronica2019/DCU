@@ -34,8 +34,10 @@
 /* USER CODE BEGIN INCLUDE */
 #include "cmsis_os.h"
 
-#define VBUS_ENABLE 	(uint8_t)0
-#define VBUS_DISABLE 	(uint8_t)1
+#define VBUS_ENABLE 										(uint8_t)0
+#define VBUS_DISABLE 										(uint8_t)1
+#define OPEN_FILE_TENTATIVES_NUMBER 		(uint8_t)8
+#define CLOSE_FILE_TENTATIVES_NUMBER 		(uint8_t)8
 
 
 typedef enum {
