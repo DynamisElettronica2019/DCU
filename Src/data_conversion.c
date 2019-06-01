@@ -185,7 +185,8 @@ extern inline float APPS_DataConversion(uint16_t input)
 {
 	float temp;
 	
-	temp = (float)((input - DATA_APPS_ZeroCalibrationOffset) / (DATA_APPS_FullCalibrationOffset - DATA_APPS_ZeroCalibrationOffset));
+	temp = (float)(input - DATA_APPS_ZeroCalibrationOffset);
+	temp = temp / ((float)(DATA_APPS_FullCalibrationOffset - DATA_APPS_ZeroCalibrationOffset));
 	temp = temp * 0.030525031f;
 	temp = temp - 12.5f;
   return temp;

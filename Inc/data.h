@@ -9,9 +9,9 @@
 #define NUMBER_OF_RECEIVED_PACKETS														(uint8_t)25
 #define NUMBER_OF_ACQUIRED_CHANNELS														(uint8_t)91
 #define BUFFER_STATE_LEN 																			(uint8_t)9
-#define BUFFER_BLOCK_LEN 																			(uint16_t)577
+#define BUFFER_BLOCK_LEN 																			(uint16_t)579
 #define BUFFER_POINTERS_NUMBER 																(uint8_t)2
-#define CLOSE_FILE_INTERVAL																		(uint32_t)60000
+#define CLOSE_FILE_INTERVAL																		(uint32_t)120000
 
 /* Packet position in CAN data packet counter vector */
 #define EFI_HALL_WHEEL_ID_COUNTER_INDEX 											(uint8_t)0
@@ -150,7 +150,8 @@
 #define DCU_12V_VOLTAGE_CSV_INDEX 														(uint16_t)560
 #define DCU_5V_VOLTAGE_CSV_INDEX 															(uint16_t)566
 #define DCU_3V3_VOLTAGE_CSV_INDEX 														(uint16_t)571
-#define END_CSV_INDEX 																				(uint16_t)576
+#define LAP_FLAG_CSV_INDEX																		(uint16_t)576
+#define END_CSV_INDEX 																				(uint16_t)578
 
 /* Data separator position in CSV file */
 #define HALL_EFFECT_FR_CSV_SEPARATOR													(HALL_EFFECT_FR_CSV_INDEX - 1)
@@ -261,6 +262,7 @@
 #define DCU_12V_VOLTAGE_CSV_SEPARATOR 												(DCU_12V_VOLTAGE_CSV_INDEX - 1)
 #define DCU_5V_VOLTAGE_CSV_SEPARATOR 													(DCU_5V_VOLTAGE_CSV_INDEX - 1)
 #define DCU_3V3_VOLTAGE_CSV_SEPARATOR 												(DCU_3V3_VOLTAGE_CSV_INDEX - 1)
+#define LAP_FLAG_CSV_SEPARATOR 																(LAP_FLAG_CSV_INDEX - 1)
 #define END_CSV_SEPARATOR																			(END_CSV_INDEX - 1)
 
 /* Calibration buffer index */
@@ -276,18 +278,10 @@
 #define LOAD_CELL_RR_CALIBRATION_INDEX 												(uint8_t)8
 #define LOAD_CELL_RL_CALIBRATION_INDEX 												(uint8_t)9
 
-/* Calibration SW ack */
-#define APPS_ZERO_CALIBRATION_DONE 														(uint8_t)1
-#define APPS_FULL_CALIBRATION_DONE 														(uint8_t)2
-#define STEER_ANGLE_CALIBRATION_DONE 													(uint8_t)3
-#define LINEAR_CALIBRATION_DONE 															(uint8_t)4
-#define LOAD_CELL_CALIBRATION_DONE 														(uint8_t)5
-
+/* SW-DCU CAN packet defines */
 #define SW_ACQUISITION_CAN_REQUEST 														(uint16_t)1
 #define SW_START_ACQUISITION_CAN_REQUEST 											(uint16_t)1
-#define TO_SW_ACQUISITION_IS_OFF															(uint16_t)2
 #define SW_STOP_ACQUISITION_CAN_REQUEST 											(uint8_t)2
-#define TO_SW_ACQUISITION_IS_ON																(uint8_t)1
 #define SW_CALIBRATIONS_CAN_REQUEST 													(uint8_t)2
 #define SW_APPS_ZERO_CALIBRATION_REQUEST 											(uint8_t)1
 #define SW_APPS_FULL_CALIBRATION_REQUEST 											(uint8_t)2
@@ -297,6 +291,16 @@
 #define EFI_IS_ALIVE_RESET 																		(uint8_t)0
 #define EFI_IS_ALIVE_SET 																			(uint8_t)1
 
+/* Calibration SW ack values */
+#define TO_SW_ACQUISITION_IS_ON																(uint8_t)1
+#define TO_SW_ACQUISITION_IS_OFF															(uint16_t)2
+#define APPS_ZERO_CALIBRATION_DONE 														(uint8_t)1
+#define APPS_FULL_CALIBRATION_DONE 														(uint8_t)2
+#define STEER_ANGLE_CALIBRATION_DONE 													(uint8_t)3
+#define LINEAR_CALIBRATION_DONE 															(uint8_t)4
+#define LOAD_CELL_CALIBRATION_DONE 														(uint8_t)5
+
+/* Start acquisition state machine */
 #define ACQUISITION_OFF_STATE 																(uint8_t)'1'
 #define ACQUISITION_ON_FROM_SW_STATE													(uint8_t)'2'
 #define ACQUISITION_ON_FROM_TELEMETRY_STATE 									(uint8_t)'3'
@@ -312,6 +316,7 @@
 #define ACQUISITION_OFF_DEBUG_REQUEST 												(uint8_t)'D'
 #define ACQUISITION_IDLE_REQUEST															(uint8_t)'E'
 
+/* State buffer */
 #define STATE_ON 																							(uint8_t)'1'
 #define STATE_OFF																							(uint8_t)'0'
 #define STATE_USB_READY_INDEX 															  (uint8_t)0
@@ -338,6 +343,9 @@ extern inline void DATA_ResetUsbPresentState(void);
 extern inline void DATA_ResetUsbReadyState(void);
 extern inline void DATA_ResetAcquisitionState(void);
 extern inline void DATA_ResetTelemetryState(void);
+extern inline uint16_t DATA_GetLapFlag(void);
+extern inline void DATA_SetLapFlag(void);
+extern inline void DATA_ResetLapFlag(void);
 extern void DATA_PacketReset(void);
 extern void DATA_ResetStateBuffer(void);
 static inline void DATA_SW_CAN_Management(uint8_t byte1, uint8_t byte2);

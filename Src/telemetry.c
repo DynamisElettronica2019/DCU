@@ -3,6 +3,7 @@
 #include "usart.h"
 #include "rtc.h"
 #include "data.h"
+#include "string_utility.h"
 
 uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
 uint8_t setRtcReceivedBuffer [BUFFER_RTC_SET_LEN];
@@ -12,6 +13,8 @@ uint8_t usartLockFlag;
 _Bool setRtcComing = 0;
 BaseType_t UART1_StateSendxHigherPriorityTaskWoken = pdFALSE;
 BaseType_t UART1_DataSendxHigherPriorityTaskWoken = pdFALSE;
+extern uint8_t DATA_BlockWriteIndex;
+extern uint8_t DATA_BlockBuffer [BUFFER_POINTERS_NUMBER][BUFFER_BLOCK_LEN];
 extern osSemaphoreId sendDataSemaphoreHandle;
 extern osSemaphoreId sendStateSemaphoreHandle;
 extern osMessageQId Usart1LockQueueHandle;
@@ -87,6 +90,13 @@ extern inline void TELEMETRY_Receive(void)
 						xQueueSendFromISR(startAcquisitionEventHandle, &startAquisitionEvent, &startAcquisition_xHigherPriorityTaskWoken);			
 						xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);				/* Lock if DMA is in use */
 						commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = STOP_ACQ_ID; 										/* Set the correct identifier */
+						HAL_UART_Transmit_DMA(&huart1, commandAckMsg, COMMAND_ACK_MSG_LEN); 				/* Transmit ack message */
+						break;
+					
+					case LAP_FLAG_ID:
+						DATA_SetLapFlag();
+						xQueueReceive(Usart1LockQueueHandle, &usartLockFlag, portMAX_DELAY);				/* Lock if DMA is in use */
+						commandAckMsg[COMMAND_ACK_IDENTIFIER_POS] = LAP_FLAG_ID; 										/* Set the correct identifier */
 						HAL_UART_Transmit_DMA(&huart1, commandAckMsg, COMMAND_ACK_MSG_LEN); 				/* Transmit ack message */
 						break;
 

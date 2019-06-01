@@ -47,6 +47,8 @@ uint8_t USB_Minutes;
 uint8_t USB_Seconds;
 uint8_t DATA_openAttempsNumber = 0;
 uint8_t DATA_closeAttempsNumber = 0;
+uint16_t USB_LapFlag;
+uint32_t USB_RowTimestamp;
 uint32_t len;
 UINT bytesWritten;
 FRESULT openResult;
@@ -107,12 +109,14 @@ extern inline void USB_SavingRequest(void)
 
 extern inline void USB_SavingTask(void)
 {
-	uint32_t timestamp;
 	uint8_t errorLetter = USB_WRITE_FILE_ERROR;
-	
+
 	if(DATA_GetAcquisitionState() == STATE_ON) {
-		timestamp = getDataTimestamp();			/* Get data timestamp private variable */
-		uint32ToString(timestamp, &DATA_BlockBuffer[DATA_BlockWriteIndex][TIMESTAMP_CSV_INDEX], 7);
+		USB_LapFlag = DATA_GetLapFlag();
+		intToStringUnsigned(USB_LapFlag, &DATA_BlockBuffer[DATA_BlockWriteIndex][LAP_FLAG_CSV_INDEX], 1);
+		DATA_ResetLapFlag();
+		USB_RowTimestamp = getDataTimestamp();
+		uint32ToString(USB_RowTimestamp, &DATA_BlockBuffer[DATA_BlockWriteIndex][TIMESTAMP_CSV_INDEX], 7);
 		DATA_SwapDataPackePointers();
 		writeResult = f_write(&USBHFile, DATA_BlockBuffer[DATA_BlockReadIndex], BUFFER_BLOCK_LEN, (void *)&bytesWritten);
 		
@@ -120,7 +124,7 @@ extern inline void USB_SavingTask(void)
 			xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
 		}
 		
-		if((timestamp % CLOSE_FILE_INTERVAL) == 0) {
+		if((USB_RowTimestamp % CLOSE_FILE_INTERVAL) == 0) {
 			USB_CloseAndOpenFile();
 		}
 	}
