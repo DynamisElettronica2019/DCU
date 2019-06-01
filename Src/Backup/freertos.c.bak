@@ -277,7 +277,7 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of alive */
-  osThreadDef(alive, aliveTask, osPriorityLow, 0, 128);
+  osThreadDef(alive, aliveTask, osPriorityIdle, 0, 128);
   aliveHandle = osThreadCreate(osThread(alive), NULL);
 
   /* definition and creation of adc1Conversion */
@@ -325,7 +325,7 @@ void MX_FREERTOS_Init(void) {
   saveUsbHandle = osThreadCreate(osThread(saveUsb), NULL);
 
   /* definition and creation of usbManager */
-  osThreadDef(usbManager, usbManagerTask, osPriorityBelowNormal, 0, 512);
+  osThreadDef(usbManager, usbManagerTask, osPriorityLow, 0, 512);
   usbManagerHandle = osThreadCreate(osThread(usbManager), NULL);
 
   /* definition and creation of startAcquisitionStateMachine */
@@ -377,12 +377,14 @@ void aliveTask(void const * argument)
 {
 
   /* USER CODE BEGIN aliveTask */
+	USB_InitStart();		/* USB peripheral config and start */
+	MX_FATFS_Init();		/* FatFS init */
+	
 	HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET); 			/* Green LED off as default */
 	HAL_GPIO_WritePin(LED_YELLOW_GPIO_Port, LED_YELLOW_Pin, GPIO_PIN_RESET); 		/* Yellow LED off as default */
 	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET); 					/* Red LED off as default */
 	HAL_TIM_Base_Start_IT(&htim5); 		/* Start timer 5 (1 Hz) in interrupt mode */
 	HAL_TIM_Base_Start_IT(&htim6); 		/* Start timer 6 (10 Hz) in interrupt mode */
-	HAL_TIM_Base_Start_IT(&htim7); 		/* Start timer 7 (100 Hz) in interrupt mode */
   
 	/* Infinite loop */
   for(;;) {
@@ -506,7 +508,8 @@ void SendStatesFunc(void const * argument)
 	uint8_t strToSend[BUFFER_STATE_LEN/2+5];
 	uint16_t strToSenLen;
 	
-	DATA_SetTelemetryState();			/* Start telemetry as default */
+	DATA_ResetStateBuffer();		/* Reset state buffer: all off */
+	DATA_SetTelemetryState();		/* Start telemetry as default */
 	
 	/* Infinite loop */
   for(;;) {
@@ -650,9 +653,6 @@ void usbManagerTask(void const * argument)
 {
   /* USER CODE BEGIN usbManageTask */
 	uint8_t USB_Event;
-	
-	USB_InitStart();		/* USB peripheral config and start */
-	MX_FATFS_Init();		/* FatFS init */
 	
   /* Infinite loop */
   for(;;) {

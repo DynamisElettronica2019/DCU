@@ -19,7 +19,7 @@ uint8_t DATA_BlockReadIndex = 0;
 uint8_t EFI_IsAlive = EFI_IS_ALIVE_RESET;
 uint8_t acquisitionState = ACQUISITION_OFF_STATE;
 uint8_t DATA_BlockBuffer [BUFFER_POINTERS_NUMBER][BUFFER_BLOCK_LEN];
-uint8_t DATA_StateBuffer [BUFFER_STATE_LEN] = "0;0;0;0;0";
+uint8_t DATA_StateBuffer [BUFFER_STATE_LEN];
 BaseType_t EFI_IsAlive_xHigherPriorityTaskWoken = pdFALSE;
 extern uint8_t DATA_BlockWriteIndex;
 extern uint32_t CAN_ReceivedPacketsCounter [NUMBER_OF_ACQUIRED_CHANNELS];
@@ -294,16 +294,16 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			CAN_ReceivedPacketsCounter[GCU_DEBUG_1_ID_COUNTER_INDEX]++;
 			intToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][GCU_TEMP_CSV_INDEX], 2);
 			intToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][GCU_CURR_CSV_INDEX], 3);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][H2O_PUMP_CURRENT_CSV_INDEX], 5);
-			intToStringUnsigned(data4, &DATA_BlockBuffer[DATA_BlockWriteIndex][FUEL_PUMP_CURRENT_CSV_INDEX], 5);
+			decimalToStringUnsigned((uint16_t)data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][H2O_PUMP_CURRENT_CSV_INDEX], 2, 1);		/* Taking into account the division by 10 */
+			decimalToStringUnsigned((uint16_t)data4, &DATA_BlockBuffer[DATA_BlockWriteIndex][FUEL_PUMP_CURRENT_CSV_INDEX], 2, 1);		/* Taking into account the division by 10 */
 			break;
 		
 		case GCU_DEBUG_2_ID:
 			CAN_ReceivedPacketsCounter[GCU_DEBUG_2_ID_COUNTER_INDEX]++;
-			intToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][GEARMOTOR_CURRENT_CSV_INDEX], 5);
-			intToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][CLUTCH_CURRENT_CSV_INDEX], 5);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][FAN_SX_CURRENT_CSV_INDEX], 5);
-			intToStringUnsigned(data4, &DATA_BlockBuffer[DATA_BlockWriteIndex][FAN_DX_CURRENT_CSV_INDEX], 5);
+			decimalToStringUnsigned((uint16_t)data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][GEARMOTOR_CURRENT_CSV_INDEX], 2, 1);		/* Taking into account the division by 10 */
+			decimalToStringUnsigned((uint16_t)data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][CLUTCH_CURRENT_CSV_INDEX], 2, 1);			/* Taking into account the division by 10 */
+			decimalToStringUnsigned((uint16_t)data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][FAN_SX_CURRENT_CSV_INDEX], 2, 1);			/* Taking into account the division by 10 */
+			decimalToStringUnsigned((uint16_t)data4, &DATA_BlockBuffer[DATA_BlockWriteIndex][FAN_DX_CURRENT_CSV_INDEX], 2, 1);			/* Taking into account the division by 10 */
 			break;
 		
 		default:
@@ -652,4 +652,17 @@ extern void DATA_PacketReset(void)
 		DATA_BlockBuffer[j][END_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 		DATA_BlockBuffer[j][END_CSV_INDEX] = END_LINE;
 	}
+}
+
+extern void DATA_ResetStateBuffer(void)
+{
+	DATA_StateBuffer[0] = '0';
+	DATA_StateBuffer[1] = ';';
+	DATA_StateBuffer[2] = '0';
+	DATA_StateBuffer[3] = ';';
+	DATA_StateBuffer[4] = '0';
+	DATA_StateBuffer[5] = ';';
+	DATA_StateBuffer[6] = '0';
+	DATA_StateBuffer[7] = ';';
+	DATA_StateBuffer[8] = '0';
 }

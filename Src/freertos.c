@@ -846,7 +846,6 @@ void updateTimestampTask(void const * argument)
   /* USER CODE END updateTimestampFromRtcTask */
 }
 
-
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
 

@@ -274,7 +274,7 @@ void MX_USB_HOST_Init(void)
 	/* Inside USBH_Start could be present a call to USBH_LL_DriverVBUS (phost, TRUE),
 	that disable te VBUS on the port: check it out in case of problems */
   
-	/* USER CODE END USB_HOST_Init_PreTreatment */
+  /* USER CODE END USB_HOST_Init_PreTreatment */
   
   /* Init host Library, add supported class and start the library. */
   if (USBH_Init(&hUsbHostHS, USBH_UserProcess, HOST_HS) != USBH_OK)

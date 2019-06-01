@@ -365,8 +365,8 @@ static inline void GPS_RMC_conversion(uint8_t * buffer)
 						i = i + 4;	
 					}
 					break;
-				case 7:
-					/*empty filed*/
+					
+				case 7:		/* Empty field */
 					break;
 				
 				case 8:		/* DATE */
@@ -407,12 +407,10 @@ static inline void GPS_VTG_conversion(uint8_t * buffer)
 					GPS_OutputVTG.reference = buffer[i];
 					break;
 				
-				case 2:
-					/*empty filed*/
+				case 2:		/* Empty field */
 					break;
 				
-				case 3: 
-					/*empty filed*/
+				case 3: 	/* Empty field */
 					break;
 				
 				case 4: 	/* SPEED OVER GROUD(KNOTS) */
@@ -502,7 +500,7 @@ static inline void GPS_SpeedSave(uint8_t *buffer, uint8_t *index)
 		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+4] = buffer[*index+3];
 		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+5] = buffer[*index+4];
 		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+6] = buffer[*index+5];
-		*index = *index +5;
+		*index = *index + 5;
 	}
 	
 	/* Speed greater than 100 km/h */

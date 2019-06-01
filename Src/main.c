@@ -83,7 +83,7 @@ int main(void)
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
-
+  
   /* Enable I-Cache---------------------------------------------------------*/
   SCB_EnableICache();
 
@@ -113,7 +113,6 @@ int main(void)
   MX_ADC2_Init();
   MX_CAN1_Init();
   MX_I2C4_Init();
-  MX_RTC_Init();
   MX_SDMMC1_SD_Init();
   MX_TIM5_Init();
   MX_TIM6_Init();
