@@ -67,5 +67,6 @@ extern inline float DCU_VbatConversion(uint32_t rawData);
 extern inline float analogAux1Conversion(uint32_t rawData);
 extern inline float analogAux2Conversion(uint32_t rawData);
 extern inline float analogAux3Conversion(uint32_t rawData);
+extern void writeSensorCalibrations(void);
 
 #endif

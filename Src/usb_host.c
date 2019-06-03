@@ -30,6 +30,7 @@
 #include "tim.h"
 #include "fatfs.h"
 #include "data.h"
+#include "data_conversion.h"
 #include "telemetry.h"
 #include "timestamp.h"
 #include "string_utility.h"
@@ -143,6 +144,7 @@ extern inline void USB_OpenFile(void)
 			if(openResult == FR_OK) {
 				USB_WriteLen(fileHeader);
 				USB_WriteLen(channelNameHeader);
+				writeSensorCalibrations();
 				DATA_SetAcquisitionState();				/* Update of the status packet */
 				resetDataTimestamp();							/* Reset data timestamp private variable */
 				HAL_TIM_Base_Start_IT(&htim7); 		/* Start timer 7 (100 Hz) in interrupt mode */
@@ -178,6 +180,18 @@ extern inline void USB_CloseFile(void)
 		else {
 			xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
 		}
+	}
+}
+
+extern inline void USB_WriteLen(uint8_t *buffer)
+{
+	uint8_t errorLetter = USB_WRITE_FILE_ERROR;
+	
+  len = strlen((char *)buffer);
+	writeResult = f_write(&USBHFile, buffer, len, (void *)&bytesWritten);
+	
+	if(writeResult != FR_OK) {
+		xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
 	}
 }
 
@@ -240,18 +254,6 @@ static inline void USB_CloseAndOpenFile(void)
 			HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
 			xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
 		}
-	}
-}
-
-static inline void USB_WriteLen(uint8_t *buffer)
-{
-	uint8_t errorLetter = USB_WRITE_FILE_ERROR;
-	
-  len = strlen((char *)buffer);
-	writeResult = f_write(&USBHFile, buffer, len, (void *)&bytesWritten);
-	
-	if(writeResult != FR_OK) {
-		xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0); 		/* Add error to queue */
 	}
 }
 
