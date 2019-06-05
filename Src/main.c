@@ -213,7 +213,7 @@ void SystemClock_Config(void)
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	GPIO_UsbOvercurrentISR(); 		/* USB overcurrent ISR */
-	GPIO_AutogearSwitchISR(); 		/* Autogear switch ISR */
+	//GPIO_AutogearSwitchISR(); 	/* Autogear switch ISR */
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)

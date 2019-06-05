@@ -144,7 +144,7 @@ extern inline void USB_OpenFile(void)
 			if(openResult == FR_OK) {
 				USB_WriteLen(fileHeader);
 				USB_WriteLen(channelNameHeader);
-				writeSensorCalibrations();
+				//writeSensorCalibrations();
 				DATA_SetAcquisitionState();				/* Update of the status packet */
 				resetDataTimestamp();							/* Reset data timestamp private variable */
 				HAL_TIM_Base_Start_IT(&htim7); 		/* Start timer 7 (100 Hz) in interrupt mode */

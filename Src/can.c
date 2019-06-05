@@ -202,17 +202,17 @@ extern inline void CAN_SendAutogearPacket(void)
 {
 	if(HAL_GPIO_ReadPin(AUTOGEAR_SWTICH_MCU_GPIO_Port, AUTOGEAR_SWTICH_MCU_Pin) == GPIO_PIN_RESET) {
 		//xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_AutogearPacket, 10/portTICK_PERIOD_MS);		/* Add CAN message to queue */
-		HAL_CAN_AddTxMessage(&hcan1, &CAN_AutogearPacket.packetHeader, CAN_AutogearPacket.packetData, &packetMailbox);
+		//HAL_CAN_AddTxMessage(&hcan1, &CAN_AutogearPacket.packetHeader, CAN_AutogearPacket.packetData, &packetMailbox);
 	}
 }
 
-extern inline void CAN_SW_SendAck(uint16_t ackValue)
+extern inline void CAN_SW_CalibrationSendAck(uint16_t ackValue)
 {
 	CAN_AcquisitionStatePacket.packetData[1] = 2;
 	CAN_AcquisitionStatePacket.packetData[3] = ackValue;
 	HAL_CAN_AddTxMessage(&hcan1, &CAN_AcquisitionStatePacket.packetHeader, CAN_AcquisitionStatePacket.packetData, &packetMailbox);
 	CAN_AcquisitionStatePacket.packetData[1] = 1;
-	//xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_AutogearPacket, 10/portTICK_PERIOD_MS);		/* Add CAN message to queue */
+	HAL_CAN_AddTxMessage(&hcan1, &CAN_AcquisitionStatePacket.packetHeader, CAN_AcquisitionStatePacket.packetData, &packetMailbox);
 }
 
 extern void CAN_PacketCounterReset(void)

@@ -704,12 +704,12 @@ static inline void DATA_SW_CAN_Management(uint8_t data1, uint8_t data2)
 		case SW_ACQUISITION_CAN_REQUEST:
 			switch(data2) {
 				case SW_START_ACQUISITION_CAN_REQUEST:
-					startAquisitionEvent = ACQUISITION_ON_TELEMETRY_REQUEST;		/* Start acquisition */
+					startAquisitionEvent = ACQUISITION_ON_SW_REQUEST;		/* Start acquisition */
 					xQueueSendFromISR(startAcquisitionEventHandle, &startAquisitionEvent, &startAcquisition_xHigherPriorityTaskWoken);	
 					break;
 				
 				case SW_STOP_ACQUISITION_CAN_REQUEST:
-					startAquisitionEvent = ACQUISITION_OFF_TELEMETRY_REQUEST;		/* Stop acquisition */
+					startAquisitionEvent = ACQUISITION_OFF_SW_REQUEST;	/* Stop acquisition */
 					xQueueSendFromISR(startAcquisitionEventHandle, &startAquisitionEvent, &startAcquisition_xHigherPriorityTaskWoken);
 					break;
 				
@@ -719,20 +719,20 @@ static inline void DATA_SW_CAN_Management(uint8_t data1, uint8_t data2)
 			break;
 		
 		case SW_CALIBRATIONS_CAN_REQUEST:
-			switch(data2) {
+			/*switch(data2) {
 				case SW_APPS_ZERO_CALIBRATION_REQUEST:
 					DATA_APPS_ZeroCalibrationOffset = DATA_RawCalibrationData[APPS_CALIBRATION_INDEX];
-					CAN_SW_SendAck(APPS_ZERO_CALIBRATION_DONE);
+					CAN_SW_CalibrationSendAck(APPS_ZERO_CALIBRATION_DONE);
 					break;
 				
 				case SW_APPS_FULL_CALIBRATION_REQUEST:
 					DATA_APPS_FullCalibrationOffset = DATA_RawCalibrationData[APPS_CALIBRATION_INDEX];
-					CAN_SW_SendAck(APPS_FULL_CALIBRATION_DONE);
+					CAN_SW_CalibrationSendAck(APPS_FULL_CALIBRATION_DONE);
 					break;
 				
 				case SW_STEER_ANGLE_CALIBRATION_REQUEST:
 					DATA_STEER_ANGLE_CalibrationOffset = (int16_t)DATA_RawCalibrationData[STEER_ANGLE_CALIBRATION_INDEX];
-					CAN_SW_SendAck(STEER_ANGLE_CALIBRATION_DONE);
+					CAN_SW_CalibrationSendAck(STEER_ANGLE_CALIBRATION_DONE);
 					break;
 				
 				case SW_LINEAR_CALIBRATION_REQUEST:
@@ -740,7 +740,7 @@ static inline void DATA_SW_CAN_Management(uint8_t data1, uint8_t data2)
 					DATA_LINEAR_FL_CalibrationOffset = DATA_RawCalibrationData[LINEAR_FL_CALIBRATION_INDEX];
 					DATA_LINEAR_RR_CalibrationOffset = DATA_RawCalibrationData[LINEAR_RR_CALIBRATION_INDEX];
 					DATA_LINEAR_RL_CalibrationOffset = DATA_RawCalibrationData[LINEAR_RL_CALIBRATION_INDEX];
-					CAN_SW_SendAck(LINEAR_CALIBRATION_DONE);
+					CAN_SW_CalibrationSendAck(LINEAR_CALIBRATION_DONE);
 					break;
 				
 				case SW_LOAD_CELL_CALIBRATION_REQUEST:
@@ -748,12 +748,12 @@ static inline void DATA_SW_CAN_Management(uint8_t data1, uint8_t data2)
 					DATA_LOAD_CELL_FL_CalibrationOffset = (int16_t)DATA_RawCalibrationData[LOAD_CELL_FL_CALIBRATION_INDEX];
 					DATA_LOAD_CELL_RR_CalibrationOffset = (int16_t)DATA_RawCalibrationData[LOAD_CELL_RR_CALIBRATION_INDEX];
 					DATA_LOAD_CELL_RL_CalibrationOffset = (int16_t)DATA_RawCalibrationData[LOAD_CELL_RL_CALIBRATION_INDEX];
-					CAN_SW_SendAck(LOAD_CELL_CALIBRATION_DONE);
+					CAN_SW_CalibrationSendAck(LOAD_CELL_CALIBRATION_DONE);
 					break;
 				
 				default:
 					break;
-			}
+			}*/
 			break;
 			
 		default:
