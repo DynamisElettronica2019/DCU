@@ -407,18 +407,18 @@ static inline void GPS_VTG_conversion(uint8_t * buffer)
 					GPS_OutputVTG.reference = buffer[i];
 					break;
 				
-				case 2:		/* Empty field */
+				case 2:		/* COURSE OVER GROUND MAGNETIC */
 					break;
 				
-				case 3: 	/* Empty field */
+				case 3: 	/* REFERENCE*/
 					break;
 				
 				case 4: 	/* SPEED OVER GROUD(KNOTS) */
 					/* Speed greater than 9 knot */
-					if(buffer[i+1] != '.' ) {
-						GPS_OutputVTG.speed1.unit = (uint8_t)GPS_StrToInt(0, buffer[i+ 1], buffer[i+2]);
-						GPS_OutputVTG.speed1.decimal = GPS_speed_decimal_conversion(buffer[i+ 4],buffer[i+ 5],buffer[i+ 6]) * 1000;
-						i = i+ 6; 
+					if((buffer[i+1] != '.') && (buffer[i+2] == '.')) {
+						GPS_OutputVTG.speed1.unit = (uint8_t)GPS_StrToInt(0, buffer[i], buffer[i+1]);
+						GPS_OutputVTG.speed1.decimal = GPS_speed_decimal_conversion(buffer[i+3],buffer[i+4],buffer[i+5]) * 1000;
+						i = i + 5; 
 					}
 					else {
 						GPS_OutputVTG.speed1.unit = buffer[i] - 48;
@@ -492,7 +492,7 @@ static inline void GPS_SpeedConversion(uint8_t *buffer, uint8_t index)
 static inline void GPS_SpeedSave(uint8_t *buffer, uint8_t *index)
 {
 	/* Speed between 10 and 100 km/h */
-	if((buffer[*index+1] != '.') && (buffer[*index+2] == '.')) {
+	if((buffer[(*index) + 1] != '.') && (buffer[(*index) + 2] == '.')) {
 		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX] = '0';
 		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+1] = buffer[*index];
 		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+2] = buffer[*index+1];
@@ -504,7 +504,7 @@ static inline void GPS_SpeedSave(uint8_t *buffer, uint8_t *index)
 	}
 	
 	/* Speed greater than 100 km/h */
-	else if((buffer[*index + 2] != '.') && (buffer[*index +1] != '.')) {
+	else if((buffer[(*index) + 2] != '.') && (buffer[(*index) +1] != '.')) {
 		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX] = buffer[*index];
 		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+1] = buffer[*index+1];
 		DATA_BlockBuffer[DATA_BlockWriteIndex][GPS_SPEED_CSV_INDEX+2] = buffer[*index+2];
