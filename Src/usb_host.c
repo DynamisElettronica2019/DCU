@@ -113,9 +113,9 @@ extern inline void USB_SavingTask(void)
 	uint8_t errorLetter = USB_WRITE_FILE_ERROR;
 
 	if(DATA_GetAcquisitionState() == STATE_ON) {
-		USB_LapFlag = DATA_GetLapFlag();
-		intToStringUnsigned(USB_LapFlag, &DATA_BlockBuffer[DATA_BlockWriteIndex][LAP_FLAG_CSV_INDEX], 1);
-		DATA_ResetLapFlag();
+		//USB_LapFlag = DATA_GetLapFlag();
+		//intToStringUnsigned(USB_LapFlag, &DATA_BlockBuffer[DATA_BlockWriteIndex][LAP_FLAG_CSV_INDEX], 1);
+		//DATA_ResetLapFlag();
 		USB_RowTimestamp = getDataTimestamp();
 		uint32ToString(USB_RowTimestamp, &DATA_BlockBuffer[DATA_BlockWriteIndex][TIMESTAMP_CSV_INDEX], 7);
 		DATA_SwapDataPackePointers();
@@ -142,7 +142,7 @@ extern inline void USB_OpenFile(void)
 			DATA_openAttempsNumber++;
 			
 			if(openResult == FR_OK) {
-				USB_WriteLen(fileHeader);
+				//USB_WriteLen(fileHeader);
 				USB_WriteLen(channelNameHeader);
 				//writeSensorCalibrations();
 				DATA_SetAcquisitionState();				/* Update of the status packet */

@@ -387,7 +387,7 @@ extern inline float analogAux3Conversion(uint32_t rawData)
 
 extern void writeSensorCalibrations(void)
 {
-	/*sprintf((char *)sersorCalibrationsbuffer, "Load cell FR offset [LSB signed] = %d;\n", DATA_LOAD_CELL_FR_CalibrationOffset);
+	sprintf((char *)sersorCalibrationsbuffer, "Load cell FR offset [LSB signed] = %d;\n", DATA_LOAD_CELL_FR_CalibrationOffset);
 	USB_WriteLen(sersorCalibrationsbuffer);
 	sprintf((char *)sersorCalibrationsbuffer, "Load cell FL offset [LSB signed] = %d;\n", DATA_LOAD_CELL_FL_CalibrationOffset);
 	USB_WriteLen(sersorCalibrationsbuffer);
@@ -408,5 +408,5 @@ extern void writeSensorCalibrations(void)
 	sprintf((char *)sersorCalibrationsbuffer, "APPS full [LSB] = %d;\n", DATA_APPS_FullCalibrationOffset);
 	USB_WriteLen(sersorCalibrationsbuffer);
 	sprintf((char *)sersorCalibrationsbuffer, "Steer angle offset [LSB signed] = %d;\n", DATA_STEER_ANGLE_CalibrationOffset);
-	USB_WriteLen(sersorCalibrationsbuffer);*/
+	USB_WriteLen(sersorCalibrationsbuffer);
 }

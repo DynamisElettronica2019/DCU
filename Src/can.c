@@ -208,11 +208,11 @@ extern inline void CAN_SendAutogearPacket(void)
 
 extern inline void CAN_SW_CalibrationSendAck(uint16_t ackValue)
 {
-	CAN_AcquisitionStatePacket.packetData[1] = 2;
-	CAN_AcquisitionStatePacket.packetData[3] = ackValue;
-	HAL_CAN_AddTxMessage(&hcan1, &CAN_AcquisitionStatePacket.packetHeader, CAN_AcquisitionStatePacket.packetData, &packetMailbox);
-	CAN_AcquisitionStatePacket.packetData[1] = 1;
-	HAL_CAN_AddTxMessage(&hcan1, &CAN_AcquisitionStatePacket.packetHeader, CAN_AcquisitionStatePacket.packetData, &packetMailbox);
+//	CAN_AcquisitionStatePacket.packetData[1] = 2;
+//	CAN_AcquisitionStatePacket.packetData[3] = ackValue;
+//	HAL_CAN_AddTxMessage(&hcan1, &CAN_AcquisitionStatePacket.packetHeader, CAN_AcquisitionStatePacket.packetData, &packetMailbox);
+//	CAN_AcquisitionStatePacket.packetData[1] = 1;
+//	HAL_CAN_AddTxMessage(&hcan1, &CAN_AcquisitionStatePacket.packetHeader, CAN_AcquisitionStatePacket.packetData, &packetMailbox);
 }
 
 extern void CAN_PacketCounterReset(void)

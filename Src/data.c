@@ -718,8 +718,8 @@ static inline void DATA_SW_CAN_Management(uint8_t data1, uint8_t data2)
 			}
 			break;
 		
-		case SW_CALIBRATIONS_CAN_REQUEST:
-			/*switch(data2) {
+		/*case SW_CALIBRATIONS_CAN_REQUEST:
+			switch(data2) {
 				case SW_APPS_ZERO_CALIBRATION_REQUEST:
 					DATA_APPS_ZeroCalibrationOffset = DATA_RawCalibrationData[APPS_CALIBRATION_INDEX];
 					CAN_SW_CalibrationSendAck(APPS_ZERO_CALIBRATION_DONE);
@@ -753,8 +753,8 @@ static inline void DATA_SW_CAN_Management(uint8_t data1, uint8_t data2)
 				
 				default:
 					break;
-			}*/
-			break;
+			}
+			break;*/
 			
 		default:
 			break;
