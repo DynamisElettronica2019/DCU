@@ -285,7 +285,7 @@ uint16_t encodeString(uint8_t* string, uint8_t* outString, uint16_t len, uint8_t
 				break;
 			
 			case '-':
-				outString[outStrIndex] = setUpperNibble(outString[outStrIndex], ENCODE_MINUS);
+				outString[outStrIndex] = setLowerNibble(outString[outStrIndex], ENCODE_MINUS);
 				break;
 			
 			default:
@@ -408,7 +408,7 @@ uint16_t encodeString(uint8_t* string, uint8_t* outString, uint16_t len, uint8_t
 				break;
 			
 			case '-':
-				outString[outStrIndex] = setUpperNibble(outString[outStrIndex], ENCODE_MINUS);
+				outString[outStrIndex] = setLowerNibble(outString[outStrIndex], ENCODE_MINUS);
 				break;
 			
 			default:
