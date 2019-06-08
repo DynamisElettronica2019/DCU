@@ -3,7 +3,7 @@
 <title>Static Call Graph - [DCU_DP11\DCU_DP11.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image DCU_DP11\DCU_DP11.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Sat Jun 08 19:44:31 2019
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Sat Jun 08 21:31:58 2019
 <BR><P>
 <H3>Maximum Stack Usage =        704 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1951,12 +1951,12 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[185]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_ResetEfiIsAlive
 <LI><a href="#[ff]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_CheckEfiIsAlive
-<LI><a href="#[18a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingRequest
+<LI><a href="#[189]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingRequest
 <LI><a href="#[184]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_IncTick
 <LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CAN_SendPackets
 <LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ADC_SamplingFunction
 <LI><a href="#[187]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;timestampUpdate
-<LI><a href="#[189]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;incrementDataTimestamp
+<LI><a href="#[18a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;incrementDataTimestamp
 <LI><a href="#[186]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TELEMETRY_StateSendTimCallback
 <LI><a href="#[188]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TELEMETRY_DataSendTimCallback
 </UL>
@@ -1977,8 +1977,8 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 88<LI>Call Chain = HAL_UART_IRQHandler &rArr; HAL_UART_TxCpltCallback &rArr; UART1_TxCallback &rArr; xQueueGenericSendFromISR &rArr; xTaskRemoveFromEventList
 </UL>
 <BR>[Calls]<UL><LI><a href="#[18d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_TxCpltCallback
-<LI><a href="#[18c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_ErrorCallback
 <LI><a href="#[178]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_Abort_IT
+<LI><a href="#[18c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_ErrorCallback
 </UL>
 <BR>[Called By]<UL><LI><a href="#[35]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART2_IRQHandler
 <LI><a href="#[34]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART1_IRQHandler
@@ -3294,7 +3294,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[150]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_HCD_ResetPort
 </UL>
 
-<P><STRONG><a name="[18a]"></a>USB_SavingRequest</STRONG> (Thumb, 40 bytes, Stack size 8 bytes, usb_host.o(i.USB_SavingRequest))
+<P><STRONG><a name="[189]"></a>USB_SavingRequest</STRONG> (Thumb, 40 bytes, Stack size 8 bytes, usb_host.o(i.USB_SavingRequest))
 <BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = USB_SavingRequest &rArr; xQueueGiveFromISR &rArr; xTaskRemoveFromEventList
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGiveFromISR
@@ -3645,7 +3645,7 @@ Global Symbols
 <LI><a href="#[220]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;f_sync
 </UL>
 
-<P><STRONG><a name="[189]"></a>incrementDataTimestamp</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, timestamp.o(i.incrementDataTimestamp))
+<P><STRONG><a name="[18a]"></a>incrementDataTimestamp</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, timestamp.o(i.incrementDataTimestamp))
 <BR><BR>[Called By]<UL><LI><a href="#[17f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_PeriodElapsedCallback
 </UL>
 
@@ -4166,7 +4166,7 @@ Global Symbols
 <LI><a href="#[11e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_CAN_TxMailbox1CompleteCallback
 <LI><a href="#[11d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_CAN_TxMailbox0CompleteCallback
 <LI><a href="#[b5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_ADC_ConvCpltCallback
-<LI><a href="#[18a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingRequest
+<LI><a href="#[189]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingRequest
 <LI><a href="#[199]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART1_TxCallback
 <LI><a href="#[196]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART1_RxCallback
 <LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPS_RxCallback
@@ -4552,8 +4552,8 @@ Local Symbols
 <LI><a href="#[1e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_AllocPipe
 <LI><a href="#[1e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_SelectInterface
 <LI><a href="#[1e3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_FindInterface
-<LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
 <LI><a href="#[1e5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;malloc
+<LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> usbh_msc.o(.data)
 </UL>

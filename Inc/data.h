@@ -11,7 +11,7 @@
 #define BUFFER_STATE_LEN 																			(uint8_t)9
 #define BUFFER_BLOCK_LEN 																			(uint16_t)597
 #define BUFFER_POINTERS_NUMBER 																(uint8_t)2
-#define CLOSE_FILE_INTERVAL																		(uint32_t)120000
+#define CLOSE_FILE_INTERVAL																		(uint32_t)300000
 
 /* Packet position in CAN data packet counter vector */
 #define EFI_HALL_WHEEL_ID_COUNTER_INDEX 											(uint8_t)0
