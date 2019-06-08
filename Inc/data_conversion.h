@@ -10,9 +10,9 @@
 #define TEMP_SENSE_VOLTAGE_OFFSET						100.0f /* [mV] */
 #define TEMP_SENSE_TEMPERATURE_GAIN 				0.1f /* [°C/mV] */
 #define TEMP_SENSE_TEMPERATURE_OFFSET				40.0f /* [°C] */
-#define _12V_POST_DIODE_SENSE_HIGH_GAIN			0.1293f
-#define _5V_DCU_GAIN												0.3237f
-#define _3V3_MCU_GAIN												0.5313f
+#define _12V_POST_DIODE_SENSE_HIGH_GAIN			0.213f
+#define _5V_DCU_GAIN												0.595f
+#define _3V3_MCU_GAIN												0.833f
 #define VBAT_GAIN														4.0f
 #define ANALOG_AUX_1_VOLTAGE_GAIN						1.56f	
 #define ANALOG_AUX_2_VOLTAGE_GAIN						1.56f
