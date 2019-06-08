@@ -6,10 +6,10 @@
 #define CHANNEL_SEPARATION																		(uint8_t)';'
 #define DECIMAL_SEPARATOR 																		(uint8_t)'.'
 #define END_LINE																							(uint8_t)'\n'
-#define NUMBER_OF_RECEIVED_PACKETS														(uint8_t)25
+#define NUMBER_OF_RECEIVED_PACKETS														(uint8_t)27
 #define NUMBER_OF_ACQUIRED_CHANNELS														(uint8_t)91
 #define BUFFER_STATE_LEN 																			(uint8_t)9
-#define BUFFER_BLOCK_LEN 																			(uint16_t)579
+#define BUFFER_BLOCK_LEN 																			(uint16_t)597
 #define BUFFER_POINTERS_NUMBER 																(uint8_t)2
 #define CLOSE_FILE_INTERVAL																		(uint32_t)120000
 
@@ -33,12 +33,14 @@
 #define IMU1_DATA_2_ID_COUNTER_INDEX 													(uint8_t)16
 #define IMU2_DATA_1_ID_COUNTER_INDEX 													(uint8_t)17
 #define IMU2_DATA_2_ID_COUNTER_INDEX 													(uint8_t)18
-#define DAU_FR_DEBUG_ID_COUNTER_INDEX 												(uint8_t)19
-#define DAU_FL_DEBUG_ID_COUNTER_INDEX 												(uint8_t)20
-#define DAU_REAR_DEBUG_ID_COUNTER_INDEX 											(uint8_t)21
-#define SW_DEBUG_ID_COUNTER_INDEX 														(uint8_t)22
-#define GCU_DEBUG_1_ID_COUNTER_INDEX 													(uint8_t)23
-#define GCU_DEBUG_2_ID_COUNTER_INDEX 													(uint8_t)24
+#define GCU_CLUTCH_MODE_MAP_SW_ID_COUNTER_INDEX 							(uint8_t)19
+#define GCU_TRACTION_LIMITER_AUTOG_ACC_SW_ID_COUNTER_INDEX 		(uint8_t)20
+#define DAU_FR_DEBUG_ID_COUNTER_INDEX 												(uint8_t)21
+#define DAU_FL_DEBUG_ID_COUNTER_INDEX 												(uint8_t)22
+#define DAU_REAR_DEBUG_ID_COUNTER_INDEX 											(uint8_t)23
+#define SW_DEBUG_ID_COUNTER_INDEX 														(uint8_t)24
+#define GCU_DEBUG_1_ID_COUNTER_INDEX 													(uint8_t)25
+#define GCU_DEBUG_2_ID_COUNTER_INDEX 													(uint8_t)26
 
 /* Data index in CSV file */
 #define TIMESTAMP_CSV_INDEX 																	(uint16_t)0
@@ -127,31 +129,39 @@
 #define GPS_LATITUDE_MINUTES_CSV_INDEX												(uint16_t)458	
 #define GPS_LONGITUDE_MINUTES_CSV_INDEX 											(uint16_t)464
 #define GPS_SPEED_CSV_INDEX	 																	(uint16_t)470
-#define DAU_FR_TEMP_CSV_INDEX 																(uint16_t)478
-#define DAU_FR_CURRENT_CSV_INDEX 															(uint16_t)481
-#define DAU_FL_TEMP_CSV_INDEX 																(uint16_t)485
-#define DAU_FL_CURRENT_CSV_INDEX 															(uint16_t)488
-#define DAU_REAR_TEMP_CSV_INDEX 															(uint16_t)492
-#define DAU_REAR_CURRENT_CSV_INDEX 														(uint16_t)495
-#define SW_TEMP_CSV_INDEX 																		(uint16_t)499
-#define SW_CURRENT_CSV_INDEX 																	(uint16_t)502
-#define GCU_TEMP_CSV_INDEX 																		(uint16_t)507
-#define GCU_CURR_CSV_INDEX 																		(uint16_t)510
-#define H2O_PUMP_CURRENT_CSV_INDEX 														(uint16_t)514
-#define FUEL_PUMP_CURRENT_CSV_INDEX 													(uint16_t)519
-#define GEARMOTOR_CURRENT_CSV_INDEX 													(uint16_t)524
-#define CLUTCH_CURRENT_CSV_INDEX 															(uint16_t)529
-#define FAN_SX_CURRENT_CSV_INDEX 															(uint16_t)534
-#define FAN_DX_CURRENT_CSV_INDEX 															(uint16_t)539
-#define DCU_TEMP_CSV_INDEX 																		(uint16_t)544
-#define DCU_CURRENT_CSV_INDEX 																(uint16_t)547
-#define XBEE_CURRENT_CSV_INDEX 																(uint16_t)552
-#define DUC_3V3_CURRENT_CSV_INDEX 														(uint16_t)556
-#define DCU_12V_VOLTAGE_CSV_INDEX 														(uint16_t)560
-#define DCU_5V_VOLTAGE_CSV_INDEX 															(uint16_t)566
-#define DCU_3V3_VOLTAGE_CSV_INDEX 														(uint16_t)571
-#define LAP_FLAG_CSV_INDEX																		(uint16_t)576
-#define END_CSV_INDEX 																				(uint16_t)578
+#define CLUTCH_FEEDBACK_CSV_INDEX															(uint16_t)478
+#define MODE_FEEDBACK_CSV_INDEX 															(uint16_t)482
+#define MAP_FEEDBACK_CSV_INDEX 																(uint16_t)484
+#define ANTISTALL_FEEDBACK_CSV_INDEX 													(uint16_t)486
+#define TRACTION_FEEDBACK_CSV_INDEX 													(uint16_t)488
+#define RPM_LIMITER_FEEDBACK_CSV_INDEX 												(uint16_t)490
+#define AUTOGEARSHIFT_FEEDBACK_CSV_INDEX 											(uint16_t)492
+#define ACCELERATION_FEEDBACK_CSV_INDEX	 											(uint16_t)494
+#define LAP_FLAG_CSV_INDEX																		(uint16_t)496
+#define DAU_FR_TEMP_CSV_INDEX 																(uint16_t)498
+#define DAU_FR_CURRENT_CSV_INDEX 															(uint16_t)501
+#define DAU_FL_TEMP_CSV_INDEX 																(uint16_t)505
+#define DAU_FL_CURRENT_CSV_INDEX 															(uint16_t)508
+#define DAU_REAR_TEMP_CSV_INDEX 															(uint16_t)512
+#define DAU_REAR_CURRENT_CSV_INDEX 														(uint16_t)515
+#define SW_TEMP_CSV_INDEX 																		(uint16_t)519
+#define SW_CURRENT_CSV_INDEX 																	(uint16_t)522
+#define GCU_TEMP_CSV_INDEX 																		(uint16_t)527
+#define GCU_CURR_CSV_INDEX 																		(uint16_t)530
+#define H2O_PUMP_CURRENT_CSV_INDEX 														(uint16_t)534
+#define FUEL_PUMP_CURRENT_CSV_INDEX 													(uint16_t)539
+#define GEARMOTOR_CURRENT_CSV_INDEX 													(uint16_t)544
+#define CLUTCH_CURRENT_CSV_INDEX 															(uint16_t)549
+#define FAN_SX_CURRENT_CSV_INDEX 															(uint16_t)554
+#define FAN_DX_CURRENT_CSV_INDEX 															(uint16_t)559
+#define DCU_TEMP_CSV_INDEX 																		(uint16_t)564
+#define DCU_CURRENT_CSV_INDEX 																(uint16_t)567
+#define XBEE_CURRENT_CSV_INDEX 																(uint16_t)572
+#define DUC_3V3_CURRENT_CSV_INDEX 														(uint16_t)576
+#define DCU_12V_VOLTAGE_CSV_INDEX 														(uint16_t)580
+#define DCU_5V_VOLTAGE_CSV_INDEX 															(uint16_t)586
+#define DCU_3V3_VOLTAGE_CSV_INDEX 														(uint16_t)591
+#define END_CSV_INDEX 																				(uint16_t)596
 
 /* Data separator position in CSV file */
 #define HALL_EFFECT_FR_CSV_SEPARATOR													(HALL_EFFECT_FR_CSV_INDEX - 1)
@@ -239,6 +249,15 @@
 #define GPS_LATITUDE_MINUTES_CSV_SEPARATOR 										(GPS_LATITUDE_MINUTES_CSV_INDEX - 1)
 #define GPS_LONGITUDE_MINUTES_CSV_SEPARATOR  									(GPS_LONGITUDE_MINUTES_CSV_INDEX - 1)
 #define GPS_SPEED_CSV_SEPARATOR  															(GPS_SPEED_CSV_INDEX - 1)
+#define CLUTCH_FEEDBACK_CSV_SEPARATOR													(CLUTCH_FEEDBACK_CSV_INDEX - 1)
+#define MODE_FEEDBACK_CSV_SEPARATOR 													(MODE_FEEDBACK_CSV_INDEX - 1)
+#define MAP_FEEDBACK_CSV_SEPARATOR														(MAP_FEEDBACK_CSV_INDEX - 1)
+#define ANTISTALL_FEEDBACK_CSV_SEPARATOR 											(ANTISTALL_FEEDBACK_CSV_INDEX - 1)
+#define TRACTION_FEEDBACK_CSV_SEPARATOR 											(TRACTION_FEEDBACK_CSV_INDEX - 1)
+#define RPM_LIMITER_FEEDBACK_CSV_SEPARATOR 										(RPM_LIMITER_FEEDBACK_CSV_INDEX - 1)
+#define AUTOGEARSHIFT_FEEDBACK_CSV_SEPARATOR 									(AUTOGEARSHIFT_FEEDBACK_CSV_INDEX - 1)
+#define ACCELERATION_FEEDBACK_CSV_SEPARATOR	 									(ACCELERATION_FEEDBACK_CSV_INDEX - 1)
+#define LAP_FLAG_CSV_SEPARATOR 																(LAP_FLAG_CSV_INDEX - 1)
 #define DAU_FR_TEMP_CSV_SEPARATOR 														(DAU_FR_TEMP_CSV_INDEX - 1)
 #define DAU_FR_CURRENT_CSV_SEPARATOR 													(DAU_FR_CURRENT_CSV_INDEX - 1)
 #define DAU_FL_TEMP_CSV_SEPARATOR 														(DAU_FL_TEMP_CSV_INDEX - 1)
@@ -262,7 +281,6 @@
 #define DCU_12V_VOLTAGE_CSV_SEPARATOR 												(DCU_12V_VOLTAGE_CSV_INDEX - 1)
 #define DCU_5V_VOLTAGE_CSV_SEPARATOR 													(DCU_5V_VOLTAGE_CSV_INDEX - 1)
 #define DCU_3V3_VOLTAGE_CSV_SEPARATOR 												(DCU_3V3_VOLTAGE_CSV_INDEX - 1)
-#define LAP_FLAG_CSV_SEPARATOR 																(LAP_FLAG_CSV_INDEX - 1)
 #define END_CSV_SEPARATOR																			(END_CSV_INDEX - 1)
 
 /* Calibration buffer index */
