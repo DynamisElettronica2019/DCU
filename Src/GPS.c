@@ -35,9 +35,9 @@ extern void GPS_Init(void)
 	HAL_UART_Transmit(&huart2, (uint8_t *)STOP_GSV, STOP_GSV_LENGTH, 100);												/* Not send GSV messages */
 	HAL_UART_Transmit(&huart2, (uint8_t *)STOP_GGA, STOP_GGA_LENGTH, 100);												/* Not send GGA messages */
 	HAL_UART_Transmit(&huart2, (uint8_t *)STOP_GSA, STOP_GSA_LENGTH, 100);												/* Not send GSA messages */
+	HAL_UART_Transmit(&huart2, GPS_FixRate10Hz, GPS_SET_FIX_RATE_10HZ_LENGTH, 100); 							/* Set fix rate at 10 Hz */
 	HAL_UART_Transmit(&huart2, (uint8_t *)SET_BAUDRATE_38400, SET_BAUDRATE_38400_LENGTH, 100);		/* Baudrate at 38400 */
 	USART2_Init_38400();																																					/* UART init at 38400 baud */
-	HAL_UART_Transmit(&huart2, GPS_FixRate10Hz, GPS_SET_FIX_RATE_10HZ_LENGTH, 100); 							/* Set fix rate at 10 Hz */
 }
 
 extern inline void GPS_DataConversion(uint8_t * GPSRawBuffer)
