@@ -999,11 +999,11 @@ ARM Macro Assembler    Page 16
               00000000 
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M7.fp.dp --apcs=
 interwork --depend=dcu_dp11\startup_stm32f767xx.d -odcu_dp11\startup_stm32f767x
-x.o -I..\\Inc -I.\RTE\_DCU_DP11 -IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.5.1\CMSIS\Cor
-e\Include -IC:\Keil_v5\ARM\PACK\Keil\STM32F7xx_DFP\2.11.0\Drivers\CMSIS\Device\
-ST\STM32F7xx\Include --predefine="__MICROLIB SETA 1" --predefine="__UVISION_VER
-SION SETA 524" --predefine="_RTE_ SETA 1" --predefine="STM32F767xx SETA 1" --li
-st=startup_stm32f767xx.lst startup_stm32f767xx.s
+x.o -I..\\Inc -I.\RTE\_DCU_DP11 -IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Inc
+lude -IC:\Keil_v5\ARM\PACK\Keil\STM32F7xx_DFP\2.11.0\Drivers\CMSIS\Device\ST\ST
+M32F7xx\Include --predefine="__MICROLIB SETA 1" --predefine="__UVISION_VERSION 
+SETA 524" --predefine="_RTE_ SETA 1" --predefine="STM32F767xx SETA 1" --list=st
+artup_stm32f767xx.lst startup_stm32f767xx.s
 
 
 
