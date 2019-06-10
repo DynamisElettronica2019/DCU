@@ -28,6 +28,8 @@
 #include "telemetry.h"
 
 uint8_t toSW_AcquisitionState = TO_SW_ACQUISITION_IS_ON;
+uint32_t CAN_ReceivedPacketsCounter [NUMBER_OF_ACQUIRED_CHANNELS];
+float brake_Partition = 0.0f;
 CAN_FilterTypeDef CAN_FilterConfigHeader;
 CAN_RxPacket_t CAN_CurrentFifo0ReceivedPacket;
 CAN_RxPacket_t CAN_CurrentFifo1ReceivedPacket;
@@ -42,7 +44,8 @@ BaseType_t CAN_Rx1xHigherPriorityTaskWoken = pdFALSE;
 BaseType_t CAN_Tx0xHigherPriorityTaskWoken = pdFALSE;
 BaseType_t CAN_Tx1xHigherPriorityTaskWoken = pdFALSE;
 BaseType_t CAN_Tx2xHigherPriorityTaskWoken = pdFALSE;
-uint32_t CAN_ReceivedPacketsCounter [NUMBER_OF_ACQUIRED_CHANNELS];
+extern float BPS_Front;
+extern float BPS_Rear;
 extern float ADC_BufferConvertedDebug [ADC_CONVERTED_DEBUG_DATA_LEN];
 extern osSemaphoreId CAN_SendSemaphoreHandle;
 extern osSemaphoreId CAN_SendDataSemaphoreCounterHandle;
@@ -171,24 +174,28 @@ extern inline void CAN_SendDebugPackets(void)
 	}
 	
 	/* DCU_DEBUG_1_ID */
-	CAN_DebugPacket1Packet.packetData[0] = (uint8_t)(((uint16_t)(ADC_BufferConvertedDebug[DCU_TEMP_SENSE_POSITION]) >> 8) & 0x00FF);
-	CAN_DebugPacket1Packet.packetData[1] = (uint8_t)((uint16_t)(ADC_BufferConvertedDebug[DCU_TEMP_SENSE_POSITION]) & 0x00FF);
-	CAN_DebugPacket1Packet.packetData[2] = (uint8_t)(((uint16_t)(ADC_BufferConvertedDebug[MAIN_CURRENT_SENSE_POSITION]) >> 8) & 0x00FF);
-	CAN_DebugPacket1Packet.packetData[3] = (uint8_t)((uint16_t)(ADC_BufferConvertedDebug[MAIN_CURRENT_SENSE_POSITION]) & 0x00FF);
-	CAN_DebugPacket1Packet.packetData[4] = (uint8_t)(((uint16_t)(ADC_BufferConvertedDebug[XBEE_CURRENT_SENSE_POSITION]) >> 8) & 0x00FF);
-	CAN_DebugPacket1Packet.packetData[5] = (uint8_t)((uint16_t)(ADC_BufferConvertedDebug[XBEE_CURRENT_SENSE_POSITION]) & 0x00FF);
-	CAN_DebugPacket1Packet.packetData[6] = (uint8_t)(((uint16_t)(ADC_BufferConvertedDebug[DCU_CURRENT_SENSE_POSITION]) >> 8) & 0x00FF);
-	CAN_DebugPacket1Packet.packetData[7] = (uint8_t)((uint16_t)(ADC_BufferConvertedDebug[DCU_CURRENT_SENSE_POSITION]) & 0x00FF);
+	CAN_DebugPacket1Packet.packetData[0] = (uint8_t)(((uint16_t)ADC_BufferConvertedDebug[DCU_TEMP_SENSE_POSITION] >> 8) & 0x00FF);
+	CAN_DebugPacket1Packet.packetData[1] = (uint8_t)((uint16_t)ADC_BufferConvertedDebug[DCU_TEMP_SENSE_POSITION] & 0x00FF);
+	CAN_DebugPacket1Packet.packetData[2] = (uint8_t)(((uint16_t)ADC_BufferConvertedDebug[MAIN_CURRENT_SENSE_POSITION] >> 8) & 0x00FF);
+	CAN_DebugPacket1Packet.packetData[3] = (uint8_t)((uint16_t)ADC_BufferConvertedDebug[MAIN_CURRENT_SENSE_POSITION] & 0x00FF);
+	CAN_DebugPacket1Packet.packetData[4] = (uint8_t)(((uint16_t)ADC_BufferConvertedDebug[XBEE_CURRENT_SENSE_POSITION] >> 8) & 0x00FF);
+	CAN_DebugPacket1Packet.packetData[5] = (uint8_t)((uint16_t)ADC_BufferConvertedDebug[XBEE_CURRENT_SENSE_POSITION] & 0x00FF);
+	CAN_DebugPacket1Packet.packetData[6] = (uint8_t)(((uint16_t)ADC_BufferConvertedDebug[DCU_CURRENT_SENSE_POSITION] >> 8) & 0x00FF);
+	CAN_DebugPacket1Packet.packetData[7] = (uint8_t)((uint16_t)ADC_BufferConvertedDebug[DCU_CURRENT_SENSE_POSITION] & 0x00FF);
 	HAL_CAN_AddTxMessage(&hcan1, &CAN_DebugPacket1Packet.packetHeader, CAN_DebugPacket1Packet.packetData, &packetMailbox);
 	//xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_DebugPacket1Packet, 10/portTICK_PERIOD_MS);
 	
 	/* DCU_DEBUG_2_ID */
-	CAN_DebugPacket2Packet.packetData[0] = (uint8_t)(((uint16_t)(ADC_BufferConvertedDebug[_12V_POST_DIODES_SENSE_POSITION]) >> 8) & 0x00FF);
-	CAN_DebugPacket2Packet.packetData[1] = (uint8_t)((uint16_t)(ADC_BufferConvertedDebug[_12V_POST_DIODES_SENSE_POSITION]) & 0x00FF);
-	CAN_DebugPacket2Packet.packetData[2] = (uint8_t)(((uint16_t)(ADC_BufferConvertedDebug[_5V_DCU_POSITION]) >> 8) & 0x00FF);
-	CAN_DebugPacket2Packet.packetData[3] = (uint8_t)((uint16_t)(ADC_BufferConvertedDebug[_5V_DCU_POSITION]) & 0x00FF);
-	CAN_DebugPacket2Packet.packetData[4] = (uint8_t)(((uint16_t)(ADC_BufferConvertedDebug[_3V3_MCU_POSITION]) >> 8) & 0x00FF);
-	CAN_DebugPacket2Packet.packetData[5] = (uint8_t)((uint16_t)(ADC_BufferConvertedDebug[_3V3_MCU_POSITION]) & 0x00FF);
+	brake_Partition = BPS_Front / (BPS_Front+BPS_Rear);
+	brake_Partition = brake_Partition * 100.0f;
+	CAN_DebugPacket2Packet.packetData[0] = (uint8_t)(((uint16_t)ADC_BufferConvertedDebug[_12V_POST_DIODES_SENSE_POSITION] >> 8) & 0x00FF);
+	CAN_DebugPacket2Packet.packetData[1] = (uint8_t)((uint16_t)ADC_BufferConvertedDebug[_12V_POST_DIODES_SENSE_POSITION] & 0x00FF);
+	CAN_DebugPacket2Packet.packetData[2] = (uint8_t)(((uint16_t)ADC_BufferConvertedDebug[_5V_DCU_POSITION] >> 8) & 0x00FF);
+	CAN_DebugPacket2Packet.packetData[3] = (uint8_t)((uint16_t)ADC_BufferConvertedDebug[_5V_DCU_POSITION] & 0x00FF);
+	CAN_DebugPacket2Packet.packetData[4] = (uint8_t)(((uint16_t)ADC_BufferConvertedDebug[_3V3_MCU_POSITION] >> 8) & 0x00FF);
+	CAN_DebugPacket2Packet.packetData[5] = (uint8_t)((uint16_t)ADC_BufferConvertedDebug[_3V3_MCU_POSITION] & 0x00FF);
+	CAN_DebugPacket2Packet.packetData[6] = (uint8_t)(((uint16_t)brake_Partition >> 8) & 0x00FF);
+	CAN_DebugPacket2Packet.packetData[7] = (uint8_t)((uint16_t)brake_Partition & 0x00FF);
 	HAL_CAN_AddTxMessage(&hcan1, &CAN_DebugPacket2Packet.packetHeader, CAN_DebugPacket2Packet.packetData, &packetMailbox);
 	//xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_DebugPacket2Packet, 10/portTICK_PERIOD_MS);
 	
@@ -262,7 +269,7 @@ static void CAN_PacketInit(void)
 	CAN_DebugPacket2Packet.packetHeader.StdId = DCU_DEBUG_2_ID;
 	CAN_DebugPacket2Packet.packetHeader.RTR = CAN_RTR_DATA;
 	CAN_DebugPacket2Packet.packetHeader.IDE = CAN_ID_STD;
-	CAN_DebugPacket2Packet.packetHeader.DLC = 6;
+	CAN_DebugPacket2Packet.packetHeader.DLC = 8;
 	CAN_DebugPacket2Packet.packetHeader.TransmitGlobalTime = DISABLE;
 	
 	/* DCU_ACQUISITION_SW_ID */

@@ -22,6 +22,8 @@ float fData1 = 0.0f;
 float fData2 = 0.0f;
 float fData3 = 0.0f;
 float fData4 = 0.0f;
+float BPS_Front = 0.0f;
+float BPS_Rear = 0.0f;
 BaseType_t EFI_IsAlive_xHigherPriorityTaskWoken = pdFALSE;
 extern uint8_t DATA_BlockWriteIndex;
 extern float DATA_LOAD_CELL_FR_CalibrationOffset;
@@ -154,7 +156,9 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			DATA_RawCalibrationData[APPS_CALIBRATION_INDEX] = data4;
 			fData1 = LINEAR_FR_DataConversion(data1) * 100.0f;		/* Taking into account the division by 100 */
 			fData2 = LOAD_CELL_FR_DataConversion((int16_t)data2);
-			fData3 = BPS_DataConversion(data3) * 100.0f;					/* Taking into account the division by 100 */
+			fData3 = BPS_DataConversion(data3);
+			BPS_Front = fData3;						/* Data for brake partition */
+			fData3 = fData3 * 100.0f;			/* Taking into account the division by 100 */	
 			fData4 = APPS_DataConversion(data4);
 			decimalToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[DATA_BlockWriteIndex][LINEARE_FR_CSV_INDEX], 2, 2);
 			intToString((int16_t)fData2, &DATA_BlockBuffer[DATA_BlockWriteIndex][LOAD_CELL_FR_CSV_INDEX], 4);
@@ -169,7 +173,9 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			DATA_RawCalibrationData[STEER_ANGLE_CALIBRATION_INDEX] = data4;
 			fData1 = LINEAR_FL_DataConversion(data1) * 100.0f;							/* Taking into account the division by 100 */
 			fData2 = LOAD_CELL_FL_DataConversion((int16_t)data2);
-			fData3 = BPS_DataConversion(data3) * 100.0f;										/* Taking into account the division by 100 */
+			fData3 = BPS_DataConversion(data3);
+			BPS_Rear = fData3;						/* Data for brake partition */
+			fData3 = fData3 * 100.0f;			/* Taking into account the division by 100 */
 			fData4 = STEERING_WHEEL_ANGLE_DataConversion((int16_t)data4) * 10.0f; 		/* Taking into account the division by 10 */
 			decimalToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[DATA_BlockWriteIndex][LINEARE_FL_CSV_INDEX], 2, 2);
 			intToString((int16_t)fData2, &DATA_BlockBuffer[DATA_BlockWriteIndex][LOAD_CELL_FL_CSV_INDEX], 4);
