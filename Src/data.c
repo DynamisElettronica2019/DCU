@@ -180,7 +180,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			decimalToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[DATA_BlockWriteIndex][LINEARE_FL_CSV_INDEX], 2, 2);
 			intToString((int16_t)fData2, &DATA_BlockBuffer[DATA_BlockWriteIndex][LOAD_CELL_FL_CSV_INDEX], 4);
 			decimalToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[DATA_BlockWriteIndex][BPS_REAR_CSV_INDEX], 2, 2);
-			decimalToString((uint16_t)fData4, &DATA_BlockBuffer[DATA_BlockWriteIndex][STEERING_WHEEL_ANGLE_CSV_INDEX], 3, 1);
+			decimalToString((int16_t)fData4, &DATA_BlockBuffer[DATA_BlockWriteIndex][STEERING_WHEEL_ANGLE_CSV_INDEX], 3, 1);
 			break;
 		
 		case DAU_REAR_ID:
