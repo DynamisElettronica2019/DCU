@@ -186,8 +186,16 @@ extern inline void CAN_SendDebugPackets(void)
 	//xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_DebugPacket1Packet, 10/portTICK_PERIOD_MS);
 	
 	/* DCU_DEBUG_2_ID */
-	brake_Partition = BPS_Front / (BPS_Front+BPS_Rear);
-	brake_Partition = brake_Partition * 100.0f;
+	
+	if ((BPS_Front  > 5000) && (BPS_Rear > 5000))		/*if an actual preassure is applied on break (frater than 5 bar)*/
+		{
+		brake_Partition = BPS_Front / (BPS_Front+BPS_Rear);		/*calculate the partition*/
+		brake_Partition = brake_Partition * 100.0f;
+	}
+	else 
+		brake_Partition = 0;																	/*if not, set the value to zero*/
+	
+	
 	CAN_DebugPacket2Packet.packetData[0] = (uint8_t)(((uint16_t)ADC_BufferConvertedDebug[_12V_POST_DIODES_SENSE_POSITION] >> 8) & 0x00FF);
 	CAN_DebugPacket2Packet.packetData[1] = (uint8_t)((uint16_t)ADC_BufferConvertedDebug[_12V_POST_DIODES_SENSE_POSITION] & 0x00FF);
 	CAN_DebugPacket2Packet.packetData[2] = (uint8_t)(((uint16_t)ADC_BufferConvertedDebug[_5V_DCU_POSITION] >> 8) & 0x00FF);
