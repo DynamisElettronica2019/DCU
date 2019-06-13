@@ -3,7 +3,7 @@
 <title>Static Call Graph - [DCU_DP11\DCU_DP11.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image DCU_DP11\DCU_DP11.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Thu Jun 13 12:41:19 2019
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Thu Jun 13 13:01:36 2019
 <BR><P>
 <H3>Maximum Stack Usage =        704 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -772,7 +772,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;automaticStartAcquisitionMonitoringTask
 </UL>
 
-<P><STRONG><a name="[e0]"></a>DATA_CanParser</STRONG> (Thumb, 4466 bytes, Stack size 48 bytes, data.o(i.DATA_CanParser))
+<P><STRONG><a name="[e0]"></a>DATA_CanParser</STRONG> (Thumb, 4474 bytes, Stack size 48 bytes, data.o(i.DATA_CanParser))
 <BR><BR>[Stack]<UL><LI>Max Depth = 120<LI>Call Chain = DATA_CanParser &rArr; CAN_SW_CalibrationSendAck &rArr; HAL_CAN_AddTxMessage
 </UL>
 <BR>[Calls]<UL><LI><a href="#[df]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSendFromISR
@@ -844,7 +844,7 @@ Global Symbols
 <LI><a href="#[1ff]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_CloseFile
 </UL>
 
-<P><STRONG><a name="[102]"></a>DATA_PacketReset</STRONG> (Thumb, 524 bytes, Stack size 8 bytes, data.o(i.DATA_PacketReset))
+<P><STRONG><a name="[102]"></a>DATA_PacketReset</STRONG> (Thumb, 544 bytes, Stack size 8 bytes, data.o(i.DATA_PacketReset))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = DATA_PacketReset
 </UL>
 <BR>[Calls]<UL><LI><a href="#[b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memset
@@ -907,7 +907,7 @@ Global Symbols
 <LI><a href="#[204]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_EventHandler
 </UL>
 
-<P><STRONG><a name="[103]"></a>DATA_SwapDataPackePointers</STRONG> (Thumb, 46 bytes, Stack size 8 bytes, data.o(i.DATA_SwapDataPackePointers))
+<P><STRONG><a name="[103]"></a>DATA_SwapDataPackePointers</STRONG> (Thumb, 48 bytes, Stack size 8 bytes, data.o(i.DATA_SwapDataPackePointers))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = DATA_SwapDataPackePointers
 </UL>
 <BR>[Calls]<UL><LI><a href="#[104]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
@@ -1078,7 +1078,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(.constdata)
 </UL>
-<P><STRONG><a name="[10f]"></a>GPS_DataConversion</STRONG> (Thumb, 2598 bytes, Stack size 64 bytes, gps.o(i.GPS_DataConversion))
+<P><STRONG><a name="[10f]"></a>GPS_DataConversion</STRONG> (Thumb, 2602 bytes, Stack size 64 bytes, gps.o(i.GPS_DataConversion))
 <BR><BR>[Stack]<UL><LI>Max Depth = 168<LI>Call Chain = GPS_DataConversion &rArr; xQueueGenericSend &rArr; xTaskResumeAll
 </UL>
 <BR>[Calls]<UL><LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_IT
@@ -1993,8 +1993,8 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 88<LI>Call Chain = HAL_UART_IRQHandler &rArr; HAL_UART_TxCpltCallback &rArr; UART1_TxCallback &rArr; xQueueGenericSendFromISR &rArr; xTaskRemoveFromEventList
 </UL>
 <BR>[Calls]<UL><LI><a href="#[190]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_TxCpltCallback
-<LI><a href="#[18f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_ErrorCallback
 <LI><a href="#[17b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_Abort_IT
+<LI><a href="#[18f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_ErrorCallback
 </UL>
 <BR>[Called By]<UL><LI><a href="#[35]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART2_IRQHandler
 <LI><a href="#[34]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART1_IRQHandler
@@ -2416,8 +2416,8 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[e0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_CanParser
 </UL>
 
-<P><STRONG><a name="[9b]"></a>SendDataFunc</STRONG> (Thumb, 100 bytes, Stack size 320 bytes, freertos.o(i.SendDataFunc))
-<BR><BR>[Stack]<UL><LI>Max Depth = 424<LI>Call Chain = SendDataFunc &rArr; xQueueGenericSend &rArr; xTaskResumeAll
+<P><STRONG><a name="[9b]"></a>SendDataFunc</STRONG> (Thumb, 100 bytes, Stack size 344 bytes, freertos.o(i.SendDataFunc))
+<BR><BR>[Stack]<UL><LI>Max Depth = 448<LI>Call Chain = SendDataFunc &rArr; xQueueGenericSend &rArr; xTaskResumeAll
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[1b9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_GetTelemetryState
@@ -2437,8 +2437,8 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(.constdata)
 </UL>
-<P><STRONG><a name="[9e]"></a>SendFollowingDataFunc</STRONG> (Thumb, 80 bytes, Stack size 312 bytes, freertos.o(i.SendFollowingDataFunc))
-<BR><BR>[Stack]<UL><LI>Max Depth = 416<LI>Call Chain = SendFollowingDataFunc &rArr; xQueueGenericSend &rArr; xTaskResumeAll
+<P><STRONG><a name="[9e]"></a>SendFollowingDataFunc</STRONG> (Thumb, 80 bytes, Stack size 336 bytes, freertos.o(i.SendFollowingDataFunc))
+<BR><BR>[Stack]<UL><LI>Max Depth = 440<LI>Call Chain = SendFollowingDataFunc &rArr; xQueueGenericSend &rArr; xTaskResumeAll
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[19b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit_DMA
@@ -4376,7 +4376,7 @@ Local Symbols
 <LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPS_VTG_conversion
 </UL>
 
-<P><STRONG><a name="[112]"></a>GPS_VTG_conversion</STRONG> (Thumb, 1002 bytes, Stack size 64 bytes, gps.o(i.GPS_VTG_conversion))
+<P><STRONG><a name="[112]"></a>GPS_VTG_conversion</STRONG> (Thumb, 994 bytes, Stack size 64 bytes, gps.o(i.GPS_VTG_conversion))
 <BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = GPS_VTG_conversion
 </UL>
 <BR>[Calls]<UL><LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPS_StrToInt
@@ -4575,8 +4575,8 @@ Local Symbols
 <LI><a href="#[1e9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_AllocPipe
 <LI><a href="#[1e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_SelectInterface
 <LI><a href="#[1e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_FindInterface
-<LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
 <LI><a href="#[1e8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;malloc
+<LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> usbh_msc.o(.data)
 </UL>
