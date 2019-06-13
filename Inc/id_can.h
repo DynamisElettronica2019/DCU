@@ -53,6 +53,10 @@
 #define DCU_DEBUG_1_ID															0x318
 #define DCU_DEBUG_2_ID															0x319
 
+/************************ DATRON **************************/
+#define DATRON_1_ID 																0x659
+#define DATRON_2_ID 																0x65A
+
 /******************* MASKS & FILTERS **********************/
 
 

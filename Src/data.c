@@ -18,6 +18,7 @@ uint16_t data2 = 0;
 uint16_t data3 = 0;
 uint16_t data4 = 0;
 uint16_t DATA_RawCalibrationData [CALIBRATION_BUFFER_DATA_NUMBER];
+uint32_t DATRON_Distance = 0;
 float fData1 = 0.0f;
 float fData2 = 0.0f;
 float fData3 = 0.0f;
@@ -339,6 +340,21 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			decimalToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][CLUTCH_CURRENT_CSV_INDEX], 2, 1);			/* Taking into account the division by 10 */
 			decimalToStringUnsigned(data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][FAN_SX_CURRENT_CSV_INDEX], 2, 1);			/* Taking into account the division by 10 */
 			decimalToStringUnsigned(data4, &DATA_BlockBuffer[DATA_BlockWriteIndex][FAN_DX_CURRENT_CSV_INDEX], 2, 1);			/* Taking into account the division by 10 */
+			break;
+		
+		/* DATRON ID range */
+		
+		case DATRON_1_ID:
+			DATRON_Distance = ((data3 << 16) & 0xFFFF0000) | data4;
+			int32ToString((int32_t)DATRON_Distance, &DATA_BlockBuffer[DATA_BlockWriteIndex][DATRON_DISTANCE_CSV_INDEX], 10);
+			break;
+		
+		case DATRON_2_ID:
+			fData1 = DATRON_Velocity_DataConversion((int16_t)data1) * 100.0f; 			/* Taking into account the division by 100 */
+			fData2 = DATRON_Velocity_DataConversion((int16_t)data2) * 100.0f; 			/* Taking into account the division by 100 */
+			decimalToString((int16_t)fData1, &DATA_BlockBuffer[DATA_BlockWriteIndex][DATRON_X_CSV_INDEX], 3, 2);
+			decimalToString((int16_t)fData2, &DATA_BlockBuffer[DATA_BlockWriteIndex][DATRON_Y_CSV_INDEX], 3, 2);
+			decimalToString((int16_t)data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][DATRON_ANGLE_CSV_INDEX], 3, 2);   	/* Taking into account the division by 100 */
 			break;
 		
 		default:
@@ -710,6 +726,10 @@ extern void DATA_PacketReset(void)
 		DATA_BlockBuffer[j][DCU_5V_VOLTAGE_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 		DATA_BlockBuffer[j][DCU_3V3_VOLTAGE_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 		DATA_BlockBuffer[j][END_CSV_SEPARATOR] = CHANNEL_SEPARATION;
+		DATA_BlockBuffer[j][DATRON_DISTANCE_CSV_SEPARATOR] = CHANNEL_SEPARATION;
+		DATA_BlockBuffer[j][DATRON_X_CSV_SEPARATOR] = CHANNEL_SEPARATION;
+		DATA_BlockBuffer[j][DATRON_Y_CSV_SEPARATOR] = CHANNEL_SEPARATION;
+		DATA_BlockBuffer[j][DATRON_ANGLE_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 		DATA_BlockBuffer[j][END_CSV_INDEX] = END_LINE;
 	}
 }

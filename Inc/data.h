@@ -161,6 +161,10 @@
 #define DCU_12V_VOLTAGE_CSV_INDEX 														(uint16_t)580
 #define DCU_5V_VOLTAGE_CSV_INDEX 															(uint16_t)586
 #define DCU_3V3_VOLTAGE_CSV_INDEX 														(uint16_t)591
+#define DATRON_DISTANCE_CSV_INDEX 														(uint16_t)591
+#define DATRON_X_CSV_INDEX 																		(uint16_t)591
+#define DATRON_Y_CSV_INDEX 																		(uint16_t)591
+#define DATRON_ANGLE_CSV_INDEX 																(uint16_t)591
 #define END_CSV_INDEX 																				(uint16_t)596
 
 /* Data separator position in CSV file */
@@ -281,6 +285,10 @@
 #define DCU_12V_VOLTAGE_CSV_SEPARATOR 												(DCU_12V_VOLTAGE_CSV_INDEX - 1)
 #define DCU_5V_VOLTAGE_CSV_SEPARATOR 													(DCU_5V_VOLTAGE_CSV_INDEX - 1)
 #define DCU_3V3_VOLTAGE_CSV_SEPARATOR 												(DCU_3V3_VOLTAGE_CSV_INDEX - 1)
+#define DATRON_DISTANCE_CSV_SEPARATOR 												(DATRON_DISTANCE_CSV_INDEX - 1)
+#define DATRON_X_CSV_SEPARATOR 																(DATRON_X_CSV_INDEX - 1)
+#define DATRON_Y_CSV_SEPARATOR 																(DATRON_Y_CSV_INDEX - 1)
+#define DATRON_ANGLE_CSV_SEPARATOR 														(DATRON_ANGLE_CSV_INDEX - 1)
 #define END_CSV_SEPARATOR																			(END_CSV_INDEX - 1)
 
 /* Calibration buffer index */

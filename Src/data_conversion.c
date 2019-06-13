@@ -188,11 +188,12 @@ extern inline float APPS_DataConversion(uint16_t input)
 {
 	float temp;
 	
-	//temp = (float)(input - DATA_APPS_ZeroCalibrationOffset);
-	//temp = temp / ((float)(DATA_APPS_FullCalibrationOffset - DATA_APPS_ZeroCalibrationOffset));
+	temp = (float)(input - DATA_APPS_ZeroCalibrationOffset);
+	temp = temp / ((float)(DATA_APPS_FullCalibrationOffset - DATA_APPS_ZeroCalibrationOffset));
 	temp = (float)input;
-	temp = temp * 0.0012210012210012f;   										//lsb to voltage
-	temp = ((temp - 0.490842490f)/(0.184371185f))*100;			// (val - val_min)/(val_max - val_min)
+	temp = temp * 0.0012210012210012f;   								/* LSB to voltage */
+	temp = ((temp - 0.490842490f) / (0.184371185f));		/* (val-val_min) / (val_max-val_min) */
+	temp = temp * 100.0f;
   return temp;
 }
 
@@ -283,6 +284,15 @@ extern inline float IR_WHEEL_RL_DataConversion(uint16_t input)
 	temp = (float)input * (VREF_DAU_RL/4095);
 	temp = temp / 0.03f;
 	temp = temp - 13.33333333f;
+	return temp;
+}
+
+extern inline float DATRON_Velocity_DataConversion(int16_t input)
+{
+	float temp;
+	
+	temp = (float)input / 100.0f;
+	temp = temp * 3.6f;
 	return temp;
 }
 

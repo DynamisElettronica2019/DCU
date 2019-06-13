@@ -15,6 +15,6 @@ GCU_rpmLimiterFB;GCU_AutogearshiftFB;GCU_AccelerationFB;lapFlag;DAU_FR_TempDebug
 DAU_FL_CurrentDebug;DAU_REAR_TempDebug;DAU_REAR_CurrentDebug;SW_TempDebug;SW_CurrentDebug;GCU_TempDebug;GCU_CurrentDebug;\
 H20_Pump_CurrentDebug;FuelPump_CurrentDebug;GearMotor_CurrentDebug;Clutch_CurrentDebug;lFan_CurrentDebug;rFan_CurrentDebug;\
 DCU_TempDebug;DCU_CurrentDebug;XBEE_CurrentDebug;DUC_3V3_VoltageDebug;DCU_12V_VoltageDebug;DCU_5V_VoltageDebug;\
-DCU_3V3_VoltageDebug;\n";
+DCU_3V3_VoltageDebug;xDatron;vDatronX;vDatronY;aDatron\n";
 
 #endif
