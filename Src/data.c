@@ -94,7 +94,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 		
 		case EFI_GEAR_RPM_TPS_PH2O_ID:
 			DATA_SetEfiIsAlive();
-			CAN_ReceivedPacketsCounter[EFI_MANUAL_LIMITER_FAN_H2O_PIT_LANE_COUNTER_INDEX]++;
+			CAN_ReceivedPacketsCounter[EFI_GEAR_RPM_TPS_PH2O_COUNTER_INDEX]++;
 			fData3 = TPS_DataConversion(data3);
 			fData4 = WATER_PRESSURE_DataConversion(data4);
 			intToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][GEAR_CSV_INDEX], 1);
@@ -113,9 +113,9 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			intToStringUnsigned((uint16_t)data4, &DATA_BlockBuffer[DATA_BlockWriteIndex][GEAR_AD_BITS_CSV_INDEX], 5);
 			break;
 		
-		case EFI_FUEL_FAN_H2O_LAUNCH_ID_COUNTER_INDEX:
+		case EFI_MANUAL_LIMITER_FAN_H2O_PIT_LANE_ID:
 			DATA_SetEfiIsAlive();
-			CAN_ReceivedPacketsCounter[EFI_FUEL_FAN_H2O_LAUNCH_ID_COUNTER_INDEX]++;
+			CAN_ReceivedPacketsCounter[EFI_MANUAL_LIMITER_FAN_H2O_PIT_LANE_COUNTER_INDEX]++;
 			fData3 = H20_PUMP_DUTY_CYCLE_DataConversion(data3);
 			intToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][MANUAL_LIMITER_ACTIVE_CSV_INDEX], 1);
 			intToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][FAN_CSV_INDEX], 1);
