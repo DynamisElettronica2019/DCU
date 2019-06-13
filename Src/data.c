@@ -110,6 +110,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			decimalToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][VH_SPEED_CSV_INDEX], 3, 1); 			/* Taking into account the division by 10 */
 			decimalToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][SLIP_TARGET_CSV_INDEX], 3, 1); 	/* Taking into account the division by 10 */
 			decimalToString((int16_t)fData3, &DATA_BlockBuffer[DATA_BlockWriteIndex][SLIP_CSV_INDEX], 4, 1); 					
+			intToStringUnsigned((uint16_t)data4, &DATA_BlockBuffer[DATA_BlockWriteIndex][GEAR_AD_BITS_CSV_INDEX], 5);
 			break;
 		
 		case EFI_FUEL_FAN_H2O_LAUNCH_ID_COUNTER_INDEX:
@@ -627,6 +628,7 @@ extern void DATA_PacketReset(void)
 		DATA_BlockBuffer[j][VH_SPEED_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 		DATA_BlockBuffer[j][SLIP_TARGET_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 		DATA_BlockBuffer[j][SLIP_CSV_SEPARATOR] = CHANNEL_SEPARATION;
+		DATA_BlockBuffer[j][GEAR_AD_BITS_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 		DATA_BlockBuffer[j][MANUAL_LIMITER_ACTIVE_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 		DATA_BlockBuffer[j][FAN_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 		DATA_BlockBuffer[j][H20_PUMP_DUTY_CYCLE_CSV_SEPARATOR] = CHANNEL_SEPARATION;

@@ -63,6 +63,7 @@
 #define VH_SPEED_CSV_INDEX 																		(uint16_t)84
 #define SLIP_TARGET_CSV_INDEX 																(uint16_t)90
 #define SLIP_CSV_INDEX																				(uint16_t)96
+#define GEAR_AD_BITS_CSV_INDEX 																(uint16_t)96
 #define MANUAL_LIMITER_ACTIVE_CSV_INDEX 											(uint16_t)104
 #define FAN_CSV_INDEX 																				(uint16_t)106
 #define H20_PUMP_DUTY_CYCLE_CSV_INDEX 												(uint16_t)108
@@ -187,6 +188,7 @@
 #define VH_SPEED_CSV_SEPARATOR 																(VH_SPEED_CSV_INDEX - 1)
 #define SLIP_TARGET_CSV_SEPARATOR 														(SLIP_TARGET_CSV_INDEX - 1)
 #define SLIP_CSV_SEPARATOR																		(SLIP_CSV_INDEX - 1)
+#define GEAR_AD_BITS_CSV_SEPARATOR														(GEAR_AD_BITS_CSV_INDEX - 1)
 #define MANUAL_LIMITER_ACTIVE_CSV_SEPARATOR 									(MANUAL_LIMITER_ACTIVE_CSV_INDEX - 1)
 #define FAN_CSV_SEPARATOR																			(FAN_CSV_INDEX - 1)
 #define H20_PUMP_DUTY_CYCLE_CSV_SEPARATOR 										(H20_PUMP_DUTY_CYCLE_CSV_INDEX - 1)
