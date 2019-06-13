@@ -173,8 +173,7 @@ extern inline void CAN_SendDebugPackets(void)
 		toSW_AcquisitionState = TO_SW_ACQUISITION_IS_OFF;
 	}
 	
-	if((BPS_Front > 5000.0f) && (BPS_Rear > 5000.0f))				/* If an actual preassure is applied on break (greater than 5 bar) */
-	{
+	if((BPS_Front > 5000.0f) && (BPS_Rear > 5000.0f)) {	 		/* If an actual preassure is applied on break (greater than 5 bar) */
 		brake_Partition = BPS_Front / (BPS_Front+BPS_Rear);		/* Calculate the partition*/
 		brake_Partition = brake_Partition * 100.0f;
 	}
@@ -191,8 +190,7 @@ extern inline void CAN_SendDebugPackets(void)
 	CAN_DebugPacket1Packet.packetData[5] = (uint8_t)((uint16_t)ADC_BufferConvertedDebug[XBEE_CURRENT_SENSE_POSITION] & 0x00FF);
 	CAN_DebugPacket1Packet.packetData[6] = (uint8_t)(((uint16_t)ADC_BufferConvertedDebug[DCU_CURRENT_SENSE_POSITION] >> 8) & 0x00FF);
 	CAN_DebugPacket1Packet.packetData[7] = (uint8_t)((uint16_t)ADC_BufferConvertedDebug[DCU_CURRENT_SENSE_POSITION] & 0x00FF);
-	HAL_CAN_AddTxMessage(&hcan1, &CAN_DebugPacket1Packet.packetHeader, CAN_DebugPacket1Packet.packetData, &packetMailbox);
-	//xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_DebugPacket1Packet, 10/portTICK_PERIOD_MS);
+	CAN_SendPacketPolling(CAN_DebugPacket1Packet);
 	
 	/* DCU_DEBUG_2_ID */
 	CAN_DebugPacket2Packet.packetData[0] = (uint8_t)(((uint16_t)ADC_BufferConvertedDebug[_12V_POST_DIODES_SENSE_POSITION] >> 8) & 0x00FF);
@@ -203,28 +201,25 @@ extern inline void CAN_SendDebugPackets(void)
 	CAN_DebugPacket2Packet.packetData[5] = (uint8_t)((uint16_t)ADC_BufferConvertedDebug[_3V3_MCU_POSITION] & 0x00FF);
 	CAN_DebugPacket2Packet.packetData[6] = (uint8_t)(((uint16_t)brake_Partition >> 8) & 0x00FF);
 	CAN_DebugPacket2Packet.packetData[7] = (uint8_t)((uint16_t)brake_Partition & 0x00FF);
-	HAL_CAN_AddTxMessage(&hcan1, &CAN_DebugPacket2Packet.packetHeader, CAN_DebugPacket2Packet.packetData, &packetMailbox);
-	//xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_DebugPacket2Packet, 10/portTICK_PERIOD_MS);
+	CAN_SendPacketPolling(CAN_DebugPacket2Packet);
 	
 	/* DCU_ACQUISITION_SW_ID */
 	CAN_AcquisitionStatePacket.packetData[3] = toSW_AcquisitionState;
-	HAL_CAN_AddTxMessage(&hcan1, &CAN_AcquisitionStatePacket.packetHeader, CAN_AcquisitionStatePacket.packetData, &packetMailbox);
-	//xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_AcquisitionStatePacket, 10/portTICK_PERIOD_MS);
+	CAN_SendPacketPolling(CAN_AcquisitionStatePacket);
 }
 
 extern inline void CAN_SendAutogearPacket(void)
 {
-	if(HAL_GPIO_ReadPin(AUTOGEAR_SWTICH_MCU_GPIO_Port, AUTOGEAR_SWTICH_MCU_Pin) == GPIO_PIN_RESET) {
-		//xQueueSend(CAN_SendDataQueueHandle, (void *)&CAN_AutogearPacket, 10/portTICK_PERIOD_MS);		/* Add CAN message to queue */
-		//HAL_CAN_AddTxMessage(&hcan1, &CAN_AutogearPacket.packetHeader, CAN_AutogearPacket.packetData, &packetMailbox);
-	}
+//	if(HAL_GPIO_ReadPin(AUTOGEAR_SWTICH_MCU_GPIO_Port, AUTOGEAR_SWTICH_MCU_Pin) == GPIO_PIN_RESET) {
+//		CAN_SendPacketPolling(CAN_AutogearPacket);
+//	}
 }
 
 extern inline void CAN_SW_CalibrationSendAck(uint8_t ackValue)
 {
 	CAN_AcquisitionStatePacket.packetData[1] = 2;
 	CAN_AcquisitionStatePacket.packetData[3] = ackValue;
-	HAL_CAN_AddTxMessage(&hcan1, &CAN_AcquisitionStatePacket.packetHeader, CAN_AcquisitionStatePacket.packetData, &packetMailbox);
+	CAN_SendPacketPolling(CAN_AcquisitionStatePacket);
 	CAN_AcquisitionStatePacket.packetData[1] = 1;
 }
 
@@ -233,6 +228,12 @@ extern void CAN_PacketCounterReset(void)
 	for(uint16_t i = 0; i < NUMBER_OF_ACQUIRED_CHANNELS; i++) {
 		CAN_ReceivedPacketsCounter[i] = 0;
 	}
+}
+
+static inline void CAN_SendPacketPolling(CAN_TxPacket_t packet)
+{
+	while(HAL_CAN_GetTxMailboxesFreeLevel(&hcan1) == 0U); 																		/* Wait for an empy TX mailbox */
+	HAL_CAN_AddTxMessage(&hcan1, &packet.packetHeader, packet.packetData, &packetMailbox); 		/* Send CAN packet */
 }
 
 static void CAN_FilterConfig(void)
@@ -310,24 +311,6 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO1, &(CAN_CurrentFifo1ReceivedPacket.packetHeader), CAN_CurrentFifo1ReceivedPacket.packetData); 
 	xQueueSendFromISR(canFifo1QueueHandle, &CAN_CurrentFifo1ReceivedPacket, &CAN_Rx1xHigherPriorityTaskWoken);
 	portYIELD_FROM_ISR(CAN_Rx1xHigherPriorityTaskWoken);
-}
-
-void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *hcan)
-{
-	xSemaphoreGiveFromISR(CAN_SendDataSemaphoreCounterHandle, &CAN_Tx0xHigherPriorityTaskWoken);
-	portYIELD_FROM_ISR(CAN_Tx0xHigherPriorityTaskWoken);
-}
-
-void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef *hcan)
-{
-	xSemaphoreGiveFromISR(CAN_SendDataSemaphoreCounterHandle, &CAN_Tx1xHigherPriorityTaskWoken);
-	portYIELD_FROM_ISR(CAN_Tx1xHigherPriorityTaskWoken);
-}
-
-void HAL_CAN_TxMailbox2CompleteCallback(CAN_HandleTypeDef *hcan)
-{
-	xSemaphoreGiveFromISR(CAN_SendDataSemaphoreCounterHandle, &CAN_Tx2xHigherPriorityTaskWoken);
-	portYIELD_FROM_ISR(CAN_Tx2xHigherPriorityTaskWoken);
 }
 
 /* USER CODE END 1 */

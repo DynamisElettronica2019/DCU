@@ -55,6 +55,7 @@ extern inline void CAN_SendDebugPackets(void);
 extern inline void CAN_SendAutogearPacket(void);
 extern inline void CAN_SW_CalibrationSendAck(uint8_t ackValue);
 extern void CAN_PacketCounterReset(void);
+static inline void CAN_SendPacketPolling(CAN_TxPacket_t packet);
 static void CAN_FilterConfig(void);
 static void CAN_PacketInit(void);
 /* USER CODE END Prototypes */

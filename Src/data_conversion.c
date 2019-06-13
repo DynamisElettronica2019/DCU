@@ -14,7 +14,6 @@ uint16_t DATA_LINEAR_RL_CalibrationOffset = 0;			/* [LSB] */
 uint16_t DATA_APPS_ZeroCalibrationOffset = 0;				/* [LSB] */
 uint16_t DATA_APPS_FullCalibrationOffset = 1;				/* [LSB] */
 uint16_t DATA_STEER_ANGLE_CalibrationOffset = 0;		/* [LSB] */
-uint8_t sersorCalibrationsbuffer [50];
 
 
 extern inline float EFI_TEMPERATURE_DataConversion(uint16_t input)
@@ -95,7 +94,7 @@ extern inline float LOAD_CELL_FR_DataConversion(int16_t input)
 { 
 	float temp;
 	
-	temp = (float)(input - DATA_LOAD_CELL_FR_CalibrationOffset);
+	temp = (float)(input - (int16_t)DATA_LOAD_CELL_FR_CalibrationOffset);
 	temp = temp * (VREF_DAU_FR/4095);
 	temp = temp * 4448.0f;
 	temp = temp - ((VREF_DAU_FR/2) * 4448.0f);
@@ -107,7 +106,7 @@ extern inline float LOAD_CELL_FL_DataConversion(int16_t input)
 { 
 	float temp;
 	
-	temp = (float)(input - DATA_LOAD_CELL_FL_CalibrationOffset);
+	temp = (float)(input - (int16_t)DATA_LOAD_CELL_FL_CalibrationOffset);
 	temp = temp * (VREF_DAU_FL/4095);
 	temp = temp * 4448.0f;
 	temp = temp - ((VREF_DAU_FL/2) * 4448.0f);
@@ -119,7 +118,7 @@ extern inline float LOAD_CELL_RR_DataConversion(int16_t input)
 { 
 	float temp;
 	
-	temp = (float)(input - DATA_LOAD_CELL_RR_CalibrationOffset);
+	temp = (float)(input - (int16_t)DATA_LOAD_CELL_RR_CalibrationOffset);
 	temp = temp * (VREF_DAU_RR/4095);
 	temp = temp * 4448.0f;
 	temp = temp - ((VREF_DAU_RR/2) * 4448.0f);
@@ -131,7 +130,7 @@ extern inline float LOAD_CELL_RL_DataConversion(int16_t input)
 { 
 	float temp;
 	
-	temp = (float)(input - DATA_LOAD_CELL_RL_CalibrationOffset);
+	temp = (float)(input - (int16_t)DATA_LOAD_CELL_RL_CalibrationOffset);
 	temp = temp * (VREF_DAU_RL/4095);
 	temp = temp * 4448.0f;
 	temp = temp - ((VREF_DAU_RL/2) * 4448.0f);
@@ -191,7 +190,7 @@ extern inline float APPS_DataConversion(uint16_t input)
 	temp = (float)(input - DATA_APPS_ZeroCalibrationOffset);
 	temp = temp / ((float)(DATA_APPS_FullCalibrationOffset - DATA_APPS_ZeroCalibrationOffset));
 	temp = (float)input;
-	temp = temp * 0.0012210012210012f;   								/* LSB to voltage */
+	temp = temp * 0.001221001f;   											/* LSB to voltage */
 	temp = ((temp - 0.490842490f) / (0.184371185f));		/* (val-val_min) / (val_max-val_min) */
 	temp = temp * 100.0f;
   return temp;
@@ -201,7 +200,7 @@ extern inline float STEERING_WHEEL_ANGLE_DataConversion(int16_t input)
 {
 	float temp;
 	
-	temp = (float)(input - DATA_STEER_ANGLE_CalibrationOffset);
+	temp = (float)(input - (int16_t)DATA_STEER_ANGLE_CalibrationOffset);
 	temp = temp * 0.10989011f;
 	temp = temp - 225.0f;
 	return temp;
@@ -394,30 +393,4 @@ extern inline float analogAux3Conversion(uint32_t rawData)
 	data = (float)rawData * ADC_LSB;
 	data = data * ANALOG_AUX_3_VOLTAGE_GAIN;
 	return data;
-}
-
-extern void writeSensorCalibrations(void)
-{
-	sprintf((char *)sersorCalibrationsbuffer, "Load cell FR offset [LSB signed] = %d;\n", DATA_LOAD_CELL_FR_CalibrationOffset);
-	USB_WriteLen(sersorCalibrationsbuffer);
-	sprintf((char *)sersorCalibrationsbuffer, "Load cell FL offset [LSB signed] = %d;\n", DATA_LOAD_CELL_FL_CalibrationOffset);
-	USB_WriteLen(sersorCalibrationsbuffer);
-	sprintf((char *)sersorCalibrationsbuffer, "Load cell RR offset [LSB signed] = %d;\n", DATA_LOAD_CELL_RR_CalibrationOffset);
-	USB_WriteLen(sersorCalibrationsbuffer);
-	sprintf((char *)sersorCalibrationsbuffer, "Load cell RL offset [LSB signed] = %d;\n", DATA_LOAD_CELL_RL_CalibrationOffset);
-	USB_WriteLen(sersorCalibrationsbuffer);
-	sprintf((char *)sersorCalibrationsbuffer, "Liner FR offset [LSB] = %d;\n", DATA_LINEAR_FR_CalibrationOffset);
-	USB_WriteLen(sersorCalibrationsbuffer);
-	sprintf((char *)sersorCalibrationsbuffer, "Liner FL offset [LSB] = %d;\n", DATA_LINEAR_FL_CalibrationOffset);
-	USB_WriteLen(sersorCalibrationsbuffer);
-	sprintf((char *)sersorCalibrationsbuffer, "Liner RR offset [LSB] = %d;\n", DATA_LINEAR_RR_CalibrationOffset);
-	USB_WriteLen(sersorCalibrationsbuffer);
-	sprintf((char *)sersorCalibrationsbuffer, "Liner RL offset [LSB] = %d;\n", DATA_LINEAR_RL_CalibrationOffset);
-	USB_WriteLen(sersorCalibrationsbuffer);
-	sprintf((char *)sersorCalibrationsbuffer, "APPS zero [LSB] = %d;\n", DATA_APPS_ZeroCalibrationOffset);
-	USB_WriteLen(sersorCalibrationsbuffer);
-	sprintf((char *)sersorCalibrationsbuffer, "APPS full [LSB] = %d;\n", DATA_APPS_FullCalibrationOffset);
-	USB_WriteLen(sersorCalibrationsbuffer);
-	sprintf((char *)sersorCalibrationsbuffer, "Steer angle offset [LSB signed] = %d;\n", DATA_STEER_ANGLE_CalibrationOffset);
-	USB_WriteLen(sersorCalibrationsbuffer);
 }
