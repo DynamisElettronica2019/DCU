@@ -1,8 +1,6 @@
 #ifndef __file_headers_H
 #define __file_headers_H
 
-static uint8_t fileHeader[] = "DynamisPRC - Politecnico di Milano;\n";
-
 static uint8_t channelNameHeader[] = "time;vWheelFR;vWheelFL;vWheelRR;vWheelRL;tWaterL_In;tWaterL_Out;tWaterR_In;tWaterR_Out;tOil_In;tOil_Out;tWaterEngine;\
 vBatt;nGear;nRPM;XTPS;pWater;vCar;XslipTarget;XSlip;GearAD_Bits;bManualLimiter;bFan;bDutyWaterPump;bPitLaneActive;pFuel;pOil;rLambda;\
 FlagSMOT;fuelLevel;tExhaust_1;tExhaust_2;xWheel_FR;fLoad_FR;pBrakeFront;XAPPS;xWheel_FL;fLoad_FL;pBrakeRear;aSteering;\

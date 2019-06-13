@@ -12,7 +12,7 @@ uint8_t EFI_IsAlive = EFI_IS_ALIVE_RESET;
 uint8_t acquisitionState = ACQUISITION_OFF_STATE;
 uint8_t DATA_BlockBuffer [BUFFER_POINTERS_NUMBER][BUFFER_BLOCK_LEN];
 uint8_t DATA_StateBuffer [BUFFER_STATE_LEN];
-uint16_t DATA_LapFlag;
+uint16_t DATA_LapFlag = 0;
 uint16_t data1 = 0;
 uint16_t data2 = 0;
 uint16_t data3 = 0;
@@ -27,17 +27,17 @@ float BPS_Front = 0.0f;
 float BPS_Rear = 0.0f;
 BaseType_t EFI_IsAlive_xHigherPriorityTaskWoken = pdFALSE;
 extern uint8_t DATA_BlockWriteIndex;
-extern float DATA_LOAD_CELL_FR_CalibrationOffset;
-extern float DATA_LOAD_CELL_FL_CalibrationOffset;
-extern float DATA_LOAD_CELL_RR_CalibrationOffset;
-extern float DATA_LOAD_CELL_RL_CalibrationOffset;
-extern float DATA_LINEAR_FR_CalibrationOffset;
-extern float DATA_LINEAR_FL_CalibrationOffset;
-extern float DATA_LINEAR_RR_CalibrationOffset;
-extern float DATA_LINEAR_RL_CalibrationOffset;
-extern float DATA_APPS_ZeroCalibrationOffset;
-extern float DATA_APPS_FullCalibrationOffset;
-extern float DATA_STEER_ANGLE_CalibrationOffset;
+extern uint16_t DATA_LOAD_CELL_FR_CalibrationOffset;
+extern uint16_t DATA_LOAD_CELL_FL_CalibrationOffset;
+extern uint16_t DATA_LOAD_CELL_RR_CalibrationOffset;
+extern uint16_t DATA_LOAD_CELL_RL_CalibrationOffset;
+extern uint16_t DATA_LINEAR_FR_CalibrationOffset;
+extern uint16_t DATA_LINEAR_FL_CalibrationOffset;
+extern uint16_t DATA_LINEAR_RR_CalibrationOffset;
+extern uint16_t DATA_LINEAR_RL_CalibrationOffset;
+extern uint16_t DATA_APPS_ZeroCalibrationOffset;
+extern uint16_t DATA_APPS_FullCalibrationOffset;
+extern uint16_t DATA_STEER_ANGLE_CalibrationOffset;
 extern uint32_t CAN_ReceivedPacketsCounter [NUMBER_OF_ACQUIRED_CHANNELS];
 extern osSemaphoreId automaticStartAcquisitionSemaphoreHandle;
 extern osMessageQId startAcquisitionEventHandle;
@@ -772,7 +772,7 @@ static inline void DATA_SW_CAN_Management(uint8_t data1, uint8_t data2)
 			}
 			break;
 		
-		/*case SW_CALIBRATIONS_CAN_REQUEST:
+		case SW_CALIBRATIONS_CAN_REQUEST:
 			switch(data2) {
 				case SW_APPS_ZERO_CALIBRATION_REQUEST:
 					DATA_APPS_ZeroCalibrationOffset = DATA_RawCalibrationData[APPS_CALIBRATION_INDEX];
@@ -785,7 +785,7 @@ static inline void DATA_SW_CAN_Management(uint8_t data1, uint8_t data2)
 					break;
 				
 				case SW_STEER_ANGLE_CALIBRATION_REQUEST:
-					DATA_STEER_ANGLE_CalibrationOffset = (int16_t)DATA_RawCalibrationData[STEER_ANGLE_CALIBRATION_INDEX];
+					DATA_STEER_ANGLE_CalibrationOffset = DATA_RawCalibrationData[STEER_ANGLE_CALIBRATION_INDEX];
 					CAN_SW_CalibrationSendAck(STEER_ANGLE_CALIBRATION_DONE);
 					break;
 				
@@ -798,17 +798,17 @@ static inline void DATA_SW_CAN_Management(uint8_t data1, uint8_t data2)
 					break;
 				
 				case SW_LOAD_CELL_CALIBRATION_REQUEST:
-					DATA_LOAD_CELL_FR_CalibrationOffset = (int16_t)DATA_RawCalibrationData[LOAD_CELL_FR_CALIBRATION_INDEX];
-					DATA_LOAD_CELL_FL_CalibrationOffset = (int16_t)DATA_RawCalibrationData[LOAD_CELL_FL_CALIBRATION_INDEX];
-					DATA_LOAD_CELL_RR_CalibrationOffset = (int16_t)DATA_RawCalibrationData[LOAD_CELL_RR_CALIBRATION_INDEX];
-					DATA_LOAD_CELL_RL_CalibrationOffset = (int16_t)DATA_RawCalibrationData[LOAD_CELL_RL_CALIBRATION_INDEX];
+					DATA_LOAD_CELL_FR_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_FR_CALIBRATION_INDEX];
+					DATA_LOAD_CELL_FL_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_FL_CALIBRATION_INDEX];
+					DATA_LOAD_CELL_RR_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_RR_CALIBRATION_INDEX];
+					DATA_LOAD_CELL_RL_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_RL_CALIBRATION_INDEX];
 					CAN_SW_CalibrationSendAck(LOAD_CELL_CALIBRATION_DONE);
 					break;
 				
 				default:
 					break;
 			}
-			break;*/
+			break;
 			
 		default:
 			break;

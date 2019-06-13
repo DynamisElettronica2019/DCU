@@ -316,12 +316,8 @@
 #define SW_STEER_ANGLE_CALIBRATION_REQUEST 										(uint8_t)3
 #define SW_LINEAR_CALIBRATION_REQUEST 												(uint8_t)4
 #define SW_LOAD_CELL_CALIBRATION_REQUEST 											(uint8_t)5
-#define EFI_IS_ALIVE_RESET 																		(uint8_t)0
-#define EFI_IS_ALIVE_SET 																			(uint8_t)1
-
-/* Calibration SW ack values */
 #define TO_SW_ACQUISITION_IS_ON																(uint8_t)1
-#define TO_SW_ACQUISITION_IS_OFF															(uint16_t)2
+#define TO_SW_ACQUISITION_IS_OFF															(uint8_t)2
 #define APPS_ZERO_CALIBRATION_DONE 														(uint8_t)1
 #define APPS_FULL_CALIBRATION_DONE 														(uint8_t)2
 #define STEER_ANGLE_CALIBRATION_DONE 													(uint8_t)3
@@ -352,6 +348,8 @@
 #define STATE_uSD_READY_INDEX 																(uint8_t)4
 #define STATE_ACQUISITION_ON_INDEX 														(uint8_t)6
 #define STATE_TELEMETRY_ON_INDEX  														(uint8_t)8
+#define EFI_IS_ALIVE_RESET 																		(uint8_t)0
+#define EFI_IS_ALIVE_SET 																			(uint8_t)1
 
 extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData);
 extern inline void startAcquisitionStateMachine(uint8_t startAcquisitionEvent);

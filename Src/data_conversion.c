@@ -3,18 +3,18 @@
 #include "data_conversion.h"
 #include "usb_host.h"
 
-int16_t DATA_LOAD_CELL_FR_CalibrationOffset = 0;		/* [LSB signed] */
-int16_t DATA_LOAD_CELL_FL_CalibrationOffset = 0;		/* [LSB signed] */
-int16_t DATA_LOAD_CELL_RR_CalibrationOffset = 0;		/* [LSB signed] */
-int16_t DATA_LOAD_CELL_RL_CalibrationOffset = 0;		/* [LSB signed] */
+uint16_t DATA_LOAD_CELL_FR_CalibrationOffset = 0;		/* [LSB] */
+uint16_t DATA_LOAD_CELL_FL_CalibrationOffset = 0;		/* [LSB] */
+uint16_t DATA_LOAD_CELL_RR_CalibrationOffset = 0;		/* [LSB] */
+uint16_t DATA_LOAD_CELL_RL_CalibrationOffset = 0;		/* [LSB] */
 uint16_t DATA_LINEAR_FR_CalibrationOffset = 0;			/* [LSB] */
 uint16_t DATA_LINEAR_FL_CalibrationOffset = 0;			/* [LSB] */
 uint16_t DATA_LINEAR_RR_CalibrationOffset = 0;			/* [LSB] */
 uint16_t DATA_LINEAR_RL_CalibrationOffset = 0;			/* [LSB] */
 uint16_t DATA_APPS_ZeroCalibrationOffset = 0;				/* [LSB] */
 uint16_t DATA_APPS_FullCalibrationOffset = 1;				/* [LSB] */
-int16_t DATA_STEER_ANGLE_CalibrationOffset = 0;			/* [LSB signed] */
-uint8_t sersorCalibrationsbuffer[50];
+uint16_t DATA_STEER_ANGLE_CalibrationOffset = 0;		/* [LSB] */
+uint8_t sersorCalibrationsbuffer [50];
 
 
 extern inline float EFI_TEMPERATURE_DataConversion(uint16_t input)
