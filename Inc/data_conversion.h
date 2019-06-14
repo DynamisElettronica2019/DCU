@@ -18,14 +18,13 @@
 #define ANALOG_AUX_2_VOLTAGE_GAIN						1.56f
 #define ANALOG_AUX_3_VOLTAGE_GAIN						1.56f
 
-#define LOAD_CELL_FR_OFFEST 								0.0f 	/* [N] */
-#define LOAD_CELL_FL_OFFEST 								0.0f	/* [N] */
-#define LOAD_CELL_RR_OFFEST 								0.0f	/* [N] */
-#define LOAD_CELL_RL_OFFEST 								0.0f	/* [N] */
-#define VREF_DAU_FR  												5.0f	/* [V] */
-#define VREF_DAU_FL  												5.0f	/* [V] */
-#define VREF_DAU_RR  												5.0f	/* [V] */
-#define VREF_DAU_RL  												5.0f	/* [V] */
+#define LOAD_CELL_FR_OFFEST 								0.0f 		/* [N] */
+#define LOAD_CELL_FL_OFFEST 								0.0f		/* [N] */
+#define LOAD_CELL_RR_OFFEST 								0.0f		/* [N] */
+#define LOAD_CELL_RL_OFFEST 								0.0f		/* [N] */
+#define VREF_DAU_FR  												5.032f	/* [V] */
+#define VREF_DAU_FL  												5.013f	/* [V] */
+#define VREF_DAU_REAR  											4.997f	/* [V] */
 
 
 extern inline float EFI_TEMPERATURE_DataConversion(uint16_t input);

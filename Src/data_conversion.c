@@ -119,9 +119,9 @@ extern inline float LOAD_CELL_RR_DataConversion(int16_t input)
 	float temp;
 	
 	temp = (float)(input - (int16_t)DATA_LOAD_CELL_RR_CalibrationOffset);
-	temp = temp * (VREF_DAU_RR/4095);
+	temp = temp * (VREF_DAU_REAR/4095);
 	temp = temp * 4448.0f;
-	temp = temp - ((VREF_DAU_RR/2) * 4448.0f);
+	temp = temp - ((VREF_DAU_REAR/2) * 4448.0f);
 	temp = temp - LOAD_CELL_RR_OFFEST;
 	return temp;
 }
@@ -131,9 +131,9 @@ extern inline float LOAD_CELL_RL_DataConversion(int16_t input)
 	float temp;
 	
 	temp = (float)(input - (int16_t)DATA_LOAD_CELL_RL_CalibrationOffset);
-	temp = temp * (VREF_DAU_RL/4095);
+	temp = temp * (VREF_DAU_REAR/4095);
 	temp = temp * 4448.0f;
-	temp = temp - ((VREF_DAU_RL/2) * 4448.0f);
+	temp = temp - ((VREF_DAU_REAR/2) * 4448.0f);
 	temp = temp - LOAD_CELL_RL_OFFEST;
 	return temp;
 }
@@ -227,7 +227,7 @@ extern inline float IR_BRAKE_RR_DataConversion(uint16_t input)
 {
 	float temp;
 	
-	temp = (float)input * (VREF_DAU_RR/4095);
+	temp = (float)input * (VREF_DAU_REAR/4095);
 	temp = temp / 0.005f;
 	temp = temp - 100.0f;
 	return temp;
@@ -237,7 +237,7 @@ extern inline float IR_BRAKE_RL_DataConversion(uint16_t input)
 {
 	float temp;
 	
-	temp = (float)input * (VREF_DAU_RL/4095);
+	temp = (float)input * (VREF_DAU_REAR/4095);
 	temp = temp / 0.005f;
 	temp = temp - 100.0f;
 	return temp;
@@ -267,7 +267,7 @@ extern inline float IR_WHEEL_RR_DataConversion(uint16_t input)
 {
 	float temp;
 	
-	temp = (float)input * (VREF_DAU_RR/4095);
+	temp = (float)input * (VREF_DAU_REAR/4095);
 	temp = temp / 0.03f;
 	temp = temp - 13.33333333f;
 	return temp;
@@ -277,7 +277,7 @@ extern inline float IR_WHEEL_RL_DataConversion(uint16_t input)
 {
 	float temp;
 	
-	temp = (float)input * (VREF_DAU_RL/4095);
+	temp = (float)input * (VREF_DAU_REAR/4095);
 	temp = temp / 0.03f;
 	temp = temp - 13.33333333f;
 	return temp;
