@@ -318,6 +318,7 @@
 #define SW_LOAD_CELL_CALIBRATION_REQUEST 											(uint8_t)5
 #define TO_SW_ACQUISITION_IS_ON																(uint8_t)1
 #define TO_SW_ACQUISITION_IS_OFF															(uint8_t)2
+#define TO_SW_ACQUISITION_IS_READY														(uint8_t)3
 #define APPS_ZERO_CALIBRATION_DONE 														(uint8_t)1
 #define APPS_FULL_CALIBRATION_DONE 														(uint8_t)2
 #define STEER_ANGLE_CALIBRATION_DONE 													(uint8_t)3

@@ -169,6 +169,9 @@ extern inline void CAN_SendDebugPackets(void)
 	if(DATA_GetAcquisitionState() == STATE_ON) {
 		toSW_AcquisitionState = TO_SW_ACQUISITION_IS_ON;
 	}
+	else if(DATA_GetUsbReadyState() == STATE_ON) {
+		toSW_AcquisitionState = TO_SW_ACQUISITION_IS_READY;
+	}
 	else {
 		toSW_AcquisitionState = TO_SW_ACQUISITION_IS_OFF;
 	}
