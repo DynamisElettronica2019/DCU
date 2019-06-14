@@ -151,75 +151,40 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>NMEA_output,0x0A</ItemText>
+          <ItemText>DATA_APPS_FullCalibrationOffset,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>\\DCU_DP11\../Src/usb_host.c\Appli_state</ItemText>
+          <ItemText>DATA_APPS_ZeroCalibrationOffset,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>DATA_BlockBuffer</ItemText>
+          <ItemText>DATA_APPS_ZeroCalibrationOffset</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>GPS_RawBuffer</ItemText>
+          <ItemText>DATA_APPS_FullCalibrationOffset</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>i,0x0A</ItemText>
+          <ItemText>DATA_LINEAR_FR_CalibrationOffset</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Appli_state</ItemText>
+          <ItemText>DATA_LINEAR_FL_CalibrationOffset</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-          <ItemText>telemetryReceivedBuffer</ItemText>
-        </Ww>
-        <Ww>
-          <count>7</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>DATA_APPS_FullCalibrationOffset,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>8</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>DATA_APPS_ZeroCalibrationOffset,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>9</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>DATA_APPS_ZeroCalibrationOffset</ItemText>
-        </Ww>
-        <Ww>
-          <count>10</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>DATA_APPS_FullCalibrationOffset</ItemText>
-        </Ww>
-        <Ww>
-          <count>11</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>DATA_LINEAR_FR_CalibrationOffset</ItemText>
-        </Ww>
-        <Ww>
-          <count>12</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>DATA_LINEAR_FL_CalibrationOffset</ItemText>
-        </Ww>
-        <Ww>
-          <count>13</count>
-          <WinNumber>1</WinNumber>
           <ItemText>DATA_LINEAR_RR_CalibrationOffset</ItemText>
         </Ww>
         <Ww>
-          <count>14</count>
+          <count>7</count>
           <WinNumber>1</WinNumber>
           <ItemText>DATA_LINEAR_RL_CalibrationOffset</ItemText>
         </Ww>
