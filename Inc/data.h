@@ -97,7 +97,7 @@
 #define BRAKE_IR_FR_CSV_INDEX																	(uint16_t)257
 #define IR1_RL_CSV_INDEX 																			(uint16_t)261
 #define IR2_RL_CSV_INDEX 																			(uint16_t)265
-#define IR3_RL_CSV_INDEX 																			(uint16_t)279
+#define IR3_RL_CSV_INDEX 																			(uint16_t)269
 #define BRAKE_IR_RL_CSV_INDEX 																(uint16_t)273
 #define IR1_RR_CSV_INDEX 																			(uint16_t)277
 #define IR2_RR_CSV_INDEX 																			(uint16_t)281
