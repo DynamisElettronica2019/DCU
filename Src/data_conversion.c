@@ -189,10 +189,7 @@ extern inline float APPS_DataConversion(uint16_t input)
 	
 	temp = (float)(input - DATA_APPS_ZeroCalibrationOffset);
 	temp = temp / ((float)(DATA_APPS_FullCalibrationOffset - DATA_APPS_ZeroCalibrationOffset));
-	temp = (float)input;
-	temp = temp * 0.001221001f;   											/* LSB to voltage */
-	temp = ((temp - 0.490842490f) / (0.184371185f));		/* (val-val_min) / (val_max-val_min) */
-	temp = temp * 100.0f;
+
   return temp;
 }
 
