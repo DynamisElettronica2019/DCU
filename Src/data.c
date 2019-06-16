@@ -301,7 +301,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 		case GCU_TRACTION_LIMITER_AUTOG_ACC_SW_ID:
 			CAN_ReceivedPacketsCounter[GCU_TRACTION_LIMITER_AUTOG_ACC_SW_ID_COUNTER_INDEX]++;
 			intToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][TRACTION_FEEDBACK_CSV_INDEX], 1);
-			intToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][RPM_LIMITER_FEEDBACK_CSV_INDEX], 1);
+			intToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][RPM_LIMITER_FEEDBACK_CSV_INDEX], 2);
 			intToStringUnsigned(data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][AUTOGEARSHIFT_FEEDBACK_CSV_INDEX], 1);
 			intToStringUnsigned(data4, &DATA_BlockBuffer[DATA_BlockWriteIndex][ACCELERATION_FEEDBACK_CSV_INDEX], 1);
 			break;
