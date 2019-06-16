@@ -4,6 +4,11 @@
 #include "id_can.h"
 #include "data_conversion.h"
 #include "string_utility.h"
+#include "rtc.h"
+
+uint32_t pippo1 = 0;
+uint32_t pippo2 = 0;
+
 
 uint8_t DATA_BlockWriteIndex = 0;
 uint8_t DATA_BlockReadIndex = 0;
@@ -162,7 +167,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			BPS_Front = fData3;						/* Data for brake partition */
 			fData3 = fData3 * 100.0f;			/* Taking into account the division by 100 */	
 			fData4 = APPS_DataConversion(data4);
-			decimalToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[DATA_BlockWriteIndex][LINEARE_FR_CSV_INDEX], 2, 2);
+			decimalToString((int16_t)fData1, &DATA_BlockBuffer[DATA_BlockWriteIndex][LINEARE_FR_CSV_INDEX], 2, 2);
 			intToString((int16_t)fData2, &DATA_BlockBuffer[DATA_BlockWriteIndex][LOAD_CELL_FR_CSV_INDEX], 4);
 			decimalToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[DATA_BlockWriteIndex][BPS_FRONT_CSV_INDEX], 2, 2);
 			intToStringUnsigned((uint16_t)fData4, &DATA_BlockBuffer[DATA_BlockWriteIndex][APPS_CSV_INDEX], 3);
@@ -179,7 +184,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			BPS_Rear = fData3;						/* Data for brake partition */
 			fData3 = fData3 * 100.0f;			/* Taking into account the division by 100 */
 			fData4 = STEERING_WHEEL_ANGLE_DataConversion((int16_t)data4) * 10.0f; 		/* Taking into account the division by 10 */
-			decimalToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[DATA_BlockWriteIndex][LINEARE_FL_CSV_INDEX], 2, 2);
+			decimalToString((int16_t)fData1, &DATA_BlockBuffer[DATA_BlockWriteIndex][LINEARE_FL_CSV_INDEX], 2, 2);
 			intToString((int16_t)fData2, &DATA_BlockBuffer[DATA_BlockWriteIndex][LOAD_CELL_FL_CSV_INDEX], 4);
 			decimalToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[DATA_BlockWriteIndex][BPS_REAR_CSV_INDEX], 2, 2);
 			decimalToString((int16_t)fData4, &DATA_BlockBuffer[DATA_BlockWriteIndex][STEERING_WHEEL_ANGLE_CSV_INDEX], 3, 1);
@@ -195,9 +200,9 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			fData2 = LOAD_CELL_RL_DataConversion((int16_t)data2);
 			fData3 = LINEAR_RR_DataConversion(data3) * 100.0f;			/* Taking into account the division by 100 */
 			fData4 = LOAD_CELL_RR_DataConversion((int16_t)data4);
-			decimalToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[DATA_BlockWriteIndex][LINEARE_RL_CSV_INDEX], 2, 2);
+			decimalToString((int16_t)fData1, &DATA_BlockBuffer[DATA_BlockWriteIndex][LINEARE_RL_CSV_INDEX], 2, 2);
 			intToString((int16_t)fData2, &DATA_BlockBuffer[DATA_BlockWriteIndex][LOAD_CELL_RL_CSV_INDEX], 4);
-			decimalToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[DATA_BlockWriteIndex][LINEARE_RR_CSV_INDEX], 2, 2);
+			decimalToString((int16_t)fData3, &DATA_BlockBuffer[DATA_BlockWriteIndex][LINEARE_RR_CSV_INDEX], 2, 2);
 			intToString((int16_t)fData4, &DATA_BlockBuffer[DATA_BlockWriteIndex][LOAD_CELL_RR_CSV_INDEX], 4);
 			break;
 		
@@ -773,35 +778,47 @@ static inline void DATA_SW_CAN_Management(uint8_t data1, uint8_t data2)
 			break;
 		
 		case SW_CALIBRATIONS_CAN_REQUEST:
+			HAL_RTCEx_BKUPWrite(&hrtc,CALIBRATION_IS_CONFIG_RTC_REGISTER,RTC_FLAG_VALUE); /*if calibration is called, writes a known value over a defined rtc backup register*/
 			switch(data2) {
 				case SW_APPS_ZERO_CALIBRATION_REQUEST:
 					DATA_APPS_ZeroCalibrationOffset = DATA_RawCalibrationData[APPS_CALIBRATION_INDEX];
+					HAL_RTCEx_BKUPWrite(&hrtc, DATA_APPS_Zero_RTC_REGISTER, (uint32_t)DATA_APPS_ZeroCalibrationOffset);
 					CAN_SW_CalibrationSendAck(APPS_ZERO_CALIBRATION_DONE);
 					break;
 				
 				case SW_APPS_FULL_CALIBRATION_REQUEST:
 					DATA_APPS_FullCalibrationOffset = DATA_RawCalibrationData[APPS_CALIBRATION_INDEX];
+					HAL_RTCEx_BKUPWrite(&hrtc, DATA_APPS_Full_RTC_REGISTER, (uint32_t)DATA_APPS_FullCalibrationOffset);
 					CAN_SW_CalibrationSendAck(APPS_FULL_CALIBRATION_DONE);
 					break;
 				
 				case SW_STEER_ANGLE_CALIBRATION_REQUEST:
 					DATA_STEER_ANGLE_CalibrationOffset = DATA_RawCalibrationData[STEER_ANGLE_CALIBRATION_INDEX];
+					HAL_RTCEx_BKUPWrite(&hrtc, DATA_STEER_ANGLE_RTC_REGISTER,(uint32_t)DATA_STEER_ANGLE_CalibrationOffset);
 					CAN_SW_CalibrationSendAck(STEER_ANGLE_CALIBRATION_DONE);
 					break;
 				
 				case SW_LINEAR_CALIBRATION_REQUEST:
 					DATA_LINEAR_FR_CalibrationOffset = DATA_RawCalibrationData[LINEAR_FR_CALIBRATION_INDEX];
+					HAL_RTCEx_BKUPWrite(&hrtc,DATA_LINEAR_FR_RTC_REGISTER,(uint32_t)DATA_LINEAR_FR_CalibrationOffset);
 					DATA_LINEAR_FL_CalibrationOffset = DATA_RawCalibrationData[LINEAR_FL_CALIBRATION_INDEX];
+					HAL_RTCEx_BKUPWrite(&hrtc,DATA_LINEAR_FL_RTC_REGISTER,(uint32_t)DATA_LINEAR_FL_CalibrationOffset);
 					DATA_LINEAR_RR_CalibrationOffset = DATA_RawCalibrationData[LINEAR_RR_CALIBRATION_INDEX];
+					HAL_RTCEx_BKUPWrite(&hrtc,DATA_LINEAR_RR_RTC_REGISTER,(uint32_t)DATA_LINEAR_RR_CalibrationOffset);
 					DATA_LINEAR_RL_CalibrationOffset = DATA_RawCalibrationData[LINEAR_RL_CALIBRATION_INDEX];
+					HAL_RTCEx_BKUPWrite(&hrtc,DATA_LINEAR_RL_RTC_REGISTER,(uint32_t)DATA_LINEAR_RL_CalibrationOffset);
 					CAN_SW_CalibrationSendAck(LINEAR_CALIBRATION_DONE);
 					break;
 				
 				case SW_LOAD_CELL_CALIBRATION_REQUEST:
 					DATA_LOAD_CELL_FR_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_FR_CALIBRATION_INDEX];
+					HAL_RTCEx_BKUPWrite(&hrtc,DATA_LOAD_CELL_FR_RTC_REGISTER,(uint32_t)DATA_LOAD_CELL_FR_CalibrationOffset);
 					DATA_LOAD_CELL_FL_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_FL_CALIBRATION_INDEX];
+					HAL_RTCEx_BKUPWrite(&hrtc,DATA_LOAD_CELL_FL_RTC_REGISTER,(uint32_t)DATA_LOAD_CELL_FL_CalibrationOffset);
 					DATA_LOAD_CELL_RR_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_RR_CALIBRATION_INDEX];
+					HAL_RTCEx_BKUPWrite(&hrtc,DATA_LOAD_CELL_RR_RTC_REGISTER,(uint32_t)DATA_LOAD_CELL_RR_CalibrationOffset);
 					DATA_LOAD_CELL_RL_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_RL_CALIBRATION_INDEX];
+					HAL_RTCEx_BKUPWrite(&hrtc,DATA_LOAD_CELL_RL_RTC_REGISTER,(uint32_t)DATA_LOAD_CELL_RL_CalibrationOffset);
 					CAN_SW_CalibrationSendAck(LOAD_CELL_CALIBRATION_DONE);
 					break;
 				
@@ -814,3 +831,45 @@ static inline void DATA_SW_CAN_Management(uint8_t data1, uint8_t data2)
 			break;
 	}
 }
+
+
+void DATA_CalibrationGetFromRegister(void){
+	
+	HAL_RTCEx_DeactivateTamper(&hrtc, RTC_TAMPER_1);				/*disables rtc tamper protection*/ 
+	__HAL_RTC_TAMPER_CLEAR_FLAG(&hrtc, RTC_FLAG_TAMP1F);
+	HAL_RTCEx_DeactivateTamper(&hrtc, RTC_TAMPER_2);				 
+	__HAL_RTC_TAMPER_CLEAR_FLAG(&hrtc, RTC_FLAG_TAMP2F);	
+	
+	__HAL_RTC_WRITEPROTECTION_DISABLE(&hrtc);
+	HAL_PWR_EnableBkUpAccess();															/*enables backup register to be written*/
+	__HAL_RTC_WRITEPROTECTION_DISABLE(&hrtc);
+	
+	if (HAL_RTCEx_BKUPRead(&hrtc, CALIBRATION_IS_CONFIG_RTC_REGISTER) == RTC_FLAG_VALUE){																	/*if one configuration was already done*/
+		DATA_LOAD_CELL_FR_CalibrationOffset = (uint16_t)HAL_RTCEx_BKUPRead(&hrtc, DATA_LOAD_CELL_FR_RTC_REGISTER);
+		DATA_LOAD_CELL_FL_CalibrationOffset = (uint16_t)HAL_RTCEx_BKUPRead(&hrtc, DATA_LOAD_CELL_FL_RTC_REGISTER);
+		DATA_LOAD_CELL_RR_CalibrationOffset = (uint16_t)HAL_RTCEx_BKUPRead(&hrtc, DATA_LOAD_CELL_RR_RTC_REGISTER);
+		DATA_LOAD_CELL_RL_CalibrationOffset = (uint16_t)HAL_RTCEx_BKUPRead(&hrtc, DATA_LOAD_CELL_RL_RTC_REGISTER);
+		DATA_LINEAR_FR_CalibrationOffset = (uint16_t)HAL_RTCEx_BKUPRead(&hrtc, DATA_LINEAR_FR_RTC_REGISTER);
+		DATA_LINEAR_FL_CalibrationOffset = (uint16_t)HAL_RTCEx_BKUPRead(&hrtc, DATA_LINEAR_FL_RTC_REGISTER);
+		DATA_LINEAR_RR_CalibrationOffset = (uint16_t)HAL_RTCEx_BKUPRead(&hrtc, DATA_LINEAR_RR_RTC_REGISTER);
+		DATA_LINEAR_RL_CalibrationOffset = (uint16_t)HAL_RTCEx_BKUPRead(&hrtc, DATA_LINEAR_RL_RTC_REGISTER);
+		DATA_APPS_ZeroCalibrationOffset = (uint16_t)HAL_RTCEx_BKUPRead(&hrtc, DATA_APPS_Zero_RTC_REGISTER);
+		DATA_APPS_FullCalibrationOffset = (uint16_t)HAL_RTCEx_BKUPRead(&hrtc, DATA_APPS_Full_RTC_REGISTER);
+		DATA_STEER_ANGLE_CalibrationOffset = (uint16_t)HAL_RTCEx_BKUPRead(&hrtc, DATA_STEER_ANGLE_RTC_REGISTER);
+	}
+	else{																																																										/*if no config where already done*/
+		DATA_LOAD_CELL_FR_CalibrationOffset = 2047;			
+		DATA_LOAD_CELL_FL_CalibrationOffset = 2047;			
+		DATA_LOAD_CELL_RR_CalibrationOffset = 2047;			
+		DATA_LOAD_CELL_RL_CalibrationOffset = 2047;			
+		DATA_LINEAR_FR_CalibrationOffset = 0;				
+		DATA_LINEAR_FL_CalibrationOffset = 0;				
+		DATA_LINEAR_RR_CalibrationOffset = 0;				
+		DATA_LINEAR_RL_CalibrationOffset = 0;				
+		DATA_APPS_ZeroCalibrationOffset = 0;					
+		DATA_APPS_FullCalibrationOffset = 1;					
+		DATA_STEER_ANGLE_CalibrationOffset = 2047;		
+	}		
+}
+
+

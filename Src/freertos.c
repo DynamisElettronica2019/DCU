@@ -700,6 +700,7 @@ void canFifo0UnpackTask(void const * argument)
 	CAN_RxPacket_t CAN_UnpackedData;
 	
 	DATA_PacketReset();					/* Reset the data saving buffer */
+	DATA_CalibrationGetFromRegister();
 	CAN_PacketCounterReset();		/* Reset the CAN packets recevide counter */
 	CAN_Start();								/* CAN filter config and start */
 	

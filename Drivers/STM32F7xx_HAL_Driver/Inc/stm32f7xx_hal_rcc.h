@@ -865,8 +865,10 @@ typedef struct
   *         and the RTC clock source selection in RCC_CSR register.
   * @note   The BKPSRAM is not affected by this reset.   
   */
+	/*
 #define __HAL_RCC_BACKUPRESET_FORCE()   (RCC->BDCR |= (RCC_BDCR_BDRST))
 #define __HAL_RCC_BACKUPRESET_RELEASE() (RCC->BDCR &= ~(RCC_BDCR_BDRST))
+	*/
 /**
   * @}
   */

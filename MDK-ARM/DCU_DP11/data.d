@@ -63,3 +63,4 @@ dcu_dp11\data.o: ../Inc/telemetry.h
 dcu_dp11\data.o: ../Inc/id_can.h
 dcu_dp11\data.o: ../Inc/data_conversion.h
 dcu_dp11\data.o: ../Inc/string_utility.h
+dcu_dp11\data.o: ../Inc/rtc.h

@@ -3,17 +3,17 @@
 #include "data_conversion.h"
 #include "usb_host.h"
 
-uint16_t DATA_LOAD_CELL_FR_CalibrationOffset = 0;		/* [LSB] */
-uint16_t DATA_LOAD_CELL_FL_CalibrationOffset = 0;		/* [LSB] */
-uint16_t DATA_LOAD_CELL_RR_CalibrationOffset = 0;		/* [LSB] */
-uint16_t DATA_LOAD_CELL_RL_CalibrationOffset = 0;		/* [LSB] */
-uint16_t DATA_LINEAR_FR_CalibrationOffset = 0;			/* [LSB] */
-uint16_t DATA_LINEAR_FL_CalibrationOffset = 0;			/* [LSB] */
-uint16_t DATA_LINEAR_RR_CalibrationOffset = 0;			/* [LSB] */
-uint16_t DATA_LINEAR_RL_CalibrationOffset = 0;			/* [LSB] */
-uint16_t DATA_APPS_ZeroCalibrationOffset = 0;				/* [LSB] */
-uint16_t DATA_APPS_FullCalibrationOffset = 1;				/* [LSB] */
-uint16_t DATA_STEER_ANGLE_CalibrationOffset = 0;		/* [LSB] */
+uint16_t DATA_LOAD_CELL_FR_CalibrationOffset;
+uint16_t DATA_LOAD_CELL_FL_CalibrationOffset;
+uint16_t DATA_LOAD_CELL_RR_CalibrationOffset;
+uint16_t DATA_LOAD_CELL_RL_CalibrationOffset;
+uint16_t DATA_LINEAR_FR_CalibrationOffset;
+uint16_t DATA_LINEAR_FL_CalibrationOffset;
+uint16_t DATA_LINEAR_RR_CalibrationOffset;
+uint16_t DATA_LINEAR_RL_CalibrationOffset;
+uint16_t DATA_APPS_ZeroCalibrationOffset;
+uint16_t DATA_APPS_FullCalibrationOffset;
+uint16_t DATA_STEER_ANGLE_CalibrationOffset;
 
 
 extern inline float EFI_TEMPERATURE_DataConversion(uint16_t input)
@@ -97,8 +97,6 @@ extern inline float LOAD_CELL_FR_DataConversion(int16_t input)
 	temp = (float)(input - (int16_t)DATA_LOAD_CELL_FR_CalibrationOffset);
 	temp = temp * (VREF_DAU_FR/4095);
 	temp = temp * 4448.0f;
-	temp = temp - ((VREF_DAU_FR/2) * 4448.0f);
-	temp = temp - LOAD_CELL_FR_OFFEST;
 	return temp;
 }
 
@@ -109,8 +107,6 @@ extern inline float LOAD_CELL_FL_DataConversion(int16_t input)
 	temp = (float)(input - (int16_t)DATA_LOAD_CELL_FL_CalibrationOffset);
 	temp = temp * (VREF_DAU_FL/4095);
 	temp = temp * 4448.0f;
-	temp = temp - ((VREF_DAU_FL/2) * 4448.0f);
-	temp = temp - LOAD_CELL_FL_OFFEST;
 	return temp;
 }
 
@@ -121,8 +117,6 @@ extern inline float LOAD_CELL_RR_DataConversion(int16_t input)
 	temp = (float)(input - (int16_t)DATA_LOAD_CELL_RR_CalibrationOffset);
 	temp = temp * (VREF_DAU_REAR/4095);
 	temp = temp * 4448.0f;
-	temp = temp - ((VREF_DAU_REAR/2) * 4448.0f);
-	temp = temp - LOAD_CELL_RR_OFFEST;
 	return temp;
 }
 
@@ -133,8 +127,6 @@ extern inline float LOAD_CELL_RL_DataConversion(int16_t input)
 	temp = (float)(input - (int16_t)DATA_LOAD_CELL_RL_CalibrationOffset);
 	temp = temp * (VREF_DAU_REAR/4095);
 	temp = temp * 4448.0f;
-	temp = temp - ((VREF_DAU_REAR/2) * 4448.0f);
-	temp = temp - LOAD_CELL_RL_OFFEST;
 	return temp;
 }
 
@@ -144,7 +136,7 @@ extern inline float LINEAR_FR_DataConversion(uint16_t input)
 	
 	temp = (float)(input - DATA_LINEAR_FR_CalibrationOffset);
 	temp = temp * (50.0f / 4095.0f);
-  return temp;
+  return (temp);
 }
 
 extern inline float LINEAR_FL_DataConversion(uint16_t input)
@@ -153,7 +145,7 @@ extern inline float LINEAR_FL_DataConversion(uint16_t input)
 	
 	temp = (float)(input - DATA_LINEAR_FL_CalibrationOffset);
 	temp = temp * (50.0f / 4095.0f);
-  return temp;
+  return (temp);
 }
 
 extern inline float LINEAR_RR_DataConversion(uint16_t input)
@@ -162,7 +154,7 @@ extern inline float LINEAR_RR_DataConversion(uint16_t input)
 	
 	temp = (float)(input - DATA_LINEAR_RR_CalibrationOffset);
 	temp = temp * (50.0f / 4095.0f);
-  return temp;
+  return (temp);
 }
 
 extern inline float LINEAR_RL_DataConversion(uint16_t input)
@@ -171,7 +163,7 @@ extern inline float LINEAR_RL_DataConversion(uint16_t input)
 	
 	temp = (float)(input - DATA_LINEAR_RL_CalibrationOffset);
 	temp = temp * (50.0f / 4095.0f);
-  return temp;
+  return (temp);
 }
 
 extern inline float BPS_DataConversion(uint16_t input)
@@ -198,9 +190,8 @@ extern inline float STEERING_WHEEL_ANGLE_DataConversion(int16_t input)
 {
 	float temp;
 	
-	temp = (float)(input - (int16_t)DATA_STEER_ANGLE_CalibrationOffset);
+	temp = (float)(input - DATA_STEER_ANGLE_CalibrationOffset);
 	temp = temp * 0.10989011f;
-	temp = temp - 225.0f;
 	return temp;
 }
 
