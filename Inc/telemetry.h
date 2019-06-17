@@ -3,8 +3,8 @@
 
 #include "data.h"
 
-#define BUFFER_COMMAND_LEN          	(uint8_t)4
-#define BUFFER_RTC_SET_LEN          	(uint8_t)18
+#define BUFFER_COMMAND_LEN          	(uint8_t)3
+#define BUFFER_RTC_SET_LEN          	(uint8_t)17
 #define ERROR_MSG_LEN               	(uint8_t)4
 #define COMMAND_ACK_MSG_LEN         	(uint8_t)4
 #define ERROR_MSG_IDENTIFIER_POS    	(uint8_t)2

@@ -62,6 +62,7 @@ extern uint8_t GPS_FirstChar;
 extern uint8_t DATA_BlockBuffer [BUFFER_POINTERS_NUMBER][BUFFER_BLOCK_LEN];
 extern uint8_t DATA_StateBuffer [BUFFER_STATE_LEN];
 extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
+extern uint8_t telemetryIndBuffer [1];
 extern uint8_t GPS_RawBuffer [GPS_MAX_LENGTH];
 /* USER CODE END Variables */
 osThreadId aliveHandle;
@@ -561,10 +562,9 @@ void SendDataFunc(void const * argument)
 void ReceiveTelemFunc(void const * argument)
 {
   /* USER CODE BEGIN ReceiveTelemFunc */
-	uint8_t tempBuffer[50];
-
-	HAL_UART_Receive(&huart1, tempBuffer, 50, 50);
-	HAL_UART_Receive_DMA(&huart1, telemetryReceivedBuffer, BUFFER_COMMAND_LEN);
+	//uint8_t tempBuffer[50];
+	//HAL_UART_Receive(&huart1, tempBuffer, 50, 50);
+	HAL_UART_Receive_DMA(&huart1, telemetryIndBuffer, 1);
   
 	/* Infinite loop */
   for(;;) {

@@ -27,6 +27,7 @@
 
 uint8_t queueUartTransmitFlag; 								/* Receive from queue and store into this variable */
 uint8_t usart1LockFlag = UART1_CLEAR_FLAG;		/* Set item to send to queue */
+uint8_t startFound = 0;
 BaseType_t UART1_TxHigherPriorityTaskWoken = pdFALSE;
 BaseType_t UART1_RxHigherPriorityTaskWoken = pdFALSE;
 BaseType_t GPS_xHigherPriorityTaskWoken = pdFALSE;
@@ -34,6 +35,8 @@ extern uint8_t GPS_ParsingChar;
 extern uint8_t GPS_FirstChar;
 extern uint8_t i;
 extern uint8_t GPS_RawBuffer [GPS_MAX_LENGTH];
+extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
+extern uint8_t telemetryIndBuffer [1];
 extern osSemaphoreId sendFollowingDataSemaphoreHandle;
 extern osSemaphoreId receiveCommandSemaphoreHandle;
 extern osSemaphoreId GPSUnboxSemHandle;
@@ -284,10 +287,25 @@ extern inline void UART1_TxCallback(void)
 
 extern inline void UART1_RxCallback(void)
 {
-	if(receiveCommandSemaphoreHandle != NULL) {																									/* Check at the beginning if the semaphore has been already created */
-		xSemaphoreGiveFromISR(receiveCommandSemaphoreHandle, &UART1_RxHigherPriorityTaskWoken); 	/* Give semaphore to task when DMA is clear */
+	if(startFound == 1) {
+		startFound = 0;
+		if(receiveCommandSemaphoreHandle != NULL) {																									/* Check at the beginning if the semaphore has been already created */
+			xSemaphoreGiveFromISR(receiveCommandSemaphoreHandle, &UART1_RxHigherPriorityTaskWoken); 	/* Give semaphore to task when DMA is clear */
+		}
+		HAL_UART_Receive_DMA(&huart1, telemetryIndBuffer, 1);
 		portYIELD_FROM_ISR(UART1_RxHigherPriorityTaskWoken); 																			/* Do context-switch if needed */
 	}
+	else {
+		if(telemetryIndBuffer[0] == MESSAGE_INIT_ID) {
+			telemetryIndBuffer[0] = ' ';
+			HAL_UART_Receive_DMA(&huart1, telemetryReceivedBuffer, BUFFER_COMMAND_LEN);
+			startFound = 1;
+		}
+		else {
+			HAL_UART_Receive_DMA(&huart1, telemetryIndBuffer, 1);
+		}
+	}
+	
 }
 
 extern inline void GPS_RxCallback(void)
