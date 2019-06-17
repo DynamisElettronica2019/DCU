@@ -82,10 +82,10 @@ extern inline float FUEL_LEVEL_DataConversion(uint16_t input)
 	float temp1;
 	float temp2;
 
-	temp1 = 0.111721f * (float)input;
-	temp1 = temp1 - 18.7223f;
-	temp2 = 0.007224f * (float)input;
-	temp2 = temp2 + 12.29331f;
+	temp1 = 0.115361f * (float)input;
+	temp1 = temp1 - 9.56609f;
+	temp2 = (-0.00488f) * (float)input;
+	temp2 = temp2 + 27.68654f;
 	temp1 = temp1 / temp2;
 	return temp1;
 }
