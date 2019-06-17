@@ -331,6 +331,7 @@ static void USBH_UserProcess  (USBH_HandleTypeDef *phost, uint8_t id)
       Appli_state = APPLICATION_READY;
 			USB_ISR_Event = CONNECTED_EVENT;
 			DATA_SetUsbReadyState();			/* Update of the status packet */
+			DATA_CalibrationOnReady();    /* Calibrate when usb is ready */
 			break;
 
     case HOST_USER_CONNECTION:

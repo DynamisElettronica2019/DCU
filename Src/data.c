@@ -872,4 +872,17 @@ void DATA_CalibrationGetFromRegister(void){
 	}		
 }
 
+void DATA_CalibrationOnReady(void) {
+	DATA_APPS_ZeroCalibrationOffset = DATA_RawCalibrationData[APPS_CALIBRATION_INDEX];
+	DATA_APPS_FullCalibrationOffset = DATA_RawCalibrationData[APPS_CALIBRATION_INDEX];
+	DATA_STEER_ANGLE_CalibrationOffset = DATA_RawCalibrationData[STEER_ANGLE_CALIBRATION_INDEX];
+	DATA_LINEAR_FR_CalibrationOffset = DATA_RawCalibrationData[LINEAR_FR_CALIBRATION_INDEX];
+	DATA_LINEAR_FL_CalibrationOffset = DATA_RawCalibrationData[LINEAR_FL_CALIBRATION_INDEX];
+	DATA_LINEAR_RR_CalibrationOffset = DATA_RawCalibrationData[LINEAR_RR_CALIBRATION_INDEX];
+	DATA_LINEAR_RL_CalibrationOffset = DATA_RawCalibrationData[LINEAR_RL_CALIBRATION_INDEX];
+	DATA_LOAD_CELL_FR_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_FR_CALIBRATION_INDEX];
+	DATA_LOAD_CELL_FL_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_FL_CALIBRATION_INDEX];
+	DATA_LOAD_CELL_RR_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_RR_CALIBRATION_INDEX];
+	DATA_LOAD_CELL_RL_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_RL_CALIBRATION_INDEX];
+}
 

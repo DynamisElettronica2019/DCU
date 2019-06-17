@@ -395,5 +395,6 @@ extern void DATA_PacketReset(void);
 extern void DATA_ResetStateBuffer(void);
 static inline void DATA_SW_CAN_Management(uint8_t byte1, uint8_t byte2);
 extern void DATA_CalibrationGetFromRegister(void);
+void DATA_CalibrationOnReady(void);
 
 #endif
