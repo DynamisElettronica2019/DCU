@@ -3,7 +3,7 @@
 <title>Static Call Graph - [DCU_DP11\DCU_DP11.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image DCU_DP11\DCU_DP11.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Mon Jun 17 11:00:08 2019
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Mon Jun 17 11:08:03 2019
 <BR><P>
 <H3>Maximum Stack Usage =        704 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -514,12 +514,12 @@ Global Symbols
 
 <P><STRONG><a name="[10a]"></a>__aeabi_memcpy</STRONG> (Thumb, 36 bytes, Stack size 0 bytes, memcpya.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceive
-<LI><a href="#[e0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSendFromISR
-<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
-<LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_SwapDataPackePointers
 <LI><a href="#[1c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceiveFromISR
 <LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_write
 <LI><a href="#[91]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_read
+<LI><a href="#[e0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSendFromISR
+<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
+<LI><a href="#[109]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_SwapDataPackePointers
 </UL>
 
 <P><STRONG><a name="[117]"></a>__aeabi_memcpy4</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, memcpya.o(.text))
@@ -742,8 +742,8 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_CAN_AddTxMessage
 <LI><a href="#[d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceive
-<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
+<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(.constdata)
 </UL>
@@ -838,9 +838,9 @@ Global Symbols
 
 <P><STRONG><a name="[d4]"></a>DATA_GetAcquisitionState</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, data.o(i.DATA_GetAcquisitionState))
 <BR><BR>[Called By]<UL><LI><a href="#[d3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CAN_SendDebugPackets
+<LI><a href="#[215]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask
 <LI><a href="#[20c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_OpenFile
 <LI><a href="#[204]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_CloseFile
-<LI><a href="#[215]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask
 </UL>
 
 <P><STRONG><a name="[216]"></a>DATA_GetLapFlag</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, data.o(i.DATA_GetLapFlag))
@@ -862,16 +862,16 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memset
 </UL>
-<BR>[Called By]<UL><LI><a href="#[204]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_CloseFile
-<LI><a href="#[215]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask
+<BR>[Called By]<UL><LI><a href="#[215]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask
 <LI><a href="#[213]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_OvercurrentEvent
 <LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;canFifo0UnpackTask
+<LI><a href="#[204]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_CloseFile
 </UL>
 
 <P><STRONG><a name="[207]"></a>DATA_ResetAcquisitionState</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, data.o(i.DATA_ResetAcquisitionState))
-<BR><BR>[Called By]<UL><LI><a href="#[204]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_CloseFile
-<LI><a href="#[215]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask
+<BR><BR>[Called By]<UL><LI><a href="#[215]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask
 <LI><a href="#[213]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_OvercurrentEvent
+<LI><a href="#[204]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_CloseFile
 </UL>
 
 <P><STRONG><a name="[1ff]"></a>DATA_ResetAcquisitionStateMachine</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, data.o(i.DATA_ResetAcquisitionStateMachine))
@@ -1084,10 +1084,10 @@ Global Symbols
 <P><STRONG><a name="[a7]"></a>GPSUnboxingFunc</STRONG> (Thumb, 36 bytes, Stack size 0 bytes, freertos.o(i.GPSUnboxingFunc))
 <BR><BR>[Stack]<UL><LI>Max Depth = 168<LI>Call Chain = GPSUnboxingFunc &rArr; GPS_DataConversion &rArr; xQueueGenericSend &rArr; xTaskResumeAll
 </UL>
-<BR>[Calls]<UL><LI><a href="#[114]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_IT
+<BR>[Calls]<UL><LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
+<LI><a href="#[114]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_IT
 <LI><a href="#[113]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPS_Init
 <LI><a href="#[115]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPS_DataConversion
-<LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(.constdata)
 </UL>
@@ -1218,8 +1218,8 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = HAL_CAN_AddTxMessage
 </UL>
 <BR>[Called By]<UL><LI><a href="#[d3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CAN_SendDebugPackets
-<LI><a href="#[d0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CAN_SW_CalibrationSendAck
 <LI><a href="#[a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CAN_SendManagerTask
+<LI><a href="#[d0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CAN_SW_CalibrationSendAck
 </UL>
 
 <P><STRONG><a name="[dc]"></a>HAL_CAN_ConfigFilter</STRONG> (Thumb, 298 bytes, Stack size 4 bytes, stm32f7xx_hal_can.o(i.HAL_CAN_ConfigFilter))
@@ -1400,10 +1400,10 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[1c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SystemClock_Config
 <LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Error_Handler
+<LI><a href="#[20a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_InitStart
 <LI><a href="#[155]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SetCurrentMode
 <LI><a href="#[15a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_ResetPort
 <LI><a href="#[156]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_HostInit
-<LI><a href="#[20a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_InitStart
 <LI><a href="#[1de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_LL_DriverVBUS
 <LI><a href="#[1d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_Delay
 </UL>
@@ -1451,11 +1451,11 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[1af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_GPIO_Init
 <LI><a href="#[1c3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SystemClock_Config
 <LI><a href="#[10d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Error_Handler
-<LI><a href="#[20c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_OpenFile
-<LI><a href="#[204]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_CloseFile
 <LI><a href="#[215]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask
 <LI><a href="#[213]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_OvercurrentEvent
 <LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;aliveTask
+<LI><a href="#[20c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_OpenFile
+<LI><a href="#[204]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_CloseFile
 <LI><a href="#[1a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_DriverVbusHS
 </UL>
 
@@ -1468,11 +1468,11 @@ Global Symbols
 <LI><a href="#[16c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RCCEx_PeriphCLKConfig
 <LI><a href="#[16b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_PWREx_EnableOverDrive
 <LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_Delay
-<LI><a href="#[125]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_Abort
-<LI><a href="#[119]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
 <LI><a href="#[174]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RTC_SetTime
 <LI><a href="#[172]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RTC_SetDate
 <LI><a href="#[170]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RTC_Init
+<LI><a href="#[119]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
+<LI><a href="#[125]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_Abort
 <LI><a href="#[19f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_WaitOnFlagUntilTimeout
 <LI><a href="#[19b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART_CheckIdleState
 </UL>
@@ -1814,8 +1814,8 @@ Global Symbols
 <P><STRONG><a name="[170]"></a>HAL_RTC_Init</STRONG> (Thumb, 202 bytes, Stack size 16 bytes, stm32f7xx_hal_rtc.o(i.HAL_RTC_Init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = HAL_RTC_Init
 </UL>
-<BR>[Calls]<UL><LI><a href="#[135]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
-<LI><a href="#[171]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RTC_MspInit
+<BR>[Calls]<UL><LI><a href="#[171]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RTC_MspInit
+<LI><a href="#[135]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
 </UL>
 <BR>[Called By]<UL><LI><a href="#[250]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;rtcPeripheralInit
 </UL>
@@ -1943,15 +1943,15 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[16a]"></a>HAL_TIM_Base_Start_IT</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, stm32f7xx_hal_tim.o(i.HAL_TIM_Base_Start_IT))
-<BR><BR>[Called By]<UL><LI><a href="#[20c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_OpenFile
-<LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;aliveTask
+<BR><BR>[Called By]<UL><LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;aliveTask
+<LI><a href="#[20c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_OpenFile
 <LI><a href="#[165]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_InitTick
 </UL>
 
 <P><STRONG><a name="[206]"></a>HAL_TIM_Base_Stop_IT</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, stm32f7xx_hal_tim.o(i.HAL_TIM_Base_Stop_IT))
-<BR><BR>[Called By]<UL><LI><a href="#[204]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_CloseFile
-<LI><a href="#[215]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask
+<BR><BR>[Called By]<UL><LI><a href="#[215]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask
 <LI><a href="#[213]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_OvercurrentEvent
+<LI><a href="#[204]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_CloseFile
 </UL>
 
 <P><STRONG><a name="[1b4]"></a>HAL_TIM_ConfigClockSource</STRONG> (Thumb, 400 bytes, Stack size 12 bytes, stm32f7xx_hal_tim.o(i.HAL_TIM_ConfigClockSource))
@@ -2018,11 +2018,11 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[194]"></a>HAL_UART_IRQHandler</STRONG> (Thumb, 382 bytes, Stack size 24 bytes, stm32f7xx_hal_uart.o(i.HAL_UART_IRQHandler))
-<BR><BR>[Stack]<UL><LI>Max Depth = 88<LI>Call Chain = HAL_UART_IRQHandler &rArr; HAL_UART_TxCpltCallback &rArr; UART1_TxCallback &rArr; xQueueGenericSendFromISR &rArr; xTaskRemoveFromEventList
+<BR><BR>[Stack]<UL><LI>Max Depth = 88<LI>Call Chain = HAL_UART_IRQHandler &rArr; HAL_UART_TxCpltCallback &rArr; UART1_TxCallback &rArr; xQueueReceiveFromISR &rArr; xTaskRemoveFromEventList
 </UL>
 <BR>[Calls]<UL><LI><a href="#[196]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_TxCpltCallback
-<LI><a href="#[181]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_Abort_IT
 <LI><a href="#[195]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_ErrorCallback
+<LI><a href="#[181]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_Abort_IT
 </UL>
 <BR>[Called By]<UL><LI><a href="#[35]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART2_IRQHandler
 <LI><a href="#[34]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART1_IRQHandler
@@ -2066,8 +2066,8 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 4<LI>Call Chain = HAL_UART_Receive_IT
 </UL>
 <BR>[Called By]<UL><LI><a href="#[11b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPS_RxCallback
-<LI><a href="#[115]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPS_DataConversion
 <LI><a href="#[a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPSUnboxingFunc
+<LI><a href="#[115]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPS_DataConversion
 </UL>
 
 <P><STRONG><a name="[19d]"></a>HAL_UART_RxCpltCallback</STRONG> (Thumb, 32 bytes, Stack size 0 bytes, main.o(i.HAL_UART_RxCpltCallback))
@@ -2107,7 +2107,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[196]"></a>HAL_UART_TxCpltCallback</STRONG> (Thumb, 18 bytes, Stack size 0 bytes, main.o(i.HAL_UART_TxCpltCallback))
-<BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = HAL_UART_TxCpltCallback &rArr; UART1_TxCallback &rArr; xQueueGenericSendFromISR &rArr; xTaskRemoveFromEventList
+<BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = HAL_UART_TxCpltCallback &rArr; UART1_TxCallback &rArr; xQueueReceiveFromISR &rArr; xTaskRemoveFromEventList
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART1_TxCallback
 </UL>
@@ -2248,11 +2248,11 @@ Global Symbols
 <P><STRONG><a name="[1ab]"></a>MX_FREERTOS_Init</STRONG> (Thumb, 1106 bytes, Stack size 568 bytes, freertos.o(i.MX_FREERTOS_Init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 704<LI>Call Chain = MX_FREERTOS_Init &rArr; osThreadCreate &rArr; xTaskCreate &rArr; pvPortMalloc &rArr; xTaskResumeAll
 </UL>
-<BR>[Calls]<UL><LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
-<LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
+<BR>[Calls]<UL><LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
 <LI><a href="#[1ae]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osThreadCreate
 <LI><a href="#[1ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osSemaphoreCreate
 <LI><a href="#[1ad]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osMessageCreate
+<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 </UL>
 <BR>[Called By]<UL><LI><a href="#[7b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
@@ -2430,7 +2430,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[e5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_CanParser
 </UL>
 
-<P><STRONG><a name="[e9]"></a>STEERING_WHEEL_ANGLE_DataConversion</STRONG> (Thumb, 30 bytes, Stack size 0 bytes, data_conversion.o(i.STEERING_WHEEL_ANGLE_DataConversion))
+<P><STRONG><a name="[e9]"></a>STEERING_WHEEL_ANGLE_DataConversion</STRONG> (Thumb, 28 bytes, Stack size 0 bytes, data_conversion.o(i.STEERING_WHEEL_ANGLE_DataConversion))
 <BR><BR>[Called By]<UL><LI><a href="#[e5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_CanParser
 </UL>
 
@@ -2440,9 +2440,9 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceive
 <LI><a href="#[1a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit_DMA
 <LI><a href="#[1bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;encodeString
+<LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
 <LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[1be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_GetTelemetryState
-<LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(.constdata)
 </UL>
@@ -2460,8 +2460,8 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit_DMA
 <LI><a href="#[1bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;encodeString
-<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
+<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(.constdata)
 </UL>
@@ -2471,10 +2471,10 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceive
 <LI><a href="#[1a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit_DMA
 <LI><a href="#[1bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;encodeString
+<LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
 <LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[1c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_SetTelemetryState
 <LI><a href="#[1c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_ResetStateBuffer
-<LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(.constdata)
 </UL>
@@ -2579,20 +2579,20 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[19e]"></a>UART1_RxCallback</STRONG> (Thumb, 106 bytes, Stack size 8 bytes, usart.o(i.UART1_RxCallback))
-<BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = UART1_RxCallback &rArr; xQueueGiveFromISR &rArr; xTaskRemoveFromEventList
+<BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = UART1_RxCallback &rArr; HAL_UART_Receive_DMA &rArr; HAL_DMA_Start_IT
 </UL>
-<BR>[Calls]<UL><LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGiveFromISR
-<LI><a href="#[19c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_DMA
+<BR>[Calls]<UL><LI><a href="#[19c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_DMA
+<LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGiveFromISR
 </UL>
 <BR>[Called By]<UL><LI><a href="#[19d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_RxCpltCallback
 </UL>
 
 <P><STRONG><a name="[1a1]"></a>UART1_TxCallback</STRONG> (Thumb, 106 bytes, Stack size 16 bytes, usart.o(i.UART1_TxCallback))
-<BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = UART1_TxCallback &rArr; xQueueGenericSendFromISR &rArr; xTaskRemoveFromEventList
+<BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = UART1_TxCallback &rArr; xQueueReceiveFromISR &rArr; xTaskRemoveFromEventList
 </UL>
-<BR>[Calls]<UL><LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGiveFromISR
+<BR>[Calls]<UL><LI><a href="#[1c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceiveFromISR
+<LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGiveFromISR
 <LI><a href="#[e0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSendFromISR
-<LI><a href="#[1c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceiveFromISR
 </UL>
 <BR>[Called By]<UL><LI><a href="#[196]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_TxCpltCallback
 </UL>
@@ -2630,14 +2630,14 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[34]"></a>USART1_IRQHandler</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, stm32f7xx_it.o(i.USART1_IRQHandler))
-<BR><BR>[Stack]<UL><LI>Max Depth = 88<LI>Call Chain = USART1_IRQHandler &rArr; HAL_UART_IRQHandler &rArr; HAL_UART_TxCpltCallback &rArr; UART1_TxCallback &rArr; xQueueGenericSendFromISR &rArr; xTaskRemoveFromEventList
+<BR><BR>[Stack]<UL><LI>Max Depth = 88<LI>Call Chain = USART1_IRQHandler &rArr; HAL_UART_IRQHandler &rArr; HAL_UART_TxCpltCallback &rArr; UART1_TxCallback &rArr; xQueueReceiveFromISR &rArr; xTaskRemoveFromEventList
 </UL>
 <BR>[Calls]<UL><LI><a href="#[194]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_IRQHandler
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f767xx.o(RESET)
 </UL>
 <P><STRONG><a name="[35]"></a>USART2_IRQHandler</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, stm32f7xx_it.o(i.USART2_IRQHandler))
-<BR><BR>[Stack]<UL><LI>Max Depth = 88<LI>Call Chain = USART2_IRQHandler &rArr; HAL_UART_IRQHandler &rArr; HAL_UART_TxCpltCallback &rArr; UART1_TxCallback &rArr; xQueueGenericSendFromISR &rArr; xTaskRemoveFromEventList
+<BR><BR>[Stack]<UL><LI>Max Depth = 88<LI>Call Chain = USART2_IRQHandler &rArr; HAL_UART_IRQHandler &rArr; HAL_UART_TxCpltCallback &rArr; UART1_TxCallback &rArr; xQueueReceiveFromISR &rArr; xTaskRemoveFromEventList
 </UL>
 <BR>[Calls]<UL><LI><a href="#[194]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_IRQHandler
 </UL>
@@ -2981,10 +2981,10 @@ Global Symbols
 <P><STRONG><a name="[1f5]"></a>USBH_MSC_Read</STRONG> (Thumb, 462 bytes, Stack size 40 bytes, usbh_msc.o(i.USBH_MSC_Read))
 <BR><BR>[Stack]<UL><LI>Max Depth = 256<LI>Call Chain = USBH_MSC_Read &rArr; USBH_MSC_SCSI_Read &rArr; USBH_MSC_BOT_Process &rArr; USBH_CtlReq &rArr; osMessagePut &rArr; xQueueGenericSend &rArr; xTaskResumeAll
 </UL>
-<BR>[Calls]<UL><LI><a href="#[1f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_MSC_SCSI_Write
+<BR>[Calls]<UL><LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osMessagePut
+<LI><a href="#[1f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_MSC_SCSI_Write
 <LI><a href="#[1f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_MSC_SCSI_RequestSense
 <LI><a href="#[1f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_MSC_SCSI_Read
-<LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osMessagePut
 </UL>
 <BR>[Called By]<UL><LI><a href="#[91]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_read
 </UL>
@@ -3049,10 +3049,10 @@ Global Symbols
 <P><STRONG><a name="[1f8]"></a>USBH_MSC_Write</STRONG> (Thumb, 462 bytes, Stack size 40 bytes, usbh_msc.o(i.USBH_MSC_Write))
 <BR><BR>[Stack]<UL><LI>Max Depth = 256<LI>Call Chain = USBH_MSC_Write &rArr; USBH_MSC_SCSI_Read &rArr; USBH_MSC_BOT_Process &rArr; USBH_CtlReq &rArr; osMessagePut &rArr; xQueueGenericSend &rArr; xTaskResumeAll
 </UL>
-<BR>[Calls]<UL><LI><a href="#[1f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_MSC_SCSI_Write
+<BR>[Calls]<UL><LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osMessagePut
+<LI><a href="#[1f7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_MSC_SCSI_Write
 <LI><a href="#[1f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_MSC_SCSI_RequestSense
 <LI><a href="#[1f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_MSC_SCSI_Read
-<LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osMessagePut
 </UL>
 <BR>[Called By]<UL><LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_write
 </UL>
@@ -3200,11 +3200,11 @@ Global Symbols
 <P><STRONG><a name="[208]"></a>USB_EventHandler</STRONG> (Thumb, 68 bytes, Stack size 8 bytes, usb_host.o(i.USB_EventHandler))
 <BR><BR>[Stack]<UL><LI>Max Depth = 208<LI>Call Chain = USB_EventHandler &rArr; f_mount &rArr; find_volume &rArr; ff_req_grant &rArr; osSemaphoreWait &rArr; xQueueSemaphoreTake &rArr; xTaskResumeAll
 </UL>
-<BR>[Calls]<UL><LI><a href="#[201]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_SetUsbReadyState
+<BR>[Calls]<UL><LI><a href="#[1aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;f_mount
+<LI><a href="#[1a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FATFS_LinkDriver
+<LI><a href="#[201]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_SetUsbReadyState
 <LI><a href="#[200]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_ResetUsbReadyState
 <LI><a href="#[1ff]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_ResetAcquisitionStateMachine
-<LI><a href="#[1aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;f_mount
-<LI><a href="#[1a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FATFS_LinkDriver
 <LI><a href="#[209]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FATFS_UnLinkDriver
 </UL>
 <BR>[Called By]<UL><LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;usbManagerTask
@@ -3274,11 +3274,11 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
 <LI><a href="#[212]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;resetDataTimestamp
+<LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_Start_IT
 <LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[211]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_SetAcquisitionState
 <LI><a href="#[d5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_GetUsbReadyState
 <LI><a href="#[d4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_GetAcquisitionState
-<LI><a href="#[16a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_Start_IT
 <LI><a href="#[210]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;f_write
 <LI><a href="#[20e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;f_open
 <LI><a href="#[20d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__2sprintf
@@ -3453,8 +3453,8 @@ Global Symbols
 <P><STRONG><a name="[a6]"></a>automaticStartAcquisitionMonitoringTask</STRONG> (Thumb, 22 bytes, Stack size 0 bytes, freertos.o(i.automaticStartAcquisitionMonitoringTask))
 <BR><BR>[Stack]<UL><LI>Max Depth = 88<LI>Call Chain = automaticStartAcquisitionMonitoringTask &rArr; xQueueSemaphoreTake &rArr; xTaskResumeAll
 </UL>
-<BR>[Calls]<UL><LI><a href="#[df]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_AutomaticStartAcquisitionManager
-<LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
+<BR>[Calls]<UL><LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
+<LI><a href="#[df]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_AutomaticStartAcquisitionManager
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(.constdata)
 </UL>
@@ -3550,8 +3550,8 @@ Global Symbols
 <LI><a href="#[22a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;f_sync
 <LI><a href="#[22b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;validate
 </UL>
-<BR>[Called By]<UL><LI><a href="#[204]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_CloseFile
-<LI><a href="#[215]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask
+<BR>[Called By]<UL><LI><a href="#[215]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask
+<LI><a href="#[204]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_CloseFile
 </UL>
 
 <P><STRONG><a name="[1aa]"></a>f_mount</STRONG> (Thumb, 204 bytes, Stack size 40 bytes, ff.o(i.f_mount))
@@ -3583,8 +3583,8 @@ Global Symbols
 <LI><a href="#[223]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;dir_find
 <LI><a href="#[233]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;disk_read
 </UL>
-<BR>[Called By]<UL><LI><a href="#[20c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_OpenFile
-<LI><a href="#[215]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask
+<BR>[Called By]<UL><LI><a href="#[215]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask
+<LI><a href="#[20c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_OpenFile
 </UL>
 
 <P><STRONG><a name="[22a]"></a>f_sync</STRONG> (Thumb, 462 bytes, Stack size 32 bytes, ff.o(i.f_sync))
@@ -3611,8 +3611,8 @@ Global Symbols
 <LI><a href="#[228]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;disk_write
 <LI><a href="#[233]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;disk_read
 </UL>
-<BR>[Called By]<UL><LI><a href="#[20c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_OpenFile
-<LI><a href="#[215]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask
+<BR>[Called By]<UL><LI><a href="#[215]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask
+<LI><a href="#[20c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_OpenFile
 </UL>
 
 <P><STRONG><a name="[230]"></a>ff_convert</STRONG> (Thumb, 58 bytes, Stack size 0 bytes, ccsbcs.o(i.ff_convert))
@@ -3703,9 +3703,9 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 20<LI>Call Chain = intToStringUnsigned
 </UL>
 <BR>[Called By]<UL><LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ADC_ReadDataDebug
+<LI><a href="#[215]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask
 <LI><a href="#[c7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;decimalToStringUnsigned
 <LI><a href="#[e5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_CanParser
-<LI><a href="#[215]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask
 </UL>
 
 <P><STRONG><a name="[7b]"></a>main</STRONG> (Thumb, 174 bytes, Stack size 0 bytes, main.o(i.main))
@@ -3778,11 +3778,11 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[e0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSendFromISR
 <LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 </UL>
-<BR>[Called By]<UL><LI><a href="#[1e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_MSC_BOT_Process
-<LI><a href="#[1f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_MSC_Write
+<BR>[Called By]<UL><LI><a href="#[1f8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_MSC_Write
 <LI><a href="#[1f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_MSC_Read
 <LI><a href="#[cc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BSP_SD_WriteCpltCallback
 <LI><a href="#[ca]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BSP_SD_ReadCpltCallback
+<LI><a href="#[1e6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_MSC_BOT_Process
 <LI><a href="#[145]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_LL_NotifyURBChange
 <LI><a href="#[13b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_LL_Disconnect
 <LI><a href="#[139]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_LL_Connect
@@ -4007,8 +4007,8 @@ Global Symbols
 
 <P><STRONG><a name="[247]"></a>vPortEnterCritical</STRONG> (Thumb, 64 bytes, Stack size 0 bytes, port.o(i.vPortEnterCritical))
 <BR><BR>[Called By]<UL><LI><a href="#[d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceive
-<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
+<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[24f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskResumeAll
 <LI><a href="#[242]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskCreate
 <LI><a href="#[8e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvIdleTask
@@ -4019,8 +4019,8 @@ Global Symbols
 
 <P><STRONG><a name="[248]"></a>vPortExitCritical</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, port.o(i.vPortExitCritical))
 <BR><BR>[Called By]<UL><LI><a href="#[d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceive
-<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
+<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[24f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskResumeAll
 <LI><a href="#[242]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskCreate
 <LI><a href="#[8e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvIdleTask
@@ -4045,9 +4045,9 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[25a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortGetIPSR
 </UL>
-<BR>[Called By]<UL><LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGiveFromISR
+<BR>[Called By]<UL><LI><a href="#[1c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceiveFromISR
+<LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGiveFromISR
 <LI><a href="#[e0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSendFromISR
-<LI><a href="#[1c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceiveFromISR
 </UL>
 
 <P><STRONG><a name="[241]"></a>vQueueDelete</STRONG> (Thumb, 62 bytes, Stack size 0 bytes, queue.o(i.vQueueDelete))
@@ -4069,8 +4069,8 @@ Global Symbols
 
 <P><STRONG><a name="[263]"></a>vTaskInternalSetTimeOutState</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, tasks.o(i.vTaskInternalSetTimeOutState))
 <BR><BR>[Called By]<UL><LI><a href="#[d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceive
-<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
+<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 </UL>
 
 <P><STRONG><a name="[24c]"></a>vTaskMissedYield</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, tasks.o(i.vTaskMissedYield))
@@ -4084,8 +4084,8 @@ Global Symbols
 <LI><a href="#[243]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvAddCurrentTaskToDelayedList
 </UL>
 <BR>[Called By]<UL><LI><a href="#[d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceive
-<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
+<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 </UL>
 
 <P><STRONG><a name="[25c]"></a>vTaskPriorityDisinheritAfterTimeout</STRONG> (Thumb, 184 bytes, Stack size 16 bytes, tasks.o(i.vTaskPriorityDisinheritAfterTimeout))
@@ -4108,8 +4108,8 @@ Global Symbols
 
 <P><STRONG><a name="[24e]"></a>vTaskSuspendAll</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, tasks.o(i.vTaskSuspendAll))
 <BR><BR>[Called By]<UL><LI><a href="#[d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceive
-<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
+<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[249]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortFree
 <LI><a href="#[24d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pvPortMalloc
 </UL>
@@ -4166,10 +4166,6 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[1ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_FREERTOS_Init
 <LI><a href="#[1bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TELEMETRY_Receive
-<LI><a href="#[115]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPS_DataConversion
-<LI><a href="#[20c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_OpenFile
-<LI><a href="#[204]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_CloseFile
-<LI><a href="#[255]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;startAcquisitionStateMachine
 <LI><a href="#[1ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osSemaphoreCreate
 <LI><a href="#[215]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_SavingTask
 <LI><a href="#[213]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_OvercurrentEvent
@@ -4179,6 +4175,10 @@ Global Symbols
 <LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SendDataFunc
 <LI><a href="#[a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CAN_SendManagerTask
 <LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osMessagePut
+<LI><a href="#[115]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPS_DataConversion
+<LI><a href="#[20c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_OpenFile
+<LI><a href="#[204]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_CloseFile
+<LI><a href="#[255]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;startAcquisitionStateMachine
 <LI><a href="#[236]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osSemaphoreRelease
 </UL>
 
@@ -4194,9 +4194,9 @@ Global Symbols
 <LI><a href="#[12a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_CAN_RxFifo0MsgPendingCallback
 <LI><a href="#[1a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART1_TxCallback
 <LI><a href="#[1bc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TELEMETRY_Receive
+<LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osMessagePut
 <LI><a href="#[e5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_CanParser
 <LI><a href="#[df]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_AutomaticStartAcquisitionManager
-<LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osMessagePut
 </UL>
 
 <P><STRONG><a name="[da]"></a>xQueueGiveFromISR</STRONG> (Thumb, 174 bytes, Stack size 16 bytes, queue.o(i.xQueueGiveFromISR))
@@ -4301,8 +4301,8 @@ Global Symbols
 <LI><a href="#[247]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortEnterCritical
 </UL>
 <BR>[Called By]<UL><LI><a href="#[d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceive
-<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
+<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 </UL>
 
 <P><STRONG><a name="[242]"></a>xTaskCreate</STRONG> (Thumb, 346 bytes, Stack size 40 bytes, tasks.o(i.xTaskCreate))
@@ -4323,8 +4323,8 @@ Global Symbols
 
 <P><STRONG><a name="[261]"></a>xTaskGetSchedulerState</STRONG> (Thumb, 24 bytes, Stack size 0 bytes, tasks.o(i.xTaskGetSchedulerState))
 <BR><BR>[Called By]<UL><LI><a href="#[d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceive
-<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
+<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 </UL>
 
 <P><STRONG><a name="[1c2]"></a>xTaskIncrementTick</STRONG> (Thumb, 230 bytes, Stack size 32 bytes, tasks.o(i.xTaskIncrementTick))
@@ -4362,11 +4362,11 @@ Global Symbols
 <LI><a href="#[244]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uxListRemove
 </UL>
 <BR>[Called By]<UL><LI><a href="#[d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceive
+<LI><a href="#[1c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceiveFromISR
+<LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
 <LI><a href="#[da]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGiveFromISR
 <LI><a href="#[e0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSendFromISR
 <LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
-<LI><a href="#[1c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceiveFromISR
-<LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
 <LI><a href="#[24a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvUnlockQueue
 </UL>
 
@@ -4379,8 +4379,8 @@ Global Symbols
 <LI><a href="#[247]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortEnterCritical
 </UL>
 <BR>[Called By]<UL><LI><a href="#[d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceive
-<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
+<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[249]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortFree
 <LI><a href="#[24d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pvPortMalloc
 <LI><a href="#[23d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vTaskDelay
@@ -4420,8 +4420,8 @@ Local Symbols
 <LI><a href="#[24c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vTaskMissedYield
 </UL>
 <BR>[Called By]<UL><LI><a href="#[d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueReceive
-<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 <LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueSemaphoreTake
+<LI><a href="#[d8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
 </UL>
 
 <P><STRONG><a name="[243]"></a>prvAddCurrentTaskToDelayedList</STRONG> (Thumb, 106 bytes, Stack size 24 bytes, tasks.o(i.prvAddCurrentTaskToDelayedList))
@@ -4593,19 +4593,19 @@ Local Symbols
 <LI><a href="#[1ee]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_AllocPipe
 <LI><a href="#[1ec]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_SelectInterface
 <LI><a href="#[1eb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_FindInterface
-<LI><a href="#[1ed]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;malloc
 <LI><a href="#[cf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
+<LI><a href="#[1ed]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;malloc
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> usbh_msc.o(.data)
 </UL>
 <P><STRONG><a name="[3]"></a>USBH_MSC_Process</STRONG> (Thumb, 714 bytes, Stack size 40 bytes, usbh_msc.o(i.USBH_MSC_Process))
 <BR><BR>[Stack]<UL><LI>Max Depth = 248<LI>Call Chain = USBH_MSC_Process &rArr; USBH_MSC_SCSI_RequestSense &rArr; USBH_MSC_BOT_Process &rArr; USBH_CtlReq &rArr; osMessagePut &rArr; xQueueGenericSend &rArr; xTaskResumeAll
 </UL>
-<BR>[Calls]<UL><LI><a href="#[1f2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_MSC_SCSI_TestUnitReady
+<BR>[Calls]<UL><LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osMessagePut
+<LI><a href="#[1f2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_MSC_SCSI_TestUnitReady
 <LI><a href="#[1f4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_MSC_SCSI_RequestSense
 <LI><a href="#[1f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_MSC_SCSI_ReadCapacity
 <LI><a href="#[1f1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USBH_MSC_SCSI_Inquiry
-<LI><a href="#[cb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osMessagePut
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> usbh_msc.o(.data)
 </UL>
@@ -4691,7 +4691,7 @@ Local Symbols
 <BR>[Address Reference Count : 1]<UL><LI> stm32f7xx_hal_uart.o(i.HAL_UART_Receive_DMA)
 </UL>
 <P><STRONG><a name="[89]"></a>UART_DMATransmitCplt</STRONG> (Thumb, 46 bytes, Stack size 8 bytes, stm32f7xx_hal_uart.o(i.UART_DMATransmitCplt))
-<BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = UART_DMATransmitCplt &rArr; HAL_UART_TxCpltCallback &rArr; UART1_TxCallback &rArr; xQueueGenericSendFromISR &rArr; xTaskRemoveFromEventList
+<BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = UART_DMATransmitCplt &rArr; HAL_UART_TxCpltCallback &rArr; UART1_TxCallback &rArr; xQueueReceiveFromISR &rArr; xTaskRemoveFromEventList
 </UL>
 <BR>[Calls]<UL><LI><a href="#[196]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_TxCpltCallback
 </UL>

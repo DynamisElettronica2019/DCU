@@ -190,8 +190,7 @@ extern inline float STEERING_WHEEL_ANGLE_DataConversion(int16_t input)
 {
 	float temp;
 	
-	input = input - 410;
-	temp = (float)(input - DATA_STEER_ANGLE_CalibrationOffset);
+	temp = (float)(input - DATA_STEER_ANGLE_CalibrationOffset - 410);
 	temp = temp * 0.10989011f;
 	return temp;
 }
