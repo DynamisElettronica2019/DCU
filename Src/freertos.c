@@ -563,9 +563,7 @@ void ReceiveTelemFunc(void const * argument)
 {
   /* USER CODE BEGIN ReceiveTelemFunc */
 	//uint8_t tempBuffer[50];
-	//HAL_UART_Receive(&huart1, tempBuffer, 50, 50);
-	HAL_UART_Receive_DMA(&huart1, telemetryIndBuffer, 1);
-  
+	//HAL_UART_Receive(&huart1, tempBuffer, 50, 50);  
 	/* Infinite loop */
   for(;;) {
     xSemaphoreTake(receiveCommandSemaphoreHandle, portMAX_DELAY); 		/* Unlock when uart rx from telemetry is completed */

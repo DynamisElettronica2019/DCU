@@ -6,8 +6,6 @@
 #include "string_utility.h"
 #include "rtc.h"
 
-uint32_t pippo1 = 0;
-uint32_t pippo2 = 0;
 
 
 uint8_t DATA_BlockWriteIndex = 0;
@@ -301,7 +299,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 		case GCU_TRACTION_LIMITER_AUTOG_ACC_SW_ID:
 			CAN_ReceivedPacketsCounter[GCU_TRACTION_LIMITER_AUTOG_ACC_SW_ID_COUNTER_INDEX]++;
 			intToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][TRACTION_FEEDBACK_CSV_INDEX], 1);
-			intToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][RPM_LIMITER_FEEDBACK_CSV_INDEX], 1);
+			intToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][RPM_LIMITER_FEEDBACK_CSV_INDEX], 3);
 			intToStringUnsigned(data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][AUTOGEARSHIFT_FEEDBACK_CSV_INDEX], 1);
 			intToStringUnsigned(data4, &DATA_BlockBuffer[DATA_BlockWriteIndex][ACCELERATION_FEEDBACK_CSV_INDEX], 1);
 			break;
@@ -778,47 +776,35 @@ static inline void DATA_SW_CAN_Management(uint8_t data1, uint8_t data2)
 			break;
 		
 		case SW_CALIBRATIONS_CAN_REQUEST:
-			HAL_RTCEx_BKUPWrite(&hrtc,CALIBRATION_IS_CONFIG_RTC_REGISTER,RTC_FLAG_VALUE); /*if calibration is called, writes a known value over a defined rtc backup register*/
 			switch(data2) {
 				case SW_APPS_ZERO_CALIBRATION_REQUEST:
 					DATA_APPS_ZeroCalibrationOffset = DATA_RawCalibrationData[APPS_CALIBRATION_INDEX];
-					HAL_RTCEx_BKUPWrite(&hrtc, DATA_APPS_Zero_RTC_REGISTER, (uint32_t)DATA_APPS_ZeroCalibrationOffset);
 					CAN_SW_CalibrationSendAck(APPS_ZERO_CALIBRATION_DONE);
 					break;
 				
 				case SW_APPS_FULL_CALIBRATION_REQUEST:
 					DATA_APPS_FullCalibrationOffset = DATA_RawCalibrationData[APPS_CALIBRATION_INDEX];
-					HAL_RTCEx_BKUPWrite(&hrtc, DATA_APPS_Full_RTC_REGISTER, (uint32_t)DATA_APPS_FullCalibrationOffset);
 					CAN_SW_CalibrationSendAck(APPS_FULL_CALIBRATION_DONE);
 					break;
 				
 				case SW_STEER_ANGLE_CALIBRATION_REQUEST:
 					DATA_STEER_ANGLE_CalibrationOffset = DATA_RawCalibrationData[STEER_ANGLE_CALIBRATION_INDEX];
-					HAL_RTCEx_BKUPWrite(&hrtc, DATA_STEER_ANGLE_RTC_REGISTER,(uint32_t)DATA_STEER_ANGLE_CalibrationOffset);
 					CAN_SW_CalibrationSendAck(STEER_ANGLE_CALIBRATION_DONE);
 					break;
 				
 				case SW_LINEAR_CALIBRATION_REQUEST:
 					DATA_LINEAR_FR_CalibrationOffset = DATA_RawCalibrationData[LINEAR_FR_CALIBRATION_INDEX];
-					HAL_RTCEx_BKUPWrite(&hrtc,DATA_LINEAR_FR_RTC_REGISTER,(uint32_t)DATA_LINEAR_FR_CalibrationOffset);
 					DATA_LINEAR_FL_CalibrationOffset = DATA_RawCalibrationData[LINEAR_FL_CALIBRATION_INDEX];
-					HAL_RTCEx_BKUPWrite(&hrtc,DATA_LINEAR_FL_RTC_REGISTER,(uint32_t)DATA_LINEAR_FL_CalibrationOffset);
 					DATA_LINEAR_RR_CalibrationOffset = DATA_RawCalibrationData[LINEAR_RR_CALIBRATION_INDEX];
-					HAL_RTCEx_BKUPWrite(&hrtc,DATA_LINEAR_RR_RTC_REGISTER,(uint32_t)DATA_LINEAR_RR_CalibrationOffset);
 					DATA_LINEAR_RL_CalibrationOffset = DATA_RawCalibrationData[LINEAR_RL_CALIBRATION_INDEX];
-					HAL_RTCEx_BKUPWrite(&hrtc,DATA_LINEAR_RL_RTC_REGISTER,(uint32_t)DATA_LINEAR_RL_CalibrationOffset);
 					CAN_SW_CalibrationSendAck(LINEAR_CALIBRATION_DONE);
 					break;
 				
 				case SW_LOAD_CELL_CALIBRATION_REQUEST:
 					DATA_LOAD_CELL_FR_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_FR_CALIBRATION_INDEX];
-					HAL_RTCEx_BKUPWrite(&hrtc,DATA_LOAD_CELL_FR_RTC_REGISTER,(uint32_t)DATA_LOAD_CELL_FR_CalibrationOffset);
 					DATA_LOAD_CELL_FL_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_FL_CALIBRATION_INDEX];
-					HAL_RTCEx_BKUPWrite(&hrtc,DATA_LOAD_CELL_FL_RTC_REGISTER,(uint32_t)DATA_LOAD_CELL_FL_CalibrationOffset);
 					DATA_LOAD_CELL_RR_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_RR_CALIBRATION_INDEX];
-					HAL_RTCEx_BKUPWrite(&hrtc,DATA_LOAD_CELL_RR_RTC_REGISTER,(uint32_t)DATA_LOAD_CELL_RR_CalibrationOffset);
 					DATA_LOAD_CELL_RL_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_RL_CALIBRATION_INDEX];
-					HAL_RTCEx_BKUPWrite(&hrtc,DATA_LOAD_CELL_RL_RTC_REGISTER,(uint32_t)DATA_LOAD_CELL_RL_CalibrationOffset);
 					CAN_SW_CalibrationSendAck(LOAD_CELL_CALIBRATION_DONE);
 					break;
 				
@@ -834,15 +820,6 @@ static inline void DATA_SW_CAN_Management(uint8_t data1, uint8_t data2)
 
 
 void DATA_CalibrationGetFromRegister(void){
-	
-	HAL_RTCEx_DeactivateTamper(&hrtc, RTC_TAMPER_1);				/*disables rtc tamper protection*/ 
-	__HAL_RTC_TAMPER_CLEAR_FLAG(&hrtc, RTC_FLAG_TAMP1F);
-	HAL_RTCEx_DeactivateTamper(&hrtc, RTC_TAMPER_2);				 
-	__HAL_RTC_TAMPER_CLEAR_FLAG(&hrtc, RTC_FLAG_TAMP2F);	
-	
-	__HAL_RTC_WRITEPROTECTION_DISABLE(&hrtc);
-	HAL_PWR_EnableBkUpAccess();															/*enables backup register to be written*/
-	__HAL_RTC_WRITEPROTECTION_DISABLE(&hrtc);
 	
 	if (HAL_RTCEx_BKUPRead(&hrtc, CALIBRATION_IS_CONFIG_RTC_REGISTER) == RTC_FLAG_VALUE){																	/*if one configuration was already done*/
 		DATA_LOAD_CELL_FR_CalibrationOffset = (uint16_t)HAL_RTCEx_BKUPRead(&hrtc, DATA_LOAD_CELL_FR_RTC_REGISTER);

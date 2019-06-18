@@ -1,8 +1,8 @@
 dcu_dp11\timers.o: ../Middlewares/Third_Party/FreeRTOS/Source/timers.c
-dcu_dp11\timers.o: D:\Programmi secondari\Keil\ARM\ARMCC\Bin\..\include\stdlib.h
+dcu_dp11\timers.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
 dcu_dp11\timers.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-dcu_dp11\timers.o: D:\Programmi secondari\Keil\ARM\ARMCC\Bin\..\include\stddef.h
-dcu_dp11\timers.o: D:\Programmi secondari\Keil\ARM\ARMCC\Bin\..\include\stdint.h
+dcu_dp11\timers.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+dcu_dp11\timers.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 dcu_dp11\timers.o: ../Inc/FreeRTOSConfig.h
 dcu_dp11\timers.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 dcu_dp11\timers.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h

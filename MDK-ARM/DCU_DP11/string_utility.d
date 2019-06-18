@@ -1,6 +1,6 @@
 dcu_dp11\string_utility.o: ..\Src\string_utility.c
 dcu_dp11\string_utility.o: ../Inc/string_utility.h
-dcu_dp11\string_utility.o: D:\Programmi secondari\Keil\ARM\ARMCC\Bin\..\include\stdint.h
+dcu_dp11\string_utility.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 dcu_dp11\string_utility.o: ../Inc/data.h
 dcu_dp11\string_utility.o: ../Inc/can.h
 dcu_dp11\string_utility.o: ../Inc/main.h
@@ -18,7 +18,7 @@ dcu_dp11\string_utility.o: ../Drivers/CMSIS/Include/mpu_armv7.h
 dcu_dp11\string_utility.o: ../Drivers/CMSIS/Device/ST/STM32F7xx/Include/system_stm32f7xx.h
 dcu_dp11\string_utility.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal.h
 dcu_dp11\string_utility.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
-dcu_dp11\string_utility.o: D:\Programmi secondari\Keil\ARM\ARMCC\Bin\..\include\stddef.h
+dcu_dp11\string_utility.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
 dcu_dp11\string_utility.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_rcc_ex.h
 dcu_dp11\string_utility.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_exti.h
 dcu_dp11\string_utility.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_gpio.h

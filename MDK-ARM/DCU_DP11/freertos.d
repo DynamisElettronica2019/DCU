@@ -1,7 +1,7 @@
 dcu_dp11\freertos.o: ../Src/freertos.c
 dcu_dp11\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-dcu_dp11\freertos.o: D:\Programmi secondari\Keil\ARM\ARMCC\Bin\..\include\stddef.h
-dcu_dp11\freertos.o: D:\Programmi secondari\Keil\ARM\ARMCC\Bin\..\include\stdint.h
+dcu_dp11\freertos.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+dcu_dp11\freertos.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
 dcu_dp11\freertos.o: ../Inc/FreeRTOSConfig.h
 dcu_dp11\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 dcu_dp11\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
@@ -71,9 +71,9 @@ dcu_dp11\freertos.o: ../Inc/bsp_driver_sd.h
 dcu_dp11\freertos.o: ../Inc/fatfs_platform.h
 dcu_dp11\freertos.o: ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_core.h
 dcu_dp11\freertos.o: ../Inc/usbh_conf.h
-dcu_dp11\freertos.o: D:\Programmi secondari\Keil\ARM\ARMCC\Bin\..\include\stdio.h
-dcu_dp11\freertos.o: D:\Programmi secondari\Keil\ARM\ARMCC\Bin\..\include\stdlib.h
-dcu_dp11\freertos.o: D:\Programmi secondari\Keil\ARM\ARMCC\Bin\..\include\string.h
+dcu_dp11\freertos.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+dcu_dp11\freertos.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+dcu_dp11\freertos.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 dcu_dp11\freertos.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
 dcu_dp11\freertos.o: ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_def.h
 dcu_dp11\freertos.o: ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc/usbh_ioreq.h

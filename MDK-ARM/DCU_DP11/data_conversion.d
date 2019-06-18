@@ -1,6 +1,6 @@
 dcu_dp11\data_conversion.o: ..\Src\data_conversion.c
-dcu_dp11\data_conversion.o: D:\Programmi secondari\Keil\ARM\ARMCC\Bin\..\include\stdint.h
-dcu_dp11\data_conversion.o: D:\Programmi secondari\Keil\ARM\ARMCC\Bin\..\include\stdio.h
+dcu_dp11\data_conversion.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+dcu_dp11\data_conversion.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 dcu_dp11\data_conversion.o: ../Inc/data_conversion.h
 dcu_dp11\data_conversion.o: ../Inc/usb_host.h
 dcu_dp11\data_conversion.o: ../Drivers/CMSIS/Device/ST/STM32F7xx/Include/stm32f7xx.h
@@ -17,7 +17,7 @@ dcu_dp11\data_conversion.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_rc
 dcu_dp11\data_conversion.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_def.h
 dcu_dp11\data_conversion.o: ../Drivers/CMSIS/Device/ST/STM32F7xx/Include/stm32f7xx.h
 dcu_dp11\data_conversion.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
-dcu_dp11\data_conversion.o: D:\Programmi secondari\Keil\ARM\ARMCC\Bin\..\include\stddef.h
+dcu_dp11\data_conversion.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
 dcu_dp11\data_conversion.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_rcc_ex.h
 dcu_dp11\data_conversion.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_exti.h
 dcu_dp11\data_conversion.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_gpio.h
