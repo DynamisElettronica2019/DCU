@@ -5,6 +5,8 @@
 #include "data_conversion.h"
 #include "string_utility.h"
 #include "rtc.h"
+#include "fatfs.h"
+
 
 
 
@@ -21,7 +23,15 @@ uint16_t data2 = 0;
 uint16_t data3 = 0;
 uint16_t data4 = 0;
 uint16_t DATA_RawCalibrationData [CALIBRATION_BUFFER_DATA_NUMBER];
+UINT DATA_CalibrationOffset [20];
 uint32_t DATRON_Distance = 0;
+
+CalibrationValues_t CalibrationValues;
+UINT UsbNumberByteRead;
+UINT UsbNumberByteWritten;
+FIL USBHFileCalibration;
+const TCHAR UsbFileConversionName;
+
 float fData1 = 0.0f;
 float fData2 = 0.0f;
 float fData3 = 0.0f;
@@ -181,7 +191,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			fData3 = BPS_DataConversion(data3);
 			BPS_Rear = fData3;						/* Data for brake partition */
 			fData3 = fData3 * 100.0f;			/* Taking into account the division by 100 */
-			fData4 = STEERING_WHEEL_ANGLE_DataConversion((int16_t)data4) * 10.0f; 		/* Taking into account the division by 10 */
+			fData4 = STEERING_WHEEL_ANGLE_DataConversion((int16_t)data4) * 10.0f ; 		/* Taking into account the division by 10 */
 			decimalToString((int16_t)fData1, &DATA_BlockBuffer[DATA_BlockWriteIndex][LINEARE_FL_CSV_INDEX], 2, 2);
 			intToString((int16_t)fData2, &DATA_BlockBuffer[DATA_BlockWriteIndex][LOAD_CELL_FL_CSV_INDEX], 4);
 			decimalToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[DATA_BlockWriteIndex][BPS_REAR_CSV_INDEX], 2, 2);
@@ -756,12 +766,13 @@ static inline void DATA_SW_CAN_Management(uint8_t data1, uint8_t data2)
 {
 	uint8_t startAquisitionEvent = ACQUISITION_IDLE_REQUEST;
 	BaseType_t startAcquisition_xHigherPriorityTaskWoken = pdFALSE;
-	
+		
 	switch(data1) {
 		case SW_ACQUISITION_CAN_REQUEST:
 			switch(data2) {
 				case SW_START_ACQUISITION_CAN_REQUEST:
 					startAquisitionEvent = ACQUISITION_ON_SW_REQUEST;		/* Start acquisition */
+					UsbLoadCalibration();																/*loads valibration values from usb file*/
 					xQueueSendFromISR(startAcquisitionEventHandle, &startAquisitionEvent, &startAcquisition_xHigherPriorityTaskWoken);	
 					break;
 				
@@ -779,32 +790,55 @@ static inline void DATA_SW_CAN_Management(uint8_t data1, uint8_t data2)
 			switch(data2) {
 				case SW_APPS_ZERO_CALIBRATION_REQUEST:
 					DATA_APPS_ZeroCalibrationOffset = DATA_RawCalibrationData[APPS_CALIBRATION_INDEX];
+					CalibrationValues.AppsZeroCalibraionOffset = DATA_RawCalibrationData[APPS_CALIBRATION_INDEX];
+					UsbSaveCalibration();
 					CAN_SW_CalibrationSendAck(APPS_ZERO_CALIBRATION_DONE);
 					break;
 				
 				case SW_APPS_FULL_CALIBRATION_REQUEST:
 					DATA_APPS_FullCalibrationOffset = DATA_RawCalibrationData[APPS_CALIBRATION_INDEX];
+					CalibrationValues.AppsFullCalibraionOffset = DATA_RawCalibrationData[APPS_CALIBRATION_INDEX];
+					UsbSaveCalibration();
 					CAN_SW_CalibrationSendAck(APPS_FULL_CALIBRATION_DONE);
 					break;
 				
-				case SW_STEER_ANGLE_CALIBRATION_REQUEST:
+				case SW_STEER_ANGLE_CALIBRATION_REQUEST:			/*deve essere rimosso, non serve piu la calibrazione da volante*/
 					DATA_STEER_ANGLE_CalibrationOffset = DATA_RawCalibrationData[STEER_ANGLE_CALIBRATION_INDEX];
+					UsbSaveCalibration();
 					CAN_SW_CalibrationSendAck(STEER_ANGLE_CALIBRATION_DONE);
 					break;
 				
 				case SW_LINEAR_CALIBRATION_REQUEST:
 					DATA_LINEAR_FR_CalibrationOffset = DATA_RawCalibrationData[LINEAR_FR_CALIBRATION_INDEX];
+					CalibrationValues.LinearFrCalibraionOffset = DATA_RawCalibrationData[LINEAR_FR_CALIBRATION_INDEX];
+				
 					DATA_LINEAR_FL_CalibrationOffset = DATA_RawCalibrationData[LINEAR_FL_CALIBRATION_INDEX];
+					CalibrationValues.LinearFlCalibraionOffset = DATA_RawCalibrationData[LINEAR_FL_CALIBRATION_INDEX];
+				
 					DATA_LINEAR_RR_CalibrationOffset = DATA_RawCalibrationData[LINEAR_RR_CALIBRATION_INDEX];
+					CalibrationValues.LinearRrCalibraionOffset = DATA_RawCalibrationData[LINEAR_RR_CALIBRATION_INDEX];
+				
 					DATA_LINEAR_RL_CalibrationOffset = DATA_RawCalibrationData[LINEAR_RL_CALIBRATION_INDEX];
+					CalibrationValues.LinearRlCalibraionOffset = DATA_RawCalibrationData[LINEAR_RL_CALIBRATION_INDEX];
+					
+					UsbSaveCalibration();
 					CAN_SW_CalibrationSendAck(LINEAR_CALIBRATION_DONE);
 					break;
 				
 				case SW_LOAD_CELL_CALIBRATION_REQUEST:
 					DATA_LOAD_CELL_FR_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_FR_CALIBRATION_INDEX];
+					CalibrationValues.LoadCellFrCalibraionOffset = DATA_RawCalibrationData[LOAD_CELL_FR_CALIBRATION_INDEX];
+				
 					DATA_LOAD_CELL_FL_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_FL_CALIBRATION_INDEX];
+					CalibrationValues.LoadCellFlCalibraionOffset = DATA_RawCalibrationData[LOAD_CELL_FL_CALIBRATION_INDEX];
+				
 					DATA_LOAD_CELL_RR_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_RR_CALIBRATION_INDEX];
+					CalibrationValues.LoadCellRrCalibraionOffset = DATA_RawCalibrationData[LOAD_CELL_RR_CALIBRATION_INDEX];
+				
 					DATA_LOAD_CELL_RL_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_RL_CALIBRATION_INDEX];
+					CalibrationValues.LoadCellRlCalibraionOffset = DATA_RawCalibrationData[LOAD_CELL_RL_CALIBRATION_INDEX];
+				
+					UsbSaveCalibration();
 					CAN_SW_CalibrationSendAck(LOAD_CELL_CALIBRATION_DONE);
 					break;
 				
@@ -819,47 +853,37 @@ static inline void DATA_SW_CAN_Management(uint8_t data1, uint8_t data2)
 }
 
 
-void DATA_CalibrationGetFromRegister(void){
+void UsbSaveCalibration(void){			/*whenever a calibration is done, this function is called and saves values on usb file*/
+	f_open(&USBHFileCalibration, &UsbFileConversionName , FA_OPEN_ALWAYS | FA_WRITE); 
+	f_write(&USBHFileCalibration, &(CalibrationValues.AppsZeroCalibraionOffset), 2, &UsbNumberByteWritten);
+	f_write(&USBHFileCalibration, &(CalibrationValues.AppsFullCalibraionOffset), 2, &UsbNumberByteWritten);
+	f_write(&USBHFileCalibration, &(CalibrationValues.LinearFrCalibraionOffset), 2, &UsbNumberByteWritten);
+	f_write(&USBHFileCalibration, &(CalibrationValues.LinearFlCalibraionOffset), 2, &UsbNumberByteWritten);
+	f_write(&USBHFileCalibration, &(CalibrationValues.LinearRrCalibraionOffset), 2, &UsbNumberByteWritten);
+	f_write(&USBHFileCalibration, &(CalibrationValues.LinearRlCalibraionOffset), 2, &UsbNumberByteWritten);
+	f_write(&USBHFileCalibration, &(CalibrationValues.LoadCellFrCalibraionOffset), 2, &UsbNumberByteWritten);
+	f_write(&USBHFileCalibration, &(CalibrationValues.LoadCellFlCalibraionOffset), 2, &UsbNumberByteWritten);
+	f_write(&USBHFileCalibration, &(CalibrationValues.LoadCellRrCalibraionOffset), 2, &UsbNumberByteWritten);
+	f_write(&USBHFileCalibration, &(CalibrationValues.LoadCellRlCalibraionOffset), 2, &UsbNumberByteWritten);
+	f_close(&USBHFileCalibration);
 	
-	if (HAL_RTCEx_BKUPRead(&hrtc, CALIBRATION_IS_CONFIG_RTC_REGISTER) == RTC_FLAG_VALUE){																	/*if one configuration was already done*/
-		DATA_LOAD_CELL_FR_CalibrationOffset = (uint16_t)HAL_RTCEx_BKUPRead(&hrtc, DATA_LOAD_CELL_FR_RTC_REGISTER);
-		DATA_LOAD_CELL_FL_CalibrationOffset = (uint16_t)HAL_RTCEx_BKUPRead(&hrtc, DATA_LOAD_CELL_FL_RTC_REGISTER);
-		DATA_LOAD_CELL_RR_CalibrationOffset = (uint16_t)HAL_RTCEx_BKUPRead(&hrtc, DATA_LOAD_CELL_RR_RTC_REGISTER);
-		DATA_LOAD_CELL_RL_CalibrationOffset = (uint16_t)HAL_RTCEx_BKUPRead(&hrtc, DATA_LOAD_CELL_RL_RTC_REGISTER);
-		DATA_LINEAR_FR_CalibrationOffset = (uint16_t)HAL_RTCEx_BKUPRead(&hrtc, DATA_LINEAR_FR_RTC_REGISTER);
-		DATA_LINEAR_FL_CalibrationOffset = (uint16_t)HAL_RTCEx_BKUPRead(&hrtc, DATA_LINEAR_FL_RTC_REGISTER);
-		DATA_LINEAR_RR_CalibrationOffset = (uint16_t)HAL_RTCEx_BKUPRead(&hrtc, DATA_LINEAR_RR_RTC_REGISTER);
-		DATA_LINEAR_RL_CalibrationOffset = (uint16_t)HAL_RTCEx_BKUPRead(&hrtc, DATA_LINEAR_RL_RTC_REGISTER);
-		DATA_APPS_ZeroCalibrationOffset = (uint16_t)HAL_RTCEx_BKUPRead(&hrtc, DATA_APPS_Zero_RTC_REGISTER);
-		DATA_APPS_FullCalibrationOffset = (uint16_t)HAL_RTCEx_BKUPRead(&hrtc, DATA_APPS_Full_RTC_REGISTER);
-		DATA_STEER_ANGLE_CalibrationOffset = (uint16_t)HAL_RTCEx_BKUPRead(&hrtc, DATA_STEER_ANGLE_RTC_REGISTER);
-	}
-	else{																																																										/*if no config where already done*/
-		DATA_LOAD_CELL_FR_CalibrationOffset = 2047;			
-		DATA_LOAD_CELL_FL_CalibrationOffset = 2047;			
-		DATA_LOAD_CELL_RR_CalibrationOffset = 2047;			
-		DATA_LOAD_CELL_RL_CalibrationOffset = 2047;			
-		DATA_LINEAR_FR_CalibrationOffset = 0;				
-		DATA_LINEAR_FL_CalibrationOffset = 0;				
-		DATA_LINEAR_RR_CalibrationOffset = 0;				
-		DATA_LINEAR_RL_CalibrationOffset = 0;				
-		DATA_APPS_ZeroCalibrationOffset = 0;					
-		DATA_APPS_FullCalibrationOffset = 1;					
-		DATA_STEER_ANGLE_CalibrationOffset = 2047;		
-	}		
 }
 
-void DATA_CalibrationOnReady(void) {
-	DATA_APPS_ZeroCalibrationOffset = DATA_RawCalibrationData[APPS_CALIBRATION_INDEX];
-	DATA_APPS_FullCalibrationOffset = DATA_RawCalibrationData[APPS_CALIBRATION_INDEX];
-	DATA_STEER_ANGLE_CalibrationOffset = DATA_RawCalibrationData[STEER_ANGLE_CALIBRATION_INDEX];
-	DATA_LINEAR_FR_CalibrationOffset = DATA_RawCalibrationData[LINEAR_FR_CALIBRATION_INDEX];
-	DATA_LINEAR_FL_CalibrationOffset = DATA_RawCalibrationData[LINEAR_FL_CALIBRATION_INDEX];
-	DATA_LINEAR_RR_CalibrationOffset = DATA_RawCalibrationData[LINEAR_RR_CALIBRATION_INDEX];
-	DATA_LINEAR_RL_CalibrationOffset = DATA_RawCalibrationData[LINEAR_RL_CALIBRATION_INDEX];
-	DATA_LOAD_CELL_FR_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_FR_CALIBRATION_INDEX];
-	DATA_LOAD_CELL_FL_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_FL_CALIBRATION_INDEX];
-	DATA_LOAD_CELL_RR_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_RR_CALIBRATION_INDEX];
-	DATA_LOAD_CELL_RL_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_RL_CALIBRATION_INDEX];
-}
+void UsbLoadCalibration(void){		/*when acquisition is started from steering wheel, this function loads calibration values from usb file*/
+	f_open(&USBHFileCalibration, &UsbFileConversionName , FA_OPEN_EXISTING | FA_READ); 
+	f_read(&USBHFileCalibration, DATA_CalibrationOffset , 20, &UsbNumberByteRead);
+	DATA_APPS_ZeroCalibrationOffset = ((DATA_CalibrationOffset[0] << 8) | (DATA_CalibrationOffset[1]));
+	DATA_APPS_FullCalibrationOffset = ((DATA_CalibrationOffset[2] << 8) | (DATA_CalibrationOffset[3]));
+	DATA_LINEAR_FR_CalibrationOffset = ((DATA_CalibrationOffset[4] << 8) | (DATA_CalibrationOffset[5]));
+	DATA_LINEAR_FL_CalibrationOffset = ((DATA_CalibrationOffset[6] << 8) | (DATA_CalibrationOffset[7]));
+	DATA_LINEAR_RR_CalibrationOffset = ((DATA_CalibrationOffset[8] << 8) | (DATA_CalibrationOffset[9]));
+	DATA_LINEAR_RL_CalibrationOffset = ((DATA_CalibrationOffset[10] << 8) | (DATA_CalibrationOffset[11]));
+	DATA_LOAD_CELL_FR_CalibrationOffset = ((DATA_CalibrationOffset[12] << 8) | (DATA_CalibrationOffset[13]));
+	DATA_LOAD_CELL_FL_CalibrationOffset = ((DATA_CalibrationOffset[14] << 8) | (DATA_CalibrationOffset[15]));
+	DATA_LOAD_CELL_RR_CalibrationOffset = ((DATA_CalibrationOffset[16] << 8) | (DATA_CalibrationOffset[17]));
+	DATA_LOAD_CELL_RL_CalibrationOffset = ((DATA_CalibrationOffset[18] << 8) | (DATA_CalibrationOffset[19]));
 
+
+	f_close(&USBHFileCalibration);
+
+}

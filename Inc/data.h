@@ -394,7 +394,22 @@ extern inline void DATA_ResetLapFlag(void);
 extern void DATA_PacketReset(void);
 extern void DATA_ResetStateBuffer(void);
 static inline void DATA_SW_CAN_Management(uint8_t byte1, uint8_t byte2);
-extern void DATA_CalibrationGetFromRegister(void);
-void DATA_CalibrationOnReady(void);
+
+void UsbSaveCalibration(void);
+void UsbLoadCalibration(void);
+
+typedef struct CalibrationValues{
+	
+	uint16_t AppsZeroCalibraionOffset;
+	uint16_t AppsFullCalibraionOffset;
+	uint16_t LinearFlCalibraionOffset;
+	uint16_t LinearFrCalibraionOffset;
+	uint16_t LinearRlCalibraionOffset;
+	uint16_t LinearRrCalibraionOffset;
+	uint16_t LoadCellFlCalibraionOffset;
+	uint16_t LoadCellFrCalibraionOffset;
+	uint16_t LoadCellRlCalibraionOffset;
+	uint16_t LoadCellRrCalibraionOffset;
+}CalibrationValues_t;
 
 #endif
