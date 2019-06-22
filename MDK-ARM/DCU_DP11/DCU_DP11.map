@@ -30,8 +30,8 @@ Section Cross References
     main.o(i.HAL_TIM_PeriodElapsedCallback) refers to timestamp.o(i.timestampUpdate) for timestampUpdate
     main.o(i.HAL_TIM_PeriodElapsedCallback) refers to data.o(i.DATA_CheckEfiIsAlive) for DATA_CheckEfiIsAlive
     main.o(i.HAL_TIM_PeriodElapsedCallback) refers to telemetry.o(i.TELEMETRY_DataSendTimCallback) for TELEMETRY_DataSendTimCallback
-    main.o(i.HAL_TIM_PeriodElapsedCallback) refers to usb_host.o(i.USB_SavingRequest) for USB_SavingRequest
     main.o(i.HAL_TIM_PeriodElapsedCallback) refers to timestamp.o(i.incrementDataTimestamp) for incrementDataTimestamp
+    main.o(i.HAL_TIM_PeriodElapsedCallback) refers to usb_host.o(i.USB_SavingRequest) for USB_SavingRequest
     main.o(i.HAL_UART_RxCpltCallback) refers to usart.o(i.GPS_RxCallback) for GPS_RxCallback
     main.o(i.HAL_UART_RxCpltCallback) refers to usart.o(i.UART1_RxCallback) for UART1_RxCallback
     main.o(i.HAL_UART_TxCpltCallback) refers to usart.o(i.UART1_TxCallback) for UART1_TxCallback
