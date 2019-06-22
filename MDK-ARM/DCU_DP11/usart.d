@@ -8,7 +8,7 @@ dcu_dp11\usart.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_def.h
 dcu_dp11\usart.o: ../Drivers/CMSIS/Device/ST/STM32F7xx/Include/stm32f7xx.h
 dcu_dp11\usart.o: ../Drivers/CMSIS/Device/ST/STM32F7xx/Include/stm32f767xx.h
 dcu_dp11\usart.o: ../Drivers/CMSIS/Include/core_cm7.h
-dcu_dp11\usart.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+dcu_dp11\usart.o: C:\Keil_v5\ARM\ARM_Compiler_5.06u6\Bin\..\include\stdint.h
 dcu_dp11\usart.o: ../Drivers/CMSIS/Include/cmsis_version.h
 dcu_dp11\usart.o: ../Drivers/CMSIS/Include/cmsis_compiler.h
 dcu_dp11\usart.o: ../Drivers/CMSIS/Include/cmsis_armcc.h
@@ -16,7 +16,7 @@ dcu_dp11\usart.o: ../Drivers/CMSIS/Include/mpu_armv7.h
 dcu_dp11\usart.o: ../Drivers/CMSIS/Device/ST/STM32F7xx/Include/system_stm32f7xx.h
 dcu_dp11\usart.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal.h
 dcu_dp11\usart.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
-dcu_dp11\usart.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+dcu_dp11\usart.o: C:\Keil_v5\ARM\ARM_Compiler_5.06u6\Bin\..\include\stddef.h
 dcu_dp11\usart.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_rcc_ex.h
 dcu_dp11\usart.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_exti.h
 dcu_dp11\usart.o: ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_gpio.h

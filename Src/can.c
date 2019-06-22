@@ -37,7 +37,6 @@ CAN_TxPacket_t CAN_AutogearPacket;
 CAN_TxPacket_t CAN_DebugPacket1Packet;
 CAN_TxPacket_t CAN_DebugPacket2Packet;
 CAN_TxPacket_t CAN_AcquisitionStatePacket;
-uint32_t packetMailbox;
 BaseType_t CAN_SendxHigherPriorityTaskWoken = pdFALSE;
 BaseType_t CAN_Rx0xHigherPriorityTaskWoken = pdFALSE;
 BaseType_t CAN_Rx1xHigherPriorityTaskWoken = pdFALSE;
@@ -166,6 +165,8 @@ extern inline void CAN_SendPackets(void)
 
 extern inline void CAN_SendDebugPackets(void)
 {
+	uint32_t packetMailbox;
+	
 	if(DATA_GetAcquisitionState() == STATE_ON) {
 		toSW_AcquisitionState = TO_SW_ACQUISITION_IS_ON;
 	}
@@ -193,7 +194,7 @@ extern inline void CAN_SendDebugPackets(void)
 	CAN_DebugPacket1Packet.packetData[5] = (uint8_t)((uint16_t)ADC_BufferConvertedDebug[XBEE_CURRENT_SENSE_POSITION] & 0x00FF);
 	CAN_DebugPacket1Packet.packetData[6] = (uint8_t)(((uint16_t)ADC_BufferConvertedDebug[DCU_CURRENT_SENSE_POSITION] >> 8) & 0x00FF);
 	CAN_DebugPacket1Packet.packetData[7] = (uint8_t)((uint16_t)ADC_BufferConvertedDebug[DCU_CURRENT_SENSE_POSITION] & 0x00FF);
-	CAN_SendPacketPolling(CAN_DebugPacket1Packet);
+	HAL_CAN_AddTxMessage(&hcan1, &CAN_DebugPacket1Packet.packetHeader, CAN_DebugPacket1Packet.packetData, &packetMailbox);
 	
 	/* DCU_DEBUG_2_ID */
 	CAN_DebugPacket2Packet.packetData[0] = (uint8_t)(((uint16_t)ADC_BufferConvertedDebug[_12V_POST_DIODES_SENSE_POSITION] >> 8) & 0x00FF);
@@ -204,11 +205,11 @@ extern inline void CAN_SendDebugPackets(void)
 	CAN_DebugPacket2Packet.packetData[5] = (uint8_t)((uint16_t)ADC_BufferConvertedDebug[_3V3_MCU_POSITION] & 0x00FF);
 	CAN_DebugPacket2Packet.packetData[6] = (uint8_t)(((uint16_t)brake_Partition >> 8) & 0x00FF);
 	CAN_DebugPacket2Packet.packetData[7] = (uint8_t)((uint16_t)brake_Partition & 0x00FF);
-	CAN_SendPacketPolling(CAN_DebugPacket2Packet);
+	HAL_CAN_AddTxMessage(&hcan1, &CAN_DebugPacket2Packet.packetHeader, CAN_DebugPacket2Packet.packetData, &packetMailbox);
 	
 	/* DCU_ACQUISITION_SW_ID */
 	CAN_AcquisitionStatePacket.packetData[3] = toSW_AcquisitionState;
-	CAN_SendPacketPolling(CAN_AcquisitionStatePacket);
+	HAL_CAN_AddTxMessage(&hcan1, &CAN_AcquisitionStatePacket.packetHeader, CAN_AcquisitionStatePacket.packetData, &packetMailbox);
 }
 
 extern inline void CAN_SendAutogearPacket(void)
@@ -220,9 +221,11 @@ extern inline void CAN_SendAutogearPacket(void)
 
 extern inline void CAN_SW_CalibrationSendAck(uint8_t ackValue)
 {
+	uint32_t packetMailbox;
+	
 	CAN_AcquisitionStatePacket.packetData[1] = 2;
 	CAN_AcquisitionStatePacket.packetData[3] = ackValue;
-	CAN_SendPacketPolling(CAN_AcquisitionStatePacket);
+	HAL_CAN_AddTxMessage(&hcan1, &CAN_AcquisitionStatePacket.packetHeader, CAN_AcquisitionStatePacket.packetData, &packetMailbox);
 	CAN_AcquisitionStatePacket.packetData[1] = 1;
 }
 
@@ -231,12 +234,6 @@ extern void CAN_PacketCounterReset(void)
 	for(uint16_t i = 0; i < NUMBER_OF_ACQUIRED_CHANNELS; i++) {
 		CAN_ReceivedPacketsCounter[i] = 0;
 	}
-}
-
-static inline void CAN_SendPacketPolling(CAN_TxPacket_t packet)
-{
-	while(HAL_CAN_GetTxMailboxesFreeLevel(&hcan1) == 0U); 																		/* Wait for an empy TX mailbox */
-	HAL_CAN_AddTxMessage(&hcan1, &packet.packetHeader, packet.packetData, &packetMailbox); 		/* Send CAN packet */
 }
 
 static void CAN_FilterConfig(void)
