@@ -3,7 +3,7 @@
 <title>Static Call Graph - [DCU_DP11\DCU_DP11.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image DCU_DP11\DCU_DP11.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Sat Jun 22 18:54:50 2019
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Sat Jun 22 20:17:53 2019
 <BR><P>
 <H3>Maximum Stack Usage =        704 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -765,7 +765,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;canFifo0UnpackTask
 </UL>
 
-<P><STRONG><a name="[df]"></a>DATA_AutomaticStartAcquisitionManager</STRONG> (Thumb, 176 bytes, Stack size 16 bytes, data.o(i.DATA_AutomaticStartAcquisitionManager))
+<P><STRONG><a name="[df]"></a>DATA_AutomaticStartAcquisitionManager</STRONG> (Thumb, 160 bytes, Stack size 16 bytes, data.o(i.DATA_AutomaticStartAcquisitionManager))
 <BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = DATA_AutomaticStartAcquisitionManager &rArr; xQueueGenericSendFromISR &rArr; xTaskRemoveFromEventList
 </UL>
 <BR>[Calls]<UL><LI><a href="#[e0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSendFromISR
@@ -773,7 +773,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;automaticStartAcquisitionMonitoringTask
 </UL>
 
-<P><STRONG><a name="[e1]"></a>DATA_CanParser</STRONG> (Thumb, 4382 bytes, Stack size 48 bytes, data.o(i.DATA_CanParser))
+<P><STRONG><a name="[e1]"></a>DATA_CanParser</STRONG> (Thumb, 4410 bytes, Stack size 48 bytes, data.o(i.DATA_CanParser))
 <BR><BR>[Stack]<UL><LI>Max Depth = 120<LI>Call Chain = DATA_CanParser &rArr; Flash_Save_Calibration &rArr; HAL_FLASH_Program &rArr; FLASH_WaitForLastOperation
 </UL>
 <BR>[Calls]<UL><LI><a href="#[e0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSendFromISR
@@ -847,7 +847,7 @@ Global Symbols
 <LI><a href="#[205]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_CloseFile
 </UL>
 
-<P><STRONG><a name="[104]"></a>DATA_PacketReset</STRONG> (Thumb, 544 bytes, Stack size 8 bytes, data.o(i.DATA_PacketReset))
+<P><STRONG><a name="[104]"></a>DATA_PacketReset</STRONG> (Thumb, 548 bytes, Stack size 8 bytes, data.o(i.DATA_PacketReset))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = DATA_PacketReset
 </UL>
 <BR>[Calls]<UL><LI><a href="#[b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memset
@@ -910,7 +910,7 @@ Global Symbols
 <LI><a href="#[209]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USB_EventHandler
 </UL>
 
-<P><STRONG><a name="[105]"></a>DATA_SwapDataPackePointers</STRONG> (Thumb, 48 bytes, Stack size 8 bytes, data.o(i.DATA_SwapDataPackePointers))
+<P><STRONG><a name="[105]"></a>DATA_SwapDataPackePointers</STRONG> (Thumb, 46 bytes, Stack size 8 bytes, data.o(i.DATA_SwapDataPackePointers))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = DATA_SwapDataPackePointers
 </UL>
 <BR>[Calls]<UL><LI><a href="#[106]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
@@ -1070,11 +1070,11 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[e1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DATA_CanParser
 </UL>
 
-<P><STRONG><a name="[220]"></a>Flash_LoadCalibration</STRONG> (Thumb, 52 bytes, Stack size 0 bytes, flash_utility.o(i.Flash_LoadCalibration))
+<P><STRONG><a name="[220]"></a>Flash_LoadCalibration</STRONG> (Thumb, 92 bytes, Stack size 0 bytes, flash_utility.o(i.Flash_LoadCalibration))
 <BR><BR>[Called By]<UL><LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;canFifo0UnpackTask
 </UL>
 
-<P><STRONG><a name="[f3]"></a>Flash_Save_Calibration</STRONG> (Thumb, 274 bytes, Stack size 16 bytes, flash_utility.o(i.Flash_Save_Calibration))
+<P><STRONG><a name="[f3]"></a>Flash_Save_Calibration</STRONG> (Thumb, 298 bytes, Stack size 16 bytes, flash_utility.o(i.Flash_Save_Calibration))
 <BR><BR>[Stack]<UL><LI>Max Depth = 72<LI>Call Chain = Flash_Save_Calibration &rArr; HAL_FLASH_Program &rArr; FLASH_WaitForLastOperation
 </UL>
 <BR>[Calls]<UL><LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_FLASH_Unlock
@@ -1108,7 +1108,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(.constdata)
 </UL>
-<P><STRONG><a name="[117]"></a>GPS_DataConversion</STRONG> (Thumb, 2610 bytes, Stack size 64 bytes, gps.o(i.GPS_DataConversion))
+<P><STRONG><a name="[117]"></a>GPS_DataConversion</STRONG> (Thumb, 2598 bytes, Stack size 64 bytes, gps.o(i.GPS_DataConversion))
 <BR><BR>[Stack]<UL><LI>Max Depth = 168<LI>Call Chain = GPS_DataConversion &rArr; xQueueGenericSend &rArr; xTaskResumeAll
 </UL>
 <BR>[Calls]<UL><LI><a href="#[116]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Receive_IT
@@ -2472,8 +2472,8 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(.constdata)
 </UL>
-<P><STRONG><a name="[9e]"></a>SendFollowingDataFunc</STRONG> (Thumb, 80 bytes, Stack size 336 bytes, freertos.o(i.SendFollowingDataFunc))
-<BR><BR>[Stack]<UL><LI>Max Depth = 440<LI>Call Chain = SendFollowingDataFunc &rArr; xQueueGenericSend &rArr; xTaskResumeAll
+<P><STRONG><a name="[9e]"></a>SendFollowingDataFunc</STRONG> (Thumb, 80 bytes, Stack size 344 bytes, freertos.o(i.SendFollowingDataFunc))
+<BR><BR>[Stack]<UL><LI>Max Depth = 448<LI>Call Chain = SendFollowingDataFunc &rArr; xQueueGenericSend &rArr; xTaskResumeAll
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit_DMA
 <LI><a href="#[1c0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;encodeString
@@ -4412,7 +4412,7 @@ Local Symbols
 <LI><a href="#[11a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPS_VTG_conversion
 </UL>
 
-<P><STRONG><a name="[11a]"></a>GPS_VTG_conversion</STRONG> (Thumb, 994 bytes, Stack size 64 bytes, gps.o(i.GPS_VTG_conversion))
+<P><STRONG><a name="[11a]"></a>GPS_VTG_conversion</STRONG> (Thumb, 1002 bytes, Stack size 64 bytes, gps.o(i.GPS_VTG_conversion))
 <BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = GPS_VTG_conversion
 </UL>
 <BR>[Calls]<UL><LI><a href="#[118]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPS_StrToInt

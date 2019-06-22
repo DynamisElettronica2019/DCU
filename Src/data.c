@@ -135,6 +135,7 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			decimalToStringUnsigned((uint16_t)fData1, &DATA_BlockBuffer[DATA_BlockWriteIndex][L_FUEL_CSV_INDEX], 2, 2);
 			intToStringUnsigned((uint16_t)fData2, &DATA_BlockBuffer[DATA_BlockWriteIndex][T_SCARICO_1_CSV_INDEX], 3);
 			intToStringUnsigned((uint16_t)fData3, &DATA_BlockBuffer[DATA_BlockWriteIndex][T_SCARICO_2_CSV_INDEX], 3);
+			intToStringUnsigned((uint16_t)fData4, &DATA_BlockBuffer[DATA_BlockWriteIndex][TC_ACTIVE_CSV_INDEX], 1);
 			break;
 		
 		/* SW ID range */
@@ -634,6 +635,7 @@ extern void DATA_PacketReset(void)
 		DATA_BlockBuffer[j][L_FUEL_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 		DATA_BlockBuffer[j][T_SCARICO_1_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 		DATA_BlockBuffer[j][T_SCARICO_2_CSV_SEPARATOR] = CHANNEL_SEPARATION;
+		DATA_BlockBuffer[j][TC_ACTIVE_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 		DATA_BlockBuffer[j][LINEARE_FR_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 		DATA_BlockBuffer[j][LOAD_CELL_FR_CSV_SEPARATOR] = CHANNEL_SEPARATION;
 		DATA_BlockBuffer[j][BPS_FRONT_CSV_SEPARATOR] = CHANNEL_SEPARATION;
