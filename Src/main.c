@@ -59,9 +59,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
 extern uint8_t telemetryIndBuffer [1];
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -83,7 +81,7 @@ void MX_FREERTOS_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+	
   /* USER CODE END 1 */
   
   /* Enable I-Cache---------------------------------------------------------*/
@@ -122,7 +120,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-		HAL_UART_Receive_DMA(&huart1, telemetryIndBuffer, 1);
+	HAL_UART_Receive_DMA(&huart1, telemetryIndBuffer, 1);
 		
   /* USER CODE END 2 */
 

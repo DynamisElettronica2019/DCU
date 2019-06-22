@@ -38,6 +38,8 @@
 #include "data.h"
 #include "telemetry.h"
 #include "timestamp.h"
+#include "flash_utility.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -57,6 +59,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
+extern OffsetHandler_t OffsetHandler;
 extern uint8_t DATA_BlockReadIndex;
 extern uint8_t GPS_FirstChar;
 extern uint8_t DATA_BlockBuffer [BUFFER_POINTERS_NUMBER][BUFFER_BLOCK_LEN];
@@ -697,8 +700,8 @@ void canFifo0UnpackTask(void const * argument)
   /* USER CODE BEGIN canFifo0UnpackTask */
 	CAN_RxPacket_t CAN_UnpackedData;
 	
+	Flash_LoadCalibration(&OffsetHandler);
 	DATA_PacketReset();					/* Reset the data saving buffer */
-	//DATA_CalibrationGetFromRegister();
 	CAN_PacketCounterReset();		/* Reset the CAN packets recevide counter */
 	CAN_Start();								/* CAN filter config and start */
 	

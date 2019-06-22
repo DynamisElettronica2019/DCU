@@ -58,3 +58,4 @@ dcu_dp11\data_conversion.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/t
 dcu_dp11\data_conversion.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
 dcu_dp11\data_conversion.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
 dcu_dp11\data_conversion.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h
+dcu_dp11\data_conversion.o: ../Inc/flash_utility.h

@@ -2,18 +2,9 @@
 #include <stdio.h>
 #include "data_conversion.h"
 #include "usb_host.h"
+#include "flash_utility.h"
 
-uint16_t DATA_LOAD_CELL_FR_CalibrationOffset;
-uint16_t DATA_LOAD_CELL_FL_CalibrationOffset;
-uint16_t DATA_LOAD_CELL_RR_CalibrationOffset;
-uint16_t DATA_LOAD_CELL_RL_CalibrationOffset;
-uint16_t DATA_LINEAR_FR_CalibrationOffset;
-uint16_t DATA_LINEAR_FL_CalibrationOffset;
-uint16_t DATA_LINEAR_RR_CalibrationOffset;
-uint16_t DATA_LINEAR_RL_CalibrationOffset;
-uint16_t DATA_APPS_ZeroCalibrationOffset;
-uint16_t DATA_APPS_FullCalibrationOffset;
-uint16_t DATA_STEER_ANGLE_CalibrationOffset;
+extern OffsetHandler_t OffsetHandler;
 
 
 extern inline float EFI_TEMPERATURE_DataConversion(uint16_t input)
@@ -94,7 +85,7 @@ extern inline float LOAD_CELL_FR_DataConversion(int16_t input)
 { 
 	float temp;
 	
-	temp = (float)(input - (int16_t)DATA_LOAD_CELL_FR_CalibrationOffset);
+	temp = (float)(input - (int16_t)OffsetHandler.DATA_LOAD_CELL_FR_CalibrationOffset);
 	temp = temp * (VREF_DAU_FR/4095);
 	temp = temp * 4448.0f;
 	return temp;
@@ -104,7 +95,7 @@ extern inline float LOAD_CELL_FL_DataConversion(int16_t input)
 { 
 	float temp;
 	
-	temp = (float)(input - (int16_t)DATA_LOAD_CELL_FL_CalibrationOffset);
+	temp = (float)(input - (int16_t)OffsetHandler.DATA_LOAD_CELL_FL_CalibrationOffset);
 	temp = temp * (VREF_DAU_FL/4095);
 	temp = temp * 4448.0f;
 	return temp;
@@ -114,7 +105,7 @@ extern inline float LOAD_CELL_RR_DataConversion(int16_t input)
 { 
 	float temp;
 	
-	temp = (float)(input - (int16_t)DATA_LOAD_CELL_RR_CalibrationOffset);
+	temp = (float)(input - (int16_t)OffsetHandler.DATA_LOAD_CELL_RR_CalibrationOffset);
 	temp = temp * (VREF_DAU_REAR/4095);
 	temp = temp * 4448.0f;
 	return temp;
@@ -124,7 +115,7 @@ extern inline float LOAD_CELL_RL_DataConversion(int16_t input)
 { 
 	float temp;
 	
-	temp = (float)(input - (int16_t)DATA_LOAD_CELL_RL_CalibrationOffset);
+	temp = (float)(input - (int16_t)OffsetHandler.DATA_LOAD_CELL_RL_CalibrationOffset);
 	temp = temp * (VREF_DAU_REAR/4095);
 	temp = temp * 4448.0f;
 	return temp;
@@ -134,7 +125,7 @@ extern inline float LINEAR_FR_DataConversion(uint16_t input)
 {
 	float temp;
 	
-	temp = (float)(input - DATA_LINEAR_FR_CalibrationOffset);
+	temp = (float)(input - OffsetHandler.DATA_LINEAR_FR_CalibrationOffset);
 	temp = temp * (50.0f / 4095.0f);
   return (temp);
 }
@@ -143,7 +134,7 @@ extern inline float LINEAR_FL_DataConversion(uint16_t input)
 {
 	float temp;
 	
-	temp = (float)(input - DATA_LINEAR_FL_CalibrationOffset);
+	temp = (float)(input - OffsetHandler.DATA_LINEAR_FL_CalibrationOffset);
 	temp = temp * (50.0f / 4095.0f);
   return (temp);
 }
@@ -152,7 +143,7 @@ extern inline float LINEAR_RR_DataConversion(uint16_t input)
 {
 	float temp;
 	
-	temp = (float)(input - DATA_LINEAR_RR_CalibrationOffset);
+	temp = (float)(input - OffsetHandler.DATA_LINEAR_RR_CalibrationOffset);
 	temp = temp * (50.0f / 4095.0f);
   return (temp);
 }
@@ -161,7 +152,7 @@ extern inline float LINEAR_RL_DataConversion(uint16_t input)
 {
 	float temp;
 	
-	temp = (float)(input - DATA_LINEAR_RL_CalibrationOffset);
+	temp = (float)(input - OffsetHandler.DATA_LINEAR_RL_CalibrationOffset);
 	temp = temp * (50.0f / 4095.0f);
   return (temp);
 }
@@ -179,8 +170,8 @@ extern inline float APPS_DataConversion(uint16_t input)
 {
 	float temp;
 	
-	temp = (float)(input - DATA_APPS_ZeroCalibrationOffset);
-	temp = temp / ((float)(DATA_APPS_FullCalibrationOffset - DATA_APPS_ZeroCalibrationOffset));
+	temp = (float)(input - OffsetHandler.DATA_APPS_ZeroCalibrationOffset);
+	temp = temp / ((float)(OffsetHandler.DATA_APPS_FullCalibrationOffset - OffsetHandler.DATA_APPS_ZeroCalibrationOffset));
 	temp = temp * 100;
 
   return temp;
@@ -191,7 +182,8 @@ extern inline float STEERING_WHEEL_ANGLE_DataConversion(int16_t input)
 	float temp;
 	
 	temp = (float)(input);
-	if (temp < 1200){
+	
+	if (temp < 1200) {
 		temp = temp + 3262.0f;
 	}
 	

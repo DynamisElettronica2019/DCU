@@ -6,8 +6,7 @@
 #include "string_utility.h"
 #include "rtc.h"
 #include "fatfs.h"
-
-
+#include "flash_utility.h"
 
 
 uint8_t DATA_BlockWriteIndex = 0;
@@ -23,34 +22,16 @@ uint16_t data2 = 0;
 uint16_t data3 = 0;
 uint16_t data4 = 0;
 uint16_t DATA_RawCalibrationData [CALIBRATION_BUFFER_DATA_NUMBER];
-UINT DATA_CalibrationOffset [20];
 uint32_t DATRON_Distance = 0;
-
-CalibrationValues_t CalibrationValues;
-UINT UsbNumberByteRead;
-UINT UsbNumberByteWritten;
-FIL USBHFileCalibration;
-const TCHAR UsbFileConversionName;
-
 float fData1 = 0.0f;
 float fData2 = 0.0f;
 float fData3 = 0.0f;
 float fData4 = 0.0f;
 float BPS_Front = 0.0f;
 float BPS_Rear = 0.0f;
+OffsetHandler_t OffsetHandler;
 BaseType_t EFI_IsAlive_xHigherPriorityTaskWoken = pdFALSE;
 extern uint8_t DATA_BlockWriteIndex;
-extern uint16_t DATA_LOAD_CELL_FR_CalibrationOffset;
-extern uint16_t DATA_LOAD_CELL_FL_CalibrationOffset;
-extern uint16_t DATA_LOAD_CELL_RR_CalibrationOffset;
-extern uint16_t DATA_LOAD_CELL_RL_CalibrationOffset;
-extern uint16_t DATA_LINEAR_FR_CalibrationOffset;
-extern uint16_t DATA_LINEAR_FL_CalibrationOffset;
-extern uint16_t DATA_LINEAR_RR_CalibrationOffset;
-extern uint16_t DATA_LINEAR_RL_CalibrationOffset;
-extern uint16_t DATA_APPS_ZeroCalibrationOffset;
-extern uint16_t DATA_APPS_FullCalibrationOffset;
-extern uint16_t DATA_STEER_ANGLE_CalibrationOffset;
 extern uint32_t CAN_ReceivedPacketsCounter [NUMBER_OF_ACQUIRED_CHANNELS];
 extern osSemaphoreId automaticStartAcquisitionSemaphoreHandle;
 extern osMessageQId startAcquisitionEventHandle;
@@ -118,11 +99,11 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 		
 		case EFI_TRACTION_CONTROL_ID:
 			DATA_SetEfiIsAlive();
-			fData3 = SLIP_DataCoversion((int16_t)data3) * 10.0f;		/* Taking into account the division by 10 */
+			fData3 = SLIP_DataCoversion((int16_t)data3);
 			CAN_ReceivedPacketsCounter[EFI_TRACTION_CONTROL_ID_COUNTER_INDEX]++;
 			decimalToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][VH_SPEED_CSV_INDEX], 3, 1); 			/* Taking into account the division by 10 */
 			decimalToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][SLIP_TARGET_CSV_INDEX], 3, 1); 	/* Taking into account the division by 10 */
-			decimalToString((int16_t)fData3, &DATA_BlockBuffer[DATA_BlockWriteIndex][SLIP_CSV_INDEX], 4, 1); 					
+			decimalToString((int16_t)fData3, &DATA_BlockBuffer[DATA_BlockWriteIndex][SLIP_CSV_INDEX], 4, 1); 				/* Taking into account the division by 10 */
 			intToStringUnsigned((uint16_t)data4, &DATA_BlockBuffer[DATA_BlockWriteIndex][GEAR_AD_BITS_CSV_INDEX], 5);
 			break;
 		
@@ -772,7 +753,6 @@ static inline void DATA_SW_CAN_Management(uint8_t data1, uint8_t data2)
 			switch(data2) {
 				case SW_START_ACQUISITION_CAN_REQUEST:
 					startAquisitionEvent = ACQUISITION_ON_SW_REQUEST;		/* Start acquisition */
-					UsbLoadCalibration();																/*loads valibration values from usb file*/
 					xQueueSendFromISR(startAcquisitionEventHandle, &startAquisitionEvent, &startAcquisition_xHigherPriorityTaskWoken);	
 					break;
 				
@@ -789,56 +769,32 @@ static inline void DATA_SW_CAN_Management(uint8_t data1, uint8_t data2)
 		case SW_CALIBRATIONS_CAN_REQUEST:
 			switch(data2) {
 				case SW_APPS_ZERO_CALIBRATION_REQUEST:
-					DATA_APPS_ZeroCalibrationOffset = DATA_RawCalibrationData[APPS_CALIBRATION_INDEX];
-					CalibrationValues.AppsZeroCalibraionOffset = DATA_RawCalibrationData[APPS_CALIBRATION_INDEX];
-					UsbSaveCalibration();
+					OffsetHandler.DATA_APPS_ZeroCalibrationOffset = DATA_RawCalibrationData[APPS_CALIBRATION_INDEX];
+					Flash_Save_Calibration(&OffsetHandler);
 					CAN_SW_CalibrationSendAck(APPS_ZERO_CALIBRATION_DONE);
 					break;
 				
 				case SW_APPS_FULL_CALIBRATION_REQUEST:
-					DATA_APPS_FullCalibrationOffset = DATA_RawCalibrationData[APPS_CALIBRATION_INDEX];
-					CalibrationValues.AppsFullCalibraionOffset = DATA_RawCalibrationData[APPS_CALIBRATION_INDEX];
-					UsbSaveCalibration();
+					OffsetHandler.DATA_APPS_FullCalibrationOffset = DATA_RawCalibrationData[APPS_CALIBRATION_INDEX];
+					Flash_Save_Calibration(&OffsetHandler);
 					CAN_SW_CalibrationSendAck(APPS_FULL_CALIBRATION_DONE);
 					break;
 				
-				case SW_STEER_ANGLE_CALIBRATION_REQUEST:			/*deve essere rimosso, non serve piu la calibrazione da volante*/
-					DATA_STEER_ANGLE_CalibrationOffset = DATA_RawCalibrationData[STEER_ANGLE_CALIBRATION_INDEX];
-					UsbSaveCalibration();
-					CAN_SW_CalibrationSendAck(STEER_ANGLE_CALIBRATION_DONE);
-					break;
-				
 				case SW_LINEAR_CALIBRATION_REQUEST:
-					DATA_LINEAR_FR_CalibrationOffset = DATA_RawCalibrationData[LINEAR_FR_CALIBRATION_INDEX];
-					CalibrationValues.LinearFrCalibraionOffset = DATA_RawCalibrationData[LINEAR_FR_CALIBRATION_INDEX];
-				
-					DATA_LINEAR_FL_CalibrationOffset = DATA_RawCalibrationData[LINEAR_FL_CALIBRATION_INDEX];
-					CalibrationValues.LinearFlCalibraionOffset = DATA_RawCalibrationData[LINEAR_FL_CALIBRATION_INDEX];
-				
-					DATA_LINEAR_RR_CalibrationOffset = DATA_RawCalibrationData[LINEAR_RR_CALIBRATION_INDEX];
-					CalibrationValues.LinearRrCalibraionOffset = DATA_RawCalibrationData[LINEAR_RR_CALIBRATION_INDEX];
-				
-					DATA_LINEAR_RL_CalibrationOffset = DATA_RawCalibrationData[LINEAR_RL_CALIBRATION_INDEX];
-					CalibrationValues.LinearRlCalibraionOffset = DATA_RawCalibrationData[LINEAR_RL_CALIBRATION_INDEX];
-					
-					UsbSaveCalibration();
+					OffsetHandler.DATA_LINEAR_FR_CalibrationOffset = DATA_RawCalibrationData[LINEAR_FR_CALIBRATION_INDEX];
+					OffsetHandler.DATA_LINEAR_FL_CalibrationOffset = DATA_RawCalibrationData[LINEAR_FL_CALIBRATION_INDEX];
+					OffsetHandler.DATA_LINEAR_RR_CalibrationOffset = DATA_RawCalibrationData[LINEAR_RR_CALIBRATION_INDEX];
+					OffsetHandler.DATA_LINEAR_RL_CalibrationOffset = DATA_RawCalibrationData[LINEAR_RL_CALIBRATION_INDEX];
+					Flash_Save_Calibration(&OffsetHandler);
 					CAN_SW_CalibrationSendAck(LINEAR_CALIBRATION_DONE);
 					break;
 				
 				case SW_LOAD_CELL_CALIBRATION_REQUEST:
-					DATA_LOAD_CELL_FR_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_FR_CALIBRATION_INDEX];
-					CalibrationValues.LoadCellFrCalibraionOffset = DATA_RawCalibrationData[LOAD_CELL_FR_CALIBRATION_INDEX];
-				
-					DATA_LOAD_CELL_FL_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_FL_CALIBRATION_INDEX];
-					CalibrationValues.LoadCellFlCalibraionOffset = DATA_RawCalibrationData[LOAD_CELL_FL_CALIBRATION_INDEX];
-				
-					DATA_LOAD_CELL_RR_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_RR_CALIBRATION_INDEX];
-					CalibrationValues.LoadCellRrCalibraionOffset = DATA_RawCalibrationData[LOAD_CELL_RR_CALIBRATION_INDEX];
-				
-					DATA_LOAD_CELL_RL_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_RL_CALIBRATION_INDEX];
-					CalibrationValues.LoadCellRlCalibraionOffset = DATA_RawCalibrationData[LOAD_CELL_RL_CALIBRATION_INDEX];
-				
-					UsbSaveCalibration();
+					OffsetHandler.DATA_LOAD_CELL_FR_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_FR_CALIBRATION_INDEX];				
+					OffsetHandler.DATA_LOAD_CELL_FL_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_FL_CALIBRATION_INDEX];				
+					OffsetHandler.DATA_LOAD_CELL_RR_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_RR_CALIBRATION_INDEX];				
+					OffsetHandler.DATA_LOAD_CELL_RL_CalibrationOffset = DATA_RawCalibrationData[LOAD_CELL_RL_CALIBRATION_INDEX];
+					Flash_Save_Calibration(&OffsetHandler);
 					CAN_SW_CalibrationSendAck(LOAD_CELL_CALIBRATION_DONE);
 					break;
 				
@@ -850,40 +806,4 @@ static inline void DATA_SW_CAN_Management(uint8_t data1, uint8_t data2)
 		default:
 			break;
 	}
-}
-
-
-void UsbSaveCalibration(void){			/*whenever a calibration is done, this function is called and saves values on usb file*/
-	f_open(&USBHFileCalibration, &UsbFileConversionName , FA_OPEN_ALWAYS | FA_WRITE); 
-	f_write(&USBHFileCalibration, &(CalibrationValues.AppsZeroCalibraionOffset), 2, &UsbNumberByteWritten);
-	f_write(&USBHFileCalibration, &(CalibrationValues.AppsFullCalibraionOffset), 2, &UsbNumberByteWritten);
-	f_write(&USBHFileCalibration, &(CalibrationValues.LinearFrCalibraionOffset), 2, &UsbNumberByteWritten);
-	f_write(&USBHFileCalibration, &(CalibrationValues.LinearFlCalibraionOffset), 2, &UsbNumberByteWritten);
-	f_write(&USBHFileCalibration, &(CalibrationValues.LinearRrCalibraionOffset), 2, &UsbNumberByteWritten);
-	f_write(&USBHFileCalibration, &(CalibrationValues.LinearRlCalibraionOffset), 2, &UsbNumberByteWritten);
-	f_write(&USBHFileCalibration, &(CalibrationValues.LoadCellFrCalibraionOffset), 2, &UsbNumberByteWritten);
-	f_write(&USBHFileCalibration, &(CalibrationValues.LoadCellFlCalibraionOffset), 2, &UsbNumberByteWritten);
-	f_write(&USBHFileCalibration, &(CalibrationValues.LoadCellRrCalibraionOffset), 2, &UsbNumberByteWritten);
-	f_write(&USBHFileCalibration, &(CalibrationValues.LoadCellRlCalibraionOffset), 2, &UsbNumberByteWritten);
-	f_close(&USBHFileCalibration);
-	
-}
-
-void UsbLoadCalibration(void){		/*when acquisition is started from steering wheel, this function loads calibration values from usb file*/
-	f_open(&USBHFileCalibration, &UsbFileConversionName , FA_OPEN_EXISTING | FA_READ); 
-	f_read(&USBHFileCalibration, DATA_CalibrationOffset , 20, &UsbNumberByteRead);
-	DATA_APPS_ZeroCalibrationOffset = ((DATA_CalibrationOffset[0] << 8) | (DATA_CalibrationOffset[1]));
-	DATA_APPS_FullCalibrationOffset = ((DATA_CalibrationOffset[2] << 8) | (DATA_CalibrationOffset[3]));
-	DATA_LINEAR_FR_CalibrationOffset = ((DATA_CalibrationOffset[4] << 8) | (DATA_CalibrationOffset[5]));
-	DATA_LINEAR_FL_CalibrationOffset = ((DATA_CalibrationOffset[6] << 8) | (DATA_CalibrationOffset[7]));
-	DATA_LINEAR_RR_CalibrationOffset = ((DATA_CalibrationOffset[8] << 8) | (DATA_CalibrationOffset[9]));
-	DATA_LINEAR_RL_CalibrationOffset = ((DATA_CalibrationOffset[10] << 8) | (DATA_CalibrationOffset[11]));
-	DATA_LOAD_CELL_FR_CalibrationOffset = ((DATA_CalibrationOffset[12] << 8) | (DATA_CalibrationOffset[13]));
-	DATA_LOAD_CELL_FL_CalibrationOffset = ((DATA_CalibrationOffset[14] << 8) | (DATA_CalibrationOffset[15]));
-	DATA_LOAD_CELL_RR_CalibrationOffset = ((DATA_CalibrationOffset[16] << 8) | (DATA_CalibrationOffset[17]));
-	DATA_LOAD_CELL_RL_CalibrationOffset = ((DATA_CalibrationOffset[18] << 8) | (DATA_CalibrationOffset[19]));
-
-
-	f_close(&USBHFileCalibration);
-
 }

@@ -93,3 +93,4 @@ dcu_dp11\freertos.o: ../Inc/GPS.h
 dcu_dp11\freertos.o: ../Inc/data.h
 dcu_dp11\freertos.o: ../Inc/telemetry.h
 dcu_dp11\freertos.o: ../Inc/timestamp.h
+dcu_dp11\freertos.o: ../Inc/flash_utility.h
