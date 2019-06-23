@@ -24,6 +24,7 @@
 #define SET_RTC_ID                  	(uint8_t)'R'
 #define LAP_FLAG_ID                  	(uint8_t)'S'
 #define CMD_READ_ERR_ID          			(uint8_t)'B'
+#define START_RX_ERR_ID          			(uint8_t)'J'
 
 #define CAN_ID_NOT_FOUND							(uint8_t)'A'
 #define STATE_MACHINE_ERROR						(uint8_t)'B'

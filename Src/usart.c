@@ -292,17 +292,17 @@ extern inline void UART1_RxCallback(void)
 		if(receiveCommandSemaphoreHandle != NULL) {																									/* Check at the beginning if the semaphore has been already created */
 			xSemaphoreGiveFromISR(receiveCommandSemaphoreHandle, &UART1_RxHigherPriorityTaskWoken); 	/* Give semaphore to task when DMA is clear */
 		}
-		HAL_UART_Receive_DMA(&huart1, telemetryIndBuffer, 1);
+		HAL_UART_Receive_IT(&huart1, telemetryIndBuffer, 1);
 		portYIELD_FROM_ISR(UART1_RxHigherPriorityTaskWoken); 																			/* Do context-switch if needed */
 	}
 	else {
 		if(telemetryIndBuffer[0] == MESSAGE_INIT_ID) {
 			telemetryIndBuffer[0] = ' ';
-			HAL_UART_Receive_DMA(&huart1, telemetryReceivedBuffer, BUFFER_COMMAND_LEN);
+			HAL_UART_Receive_IT(&huart1, telemetryReceivedBuffer, BUFFER_COMMAND_LEN);
 			startFound = 1;
 		}
 		else {
-			HAL_UART_Receive_DMA(&huart1, telemetryIndBuffer, 1);
+			HAL_UART_Receive_IT(&huart1, telemetryIndBuffer, 1);
 		}
 	}
 	

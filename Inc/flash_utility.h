@@ -10,6 +10,7 @@
 #define SECTOR_11_END_ADDRESS_AXIM									(uint32_t)0x081FFFFF		/* AXIM interface */
 #define SECTOR_11_BEGIN_ADDRESS_ICTM								(uint32_t)0x003C0000		/* ICTM interface */
 #define SECTOR_11_END_ADDRESS_ICTM									(uint32_t)0x003FFFFF		/* ICTM interface */
+
 #define DATA_ARE_CALIBRATED_SECTOR_ADDRESS_OFFSET		(uint32_t)0x00000000
 #define APPS_FULL_SECTOR_ADDRESS_OFFSET 						(uint32_t)0x00000004
 #define APPS_ZERO_SECTOR_ADDRESS_OFFSET 						(uint32_t)0x00000008
