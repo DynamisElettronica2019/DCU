@@ -654,13 +654,15 @@ void saveUsbTask(void const * argument)
 /* USER CODE END Header_usbManagerTask */
 void usbManagerTask(void const * argument)
 {
-  /* USER CODE BEGIN usbManagerTask */
+  /* USER CODE BEGIN usbManageTask */
+	uint8_t USB_Event;
+	
   /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END usbManagerTask */
+  for(;;) {
+		xQueueReceive(usbEventQueueHandle, &USB_Event, portMAX_DELAY);		/* Wait for and event */
+		USB_EventHandler(USB_Event); 																			/* Manage USB insertion evets */														
+	}
+  /* USER CODE END usbManageTask */
 }
 
 /* USER CODE BEGIN Header_startAcquisitionStateMachineTask */

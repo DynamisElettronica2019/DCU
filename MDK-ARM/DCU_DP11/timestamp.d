@@ -1,9 +1,9 @@
 dcu_dp11\timestamp.o: ..\Src\timestamp.c
 dcu_dp11\timestamp.o: ../Inc/timestamp.h
-dcu_dp11\timestamp.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+dcu_dp11\timestamp.o: C:\Keil_v5\ARM\ARM_Compiler_5.06u6\Bin\..\include\stdint.h
 dcu_dp11\timestamp.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
 dcu_dp11\timestamp.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
-dcu_dp11\timestamp.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+dcu_dp11\timestamp.o: C:\Keil_v5\ARM\ARM_Compiler_5.06u6\Bin\..\include\stddef.h
 dcu_dp11\timestamp.o: ../Inc/FreeRTOSConfig.h
 dcu_dp11\timestamp.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
 dcu_dp11\timestamp.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
