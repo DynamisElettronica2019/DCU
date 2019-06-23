@@ -38,6 +38,8 @@
 #include "data.h"
 #include "telemetry.h"
 #include "timestamp.h"
+#include "flash_utility.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -57,11 +59,13 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
+extern OffsetHandler_t OffsetHandler;
 extern uint8_t DATA_BlockReadIndex;
 extern uint8_t GPS_FirstChar;
 extern uint8_t DATA_BlockBuffer [BUFFER_POINTERS_NUMBER][BUFFER_BLOCK_LEN];
 extern uint8_t DATA_StateBuffer [BUFFER_STATE_LEN];
 extern uint8_t telemetryReceivedBuffer [BUFFER_COMMAND_LEN];
+extern uint8_t telemetryIndBuffer [1];
 extern uint8_t GPS_RawBuffer [GPS_MAX_LENGTH];
 /* USER CODE END Variables */
 osThreadId aliveHandle;
@@ -561,11 +565,10 @@ void SendDataFunc(void const * argument)
 void ReceiveTelemFunc(void const * argument)
 {
   /* USER CODE BEGIN ReceiveTelemFunc */
-	uint8_t tempBuffer[50];
-
-	HAL_UART_Receive(&huart1, tempBuffer, 50, 50);
-	HAL_UART_Receive_DMA(&huart1, telemetryReceivedBuffer, BUFFER_COMMAND_LEN);
-  
+	if(HAL_UART_Receive_IT(&huart1, telemetryIndBuffer, 1) != HAL_OK) {
+		uint8_t startRxErrorLetter = START_RX_ERR_ID;
+		xQueueSend(ErrorQueueHandle, (void *)&startRxErrorLetter, (TickType_t)0); 					/* Add error to queue */
+	}
 	/* Infinite loop */
   for(;;) {
     xSemaphoreTake(receiveCommandSemaphoreHandle, portMAX_DELAY); 		/* Unlock when uart rx from telemetry is completed */
@@ -699,6 +702,7 @@ void canFifo0UnpackTask(void const * argument)
   /* USER CODE BEGIN canFifo0UnpackTask */
 	CAN_RxPacket_t CAN_UnpackedData;
 	
+	Flash_LoadCalibration(&OffsetHandler);
 	DATA_PacketReset();					/* Reset the data saving buffer */
 	CAN_PacketCounterReset();		/* Reset the CAN packets recevide counter */
 	CAN_Start();								/* CAN filter config and start */
@@ -845,7 +849,6 @@ void updateTimestampTask(void const * argument)
   }
   /* USER CODE END updateTimestampFromRtcTask */
 }
-
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */

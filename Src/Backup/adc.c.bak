@@ -402,18 +402,16 @@ extern inline void ADC_ReadDataDebug(void)
 	ADC_BufferConvertedDebug[XBEE_CURRENT_SENSE_POSITION] = DCU_XbeeCurrentSenseConversion(ADC1_BufferRaw[XBEE_CURRENT_SENSE_POSITION]);
 	ADC_BufferConvertedDebug[VBAT_CHANNEL_POSITION] = DCU_VbatConversion(ADC1_BufferRaw[VBAT_CHANNEL_POSITION]);
 	
-	if(DATA_GetAcquisitionState() == STATE_ON) {
-		_5vTemp = ADC_BufferConvertedDebug[_5V_DCU_POSITION] * 100.0f;
-		_12vTemp = ADC_BufferConvertedDebug[_12V_POST_DIODES_SENSE_POSITION] * 100.0f;
-		_3v3Temp = ADC_BufferConvertedDebug[_3V3_MCU_POSITION] * 100.0f;
-		intToStringUnsigned(ADC_BufferConvertedDebug[DCU_TEMP_SENSE_POSITION], &DATA_BlockBuffer[DATA_BlockWriteIndex][DCU_TEMP_CSV_INDEX], 2);
-		intToStringUnsigned(ADC_BufferConvertedDebug[MAIN_CURRENT_SENSE_POSITION], &DATA_BlockBuffer[DATA_BlockWriteIndex][DCU_CURRENT_CSV_INDEX], 4);
-		intToStringUnsigned(ADC_BufferConvertedDebug[DCU_CURRENT_SENSE_POSITION], &DATA_BlockBuffer[DATA_BlockWriteIndex][DUC_3V3_CURRENT_CSV_INDEX], 3);
-		decimalToStringUnsigned((uint16_t)_5vTemp, &DATA_BlockBuffer[DATA_BlockWriteIndex][DCU_5V_VOLTAGE_CSV_INDEX], 1, 2);
-		decimalToStringUnsigned((uint16_t)_12vTemp, &DATA_BlockBuffer[DATA_BlockWriteIndex][DCU_12V_VOLTAGE_CSV_INDEX], 2, 2);
-		decimalToStringUnsigned((uint16_t)_3v3Temp, &DATA_BlockBuffer[DATA_BlockWriteIndex][DCU_3V3_VOLTAGE_CSV_INDEX], 1, 2);
-		intToStringUnsigned(ADC_BufferConvertedDebug[XBEE_CURRENT_SENSE_POSITION], &DATA_BlockBuffer[DATA_BlockWriteIndex][XBEE_CURRENT_CSV_INDEX], 3);
-	}
+	_5vTemp = ADC_BufferConvertedDebug[_5V_DCU_POSITION] * 100.0f;
+	_12vTemp = ADC_BufferConvertedDebug[_12V_POST_DIODES_SENSE_POSITION] * 100.0f;
+	_3v3Temp = ADC_BufferConvertedDebug[_3V3_MCU_POSITION] * 100.0f;
+	intToStringUnsigned(ADC_BufferConvertedDebug[DCU_TEMP_SENSE_POSITION], &DATA_BlockBuffer[DATA_BlockWriteIndex][DCU_TEMP_CSV_INDEX], 2);
+	intToStringUnsigned(ADC_BufferConvertedDebug[MAIN_CURRENT_SENSE_POSITION], &DATA_BlockBuffer[DATA_BlockWriteIndex][DCU_CURRENT_CSV_INDEX], 4);
+	intToStringUnsigned(ADC_BufferConvertedDebug[DCU_CURRENT_SENSE_POSITION], &DATA_BlockBuffer[DATA_BlockWriteIndex][DUC_3V3_CURRENT_CSV_INDEX], 3);
+	decimalToStringUnsigned((uint16_t)_5vTemp, &DATA_BlockBuffer[DATA_BlockWriteIndex][DCU_5V_VOLTAGE_CSV_INDEX], 1, 2);
+	decimalToStringUnsigned((uint16_t)_12vTemp, &DATA_BlockBuffer[DATA_BlockWriteIndex][DCU_12V_VOLTAGE_CSV_INDEX], 2, 2);
+	decimalToStringUnsigned((uint16_t)_3v3Temp, &DATA_BlockBuffer[DATA_BlockWriteIndex][DCU_3V3_VOLTAGE_CSV_INDEX], 1, 2);
+	intToStringUnsigned(ADC_BufferConvertedDebug[XBEE_CURRENT_SENSE_POSITION], &DATA_BlockBuffer[DATA_BlockWriteIndex][XBEE_CURRENT_CSV_INDEX], 3);
 }
 
 extern inline void ADC_ReadDataAux(void)

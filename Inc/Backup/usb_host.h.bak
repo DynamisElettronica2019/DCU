@@ -34,8 +34,10 @@
 /* USER CODE BEGIN INCLUDE */
 #include "cmsis_os.h"
 
-#define VBUS_ENABLE 	(uint8_t)0
-#define VBUS_DISABLE 	(uint8_t)1
+#define VBUS_ENABLE 										(uint8_t)0
+#define VBUS_DISABLE 										(uint8_t)1
+#define OPEN_FILE_TENTATIVES_NUMBER 		(uint8_t)8
+#define CLOSE_FILE_TENTATIVES_NUMBER 		(uint8_t)8
 
 
 typedef enum {
@@ -48,10 +50,10 @@ extern inline void USB_SavingRequest(void);
 extern inline void USB_SavingTask(void);
 extern inline void USB_OpenFile(void);
 extern inline void USB_CloseFile(void);
+extern inline void USB_WriteLen(uint8_t *buffer);
 extern inline void USB_EventHandler(uint8_t USB_Event);
 extern inline void USB_OvercurrentEvent(void);
 static inline void USB_CloseAndOpenFile(void);
-static inline void USB_WriteLen(uint8_t *buffer);
 static inline void USB_GetFilename(void);
 /* USER CODE END INCLUDE */
 

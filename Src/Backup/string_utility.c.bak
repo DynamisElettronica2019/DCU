@@ -199,6 +199,64 @@ extern inline void intToStringUnsigned(uint16_t i, uint8_t *s, uint8_t size)
 	}
 }
 
+extern inline void int32ToString(int32_t i, uint8_t *s, uint8_t size)
+{
+  uint8_t count = 0;
+	uint8_t charSizeCount = 0;
+	uint8_t j = 0;
+	int32_t divResult;
+	
+	// Se il numero è negatico, lo trasformo in uno positivo mettendo il meno davanti
+	if(i < 0)
+  {
+		s[0] = '-';
+		i = i * (-1);
+		charSizeCount = 1;
+    j = 1;
+	}
+
+	divResult = i;
+
+	// Divido l'intero per 10 fino a quando non è nullo, ovvero conto le cifre del numero da covertire
+	while((divResult != 0) || (count == 0))
+	{
+		divResult = divResult / 10;
+		count++;
+		charSizeCount++;
+	}
+
+	divResult = i;
+
+	// Controllo se il nuemro da convertire richiede più spazio di quello voluto (parametro size)
+	// Se lo richiede scrivo sempre '*', alrimenti lo converto nella stringa
+	if(charSizeCount > size)
+  {
+		for(j = 0; j < size; j++)
+		{
+			s[j] = '*';
+		}
+	}
+
+	else
+	{
+    
+		// Se l'intero richiede un numero di cifre inferiore a quello voluto lo completo con zeri
+		while(charSizeCount < size)
+		{
+			s[j] = '0';
+			j++;
+			charSizeCount++;
+		}
+
+		// Include nella stringa il resto della divisione intera del numero per 10
+		// Riduco in numero di un ordine di grandezza e il resto lo includo nell'iterazione successiva
+		for(j = 0; j < count; j++)
+		{
+			s[(charSizeCount - 1) - j] = (divResult % 10) + '0';
+			divResult /= 10;
+		}
+	}
+}
 
 extern inline void uint32ToString(uint32_t i, uint8_t *s, uint8_t size)
 {
@@ -249,7 +307,6 @@ extern inline void uint32ToString(uint32_t i, uint8_t *s, uint8_t size)
 		}
 	}
 }
-
 
 extern inline uint8_t getByteFromString(uint8_t char1, uint8_t char2)
 {

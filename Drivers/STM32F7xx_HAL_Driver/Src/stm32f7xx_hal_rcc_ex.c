@@ -211,8 +211,8 @@ HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(RCC_PeriphCLKInitTypeDef  *PeriphClk
       tmpreg0 = (RCC->BDCR & ~(RCC_BDCR_RTCSEL));
 
       /* RTC Clock selection can be changed only if the Backup Domain is reset */
-      //__HAL_RCC_BACKUPRESET_FORCE();
-      //__HAL_RCC_BACKUPRESET_RELEASE();
+      __HAL_RCC_BACKUPRESET_FORCE();
+      __HAL_RCC_BACKUPRESET_RELEASE();
 
       /* Restore the Content of BDCR register */
       RCC->BDCR = tmpreg0;
