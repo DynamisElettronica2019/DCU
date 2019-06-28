@@ -45,6 +45,8 @@ extern inline void UART1_TxCallback(void);
 extern inline void UART1_RxCallback(void);
 extern inline void GPS_RxCallback(void);
 extern void USART2_Init_38400(void);
+extern void USART2_Init_9600(void);
+
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

@@ -148,6 +148,7 @@ typedef struct NMEA_output_types {
 
 
 extern void GPS_Init(void);
+extern void GPS_Init2(void);
 extern inline void GPS_DataConversion(uint8_t * GPSRawBuffer);
 static inline uint8_t GPS_get_messageID(uint8_t * buffer);
 static inline void GPS_GGA_conversion(uint8_t * buffer);
