@@ -28,10 +28,9 @@
 #include "telemetry.h"
 
 uint8_t toSW_AcquisitionState = TO_SW_ACQUISITION_IS_ON;
-uint32_t CAN_ReceivedPacketsCounter [NUMBER_OF_ACQUIRED_CHANNELS];
+uint32_t CAN_ReceivedPacketsCounter [NUMBER_OF_RECEIVED_PACKETS];
 uint32_t packetMailbox;
 float brake_Partition = 0.0f;
-CAN_FilterTypeDef CAN_FilterConfigHeader;
 CAN_RxPacket_t CAN_CurrentFifo0ReceivedPacket;
 CAN_RxPacket_t CAN_CurrentFifo1ReceivedPacket;
 CAN_TxPacket_t CAN_AutogearPacket;
@@ -228,7 +227,7 @@ extern inline void CAN_SW_CalibrationSendAck(uint8_t ackValue)
 
 extern void CAN_PacketCounterReset(void)
 {
-	for(uint16_t i = 0; i < NUMBER_OF_ACQUIRED_CHANNELS; i++) {
+	for(uint16_t i = 0; i < NUMBER_OF_RECEIVED_PACKETS; i++) {
 		CAN_ReceivedPacketsCounter[i] = 0;
 	}
 }
@@ -241,29 +240,13 @@ static inline void CAN_SendPacketPolling(CAN_TxPacket_t packet)
 
 static void CAN_FilterConfig(void)
 {
-	CAN_FilterConfigHeader.FilterBank = 0;
-  CAN_FilterConfigHeader.FilterMode = CAN_FILTERMODE_IDMASK;
-  CAN_FilterConfigHeader.FilterScale = CAN_FILTERSCALE_32BIT;
-	CAN_FilterConfigHeader.FilterIdHigh = (0x0000 << 5);
-  CAN_FilterConfigHeader.FilterIdLow = 0x0000;
-	CAN_FilterConfigHeader.FilterMaskIdHigh = (0x0001 << 5);
-  CAN_FilterConfigHeader.FilterMaskIdLow = 0x0000;
-	CAN_FilterConfigHeader.FilterFIFOAssignment = CAN_RX_FIFO0;
-  CAN_FilterConfigHeader.FilterActivation = ENABLE;	
-  CAN_FilterConfigHeader.SlaveStartFilterBank = 14;
-	HAL_CAN_ConfigFilter(&hcan1, &CAN_FilterConfigHeader);
-	
-  CAN_FilterConfigHeader.FilterBank = 1;
-  CAN_FilterConfigHeader.FilterMode = CAN_FILTERMODE_IDMASK;
-  CAN_FilterConfigHeader.FilterScale = CAN_FILTERSCALE_32BIT;
-	CAN_FilterConfigHeader.FilterIdHigh = (0x0001 << 5);
-  CAN_FilterConfigHeader.FilterIdLow = 0x0000;
-	CAN_FilterConfigHeader.FilterMaskIdHigh = (0x0001 << 5);
-  CAN_FilterConfigHeader.FilterMaskIdLow = 0x0000;
-	CAN_FilterConfigHeader.FilterFIFOAssignment = CAN_RX_FIFO1;
-  CAN_FilterConfigHeader.FilterActivation = ENABLE;	
-  CAN_FilterConfigHeader.SlaveStartFilterBank = 14;
-	HAL_CAN_ConfigFilter(&hcan1, &CAN_FilterConfigHeader);
+	CAN_SetFiler(0, 0x7FC, 0x304, CAN_RX_FIFO0); 		/* EFI mask 1 */
+	CAN_SetFiler(1, 0x7F8, 0x30C, CAN_RX_FIFO0); 		/* EFI mask 2 */
+	CAN_SetFiler(2, 0x7F0, 0x312, CAN_RX_FIFO0); 		/* Debug and GCU mask 1 */
+	CAN_SetFiler(3, 0x7FF, 0x400, CAN_RX_FIFO0); 		/* SW start acquisition mask */
+	CAN_SetFiler(4, 0x7FF, 0x500, CAN_RX_FIFO0); 		/* GCU mask 2 */
+	CAN_SetFiler(5, 0x7F0, 0x650, CAN_RX_FIFO1); 		/* DAUs and Datron mask */
+	CAN_SetFiler(6, 0x7F8, 0x708, CAN_RX_FIFO1); 		/* IMUs */
 }
 
 static void CAN_PacketInit(void)
@@ -302,9 +285,30 @@ static void CAN_PacketInit(void)
 	CAN_AutogearPacket.packetHeader.TransmitGlobalTime = DISABLE;
 }
 
+static void CAN_SetFiler(uint8_t filterBank, uint16_t filterMask, uint16_t filterID, uint32_t CAN_FIFO_Number)
+{
+	CAN_FilterTypeDef CAN_FilterConfigHeader;
+  CAN_FilterConfigHeader.FilterBank = filterBank;
+  CAN_FilterConfigHeader.FilterMode = CAN_FILTERMODE_IDMASK;
+  CAN_FilterConfigHeader.FilterScale = CAN_FILTERSCALE_32BIT;
+	CAN_FilterConfigHeader.FilterIdHigh = (filterID << 5);
+  CAN_FilterConfigHeader.FilterIdLow = 0x0000;
+  CAN_FilterConfigHeader.FilterMaskIdHigh = (filterMask << 5);
+  CAN_FilterConfigHeader.FilterMaskIdLow = 0x0000;
+	CAN_FilterConfigHeader.FilterFIFOAssignment = CAN_FIFO_Number;
+  CAN_FilterConfigHeader.FilterActivation = ENABLE;	
+  CAN_FilterConfigHeader.SlaveStartFilterBank = 14;
+	HAL_CAN_ConfigFilter(&hcan1, &CAN_FilterConfigHeader);
+}
+
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
 	HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &(CAN_CurrentFifo0ReceivedPacket.packetHeader), CAN_CurrentFifo0ReceivedPacket.packetData);
+	
+	if((CAN_CurrentFifo0ReceivedPacket.packetHeader.FilterMatchIndex == 0) || (CAN_CurrentFifo0ReceivedPacket.packetHeader.FilterMatchIndex == 1)) { 
+    DATA_SetEfiIsAlive();
+	}
+	
 	xQueueSendFromISR(canFifo0QueueHandle, &CAN_CurrentFifo0ReceivedPacket, &CAN_Rx0xHigherPriorityTaskWoken);
 	portYIELD_FROM_ISR(CAN_Rx0xHigherPriorityTaskWoken);
 }

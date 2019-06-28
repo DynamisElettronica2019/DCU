@@ -6,8 +6,7 @@
 #define CHANNEL_SEPARATION																		(uint8_t)';'
 #define DECIMAL_SEPARATOR 																		(uint8_t)'.'
 #define END_LINE																							(uint8_t)'\n'
-#define NUMBER_OF_RECEIVED_PACKETS														(uint8_t)27
-#define NUMBER_OF_ACQUIRED_CHANNELS														(uint8_t)91
+#define NUMBER_OF_RECEIVED_PACKETS														(uint8_t)30
 #define BUFFER_STATE_LEN 																			(uint8_t)9
 #define BUFFER_BLOCK_LEN 																			(uint16_t)647
 #define BUFFER_POINTERS_NUMBER 																(uint8_t)2
@@ -33,14 +32,17 @@
 #define IMU1_DATA_2_ID_COUNTER_INDEX 													(uint8_t)16
 #define IMU2_DATA_1_ID_COUNTER_INDEX 													(uint8_t)17
 #define IMU2_DATA_2_ID_COUNTER_INDEX 													(uint8_t)18
-#define GCU_CLUTCH_MODE_MAP_SW_ID_COUNTER_INDEX 							(uint8_t)19
-#define GCU_TRACTION_LIMITER_AUTOG_ACC_SW_ID_COUNTER_INDEX 		(uint8_t)20
-#define DAU_FR_DEBUG_ID_COUNTER_INDEX 												(uint8_t)21
-#define DAU_FL_DEBUG_ID_COUNTER_INDEX 												(uint8_t)22
-#define DAU_REAR_DEBUG_ID_COUNTER_INDEX 											(uint8_t)23
-#define SW_DEBUG_ID_COUNTER_INDEX 														(uint8_t)24
-#define GCU_DEBUG_1_ID_COUNTER_INDEX 													(uint8_t)25
-#define GCU_DEBUG_2_ID_COUNTER_INDEX 													(uint8_t)26
+#define SW_ACQUISITION_DCU_ID_COUNTER_INDEX										(uint8_t)19
+#define GCU_CLUTCH_MODE_MAP_SW_ID_COUNTER_INDEX 							(uint8_t)20
+#define GCU_TRACTION_LIMITER_AUTOG_ACC_SW_ID_COUNTER_INDEX 		(uint8_t)21
+#define DAU_FR_DEBUG_ID_COUNTER_INDEX 												(uint8_t)22
+#define DAU_FL_DEBUG_ID_COUNTER_INDEX 												(uint8_t)23
+#define DAU_REAR_DEBUG_ID_COUNTER_INDEX 											(uint8_t)24
+#define SW_DEBUG_ID_COUNTER_INDEX 														(uint8_t)25
+#define GCU_DEBUG_1_ID_COUNTER_INDEX 													(uint8_t)26
+#define GCU_DEBUG_2_ID_COUNTER_INDEX 													(uint8_t)27
+#define DATRON_1_ID_COUNTER_INDEX															(uint8_t)28
+#define DATRON_2_ID_COUNTER_INDEX															(uint8_t)29
 
 /* Data index in CSV file */
 #define TIMESTAMP_CSV_INDEX 																	(uint16_t)0
@@ -372,7 +374,8 @@
 #define CALIBRATION_IS_CONFIG_RTC_REGISTER										((uint32_t)0x0000000CU)
 
 
-extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData);
+extern inline void DATA_CanParser_FIFO0(CAN_RxPacket_t *unpackedData);
+extern inline void DATA_CanParser_FIFO1(CAN_RxPacket_t *unpackedData);
 extern inline void startAcquisitionStateMachine(uint8_t startAcquisitionEvent);
 extern inline void DATA_ResetAcquisitionStateMachine(void);
 extern inline void DATA_CheckEfiIsAlive(void);

@@ -32,13 +32,13 @@ float BPS_Rear = 0.0f;
 OffsetHandler_t OffsetHandler;
 BaseType_t EFI_IsAlive_xHigherPriorityTaskWoken = pdFALSE;
 extern uint8_t DATA_BlockWriteIndex;
-extern uint32_t CAN_ReceivedPacketsCounter [NUMBER_OF_ACQUIRED_CHANNELS];
+extern uint32_t CAN_ReceivedPacketsCounter [NUMBER_OF_RECEIVED_PACKETS];
 extern osSemaphoreId automaticStartAcquisitionSemaphoreHandle;
 extern osMessageQId startAcquisitionEventHandle;
 extern osMessageQId ErrorQueueHandle;
 
 
-extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
+extern inline void DATA_CanParser_FIFO0(CAN_RxPacket_t *unpackedData)
 {	
 	/* Get the four 16 bit data from the 8 bit CAN messages */
 	data1 = (unpackedData->packetData[0] << 8) | unpackedData->packetData[1]; 		/* First data in the packet */
@@ -52,7 +52,6 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 		/* EFI ID range */
 		
 		case EFI_HALL_WHEEL_ID:
-			DATA_SetEfiIsAlive();
 			CAN_ReceivedPacketsCounter[EFI_HALL_WHEEL_ID_COUNTER_INDEX]++;
 			decimalToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][HALL_EFFECT_FR_CSV_INDEX], 3, 1); 		/* Taking into account the division by 10 */
 			decimalToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][HALL_EFFECT_FL_CSV_INDEX], 3, 1); 		/* Taking into account the division by 10 */
@@ -61,7 +60,6 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			break;
 		
 		case EFI_WATER_TEMPERATURE_ID:
-			DATA_SetEfiIsAlive();
 			CAN_ReceivedPacketsCounter[EFI_WATER_TEMPERATURE_ID_COUNTER_INDEX]++;
 			fData1 = EFI_TEMPERATURE_DataConversion(data1);
 			fData2 = EFI_TEMPERATURE_DataConversion(data2);
@@ -74,7 +72,6 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			break;
 		
 		case EFI_OIL_T_ENGINE_BAT_ID:
-			DATA_SetEfiIsAlive();
 			CAN_ReceivedPacketsCounter[EFI_OIL_T_ENGINE_BAT_ID_COUNTER_INDEX]++;
 			fData1 = EFI_TEMPERATURE_DataConversion(data1);
 			fData2 = EFI_TEMPERATURE_DataConversion(data2);
@@ -87,7 +84,6 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			break;
 		
 		case EFI_GEAR_RPM_TPS_PH2O_ID:
-			DATA_SetEfiIsAlive();
 			CAN_ReceivedPacketsCounter[EFI_GEAR_RPM_TPS_PH2O_COUNTER_INDEX]++;
 			fData3 = TPS_DataConversion(data3);
 			fData4 = WATER_PRESSURE_DataConversion(data4);
@@ -98,7 +94,6 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			break;
 		
 		case EFI_TRACTION_CONTROL_ID:
-			DATA_SetEfiIsAlive();
 			fData3 = SLIP_DataCoversion((int16_t)data3);
 			CAN_ReceivedPacketsCounter[EFI_TRACTION_CONTROL_ID_COUNTER_INDEX]++;
 			decimalToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][VH_SPEED_CSV_INDEX], 3, 1); 			/* Taking into account the division by 10 */
@@ -108,7 +103,6 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			break;
 		
 		case EFI_MANUAL_LIMITER_FAN_H2O_PIT_LANE_ID:
-			DATA_SetEfiIsAlive();
 			CAN_ReceivedPacketsCounter[EFI_MANUAL_LIMITER_FAN_H2O_PIT_LANE_COUNTER_INDEX]++;
 			fData3 = H20_PUMP_DUTY_CYCLE_DataConversion(data3);
 			intToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][MANUAL_LIMITER_ACTIVE_CSV_INDEX], 1);
@@ -118,7 +112,6 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			break;
 		
 		case EFI_PRESSURES_LAMBDA_SMOT_ID:
-			DATA_SetEfiIsAlive();
 			CAN_ReceivedPacketsCounter[EFI_PRESSURES_LAMBDA_SMOT_ID_COUNTER_INDEX]++;
 			intToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][FUEL_PRESSURE_CSV_INDEX], 5);
 			intToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][OIL_PRESSURE_CSV_INDEX], 5);
@@ -127,7 +120,6 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			break;
 		
 		case EFI_LOIL_EXHAUST_ID:
-			DATA_SetEfiIsAlive();
 			CAN_ReceivedPacketsCounter[EFI_LOIL_EXHAUST_ID_COUNTER_INDEX]++;
 			fData1 = FUEL_LEVEL_DataConversion(data1) * 100.0f;						/* Taking into account the division by 100 */
 			fData2 = EXHAUST_TEMPERATURE_DataConversion(data2);
@@ -141,9 +133,86 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 		/* SW ID range */
 		
 		case SW_ACQUISITION_DCU_ID:
+			CAN_ReceivedPacketsCounter[SW_ACQUISITION_DCU_ID_COUNTER_INDEX]++;
 			DATA_SW_CAN_Management(data1, data2);
 			break;
 		
+		/* GCU ID range */
+		
+		case GCU_CLUTCH_MODE_MAP_SW_ID:
+			CAN_ReceivedPacketsCounter[GCU_CLUTCH_MODE_MAP_SW_ID_COUNTER_INDEX]++;
+			intToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][CLUTCH_FEEDBACK_CSV_INDEX], 3);
+			intToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][MODE_FEEDBACK_CSV_INDEX], 1);
+			intToStringUnsigned(data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][MAP_FEEDBACK_CSV_INDEX], 1);
+			intToStringUnsigned(data4, &DATA_BlockBuffer[DATA_BlockWriteIndex][ANTISTALL_FEEDBACK_CSV_INDEX], 1);
+			break;
+	
+		case GCU_TRACTION_LIMITER_AUTOG_ACC_SW_ID:
+			CAN_ReceivedPacketsCounter[GCU_TRACTION_LIMITER_AUTOG_ACC_SW_ID_COUNTER_INDEX]++;
+			intToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][TRACTION_FEEDBACK_CSV_INDEX], 1);
+			intToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][RPM_LIMITER_FEEDBACK_CSV_INDEX], 3);
+			intToStringUnsigned(data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][AUTOGEARSHIFT_FEEDBACK_CSV_INDEX], 1);
+			intToStringUnsigned(data4, &DATA_BlockBuffer[DATA_BlockWriteIndex][ACCELERATION_FEEDBACK_CSV_INDEX], 1);
+			break;
+		
+		/* Debug ID range */
+		
+		case DAU_FR_DEBUG_ID:
+			CAN_ReceivedPacketsCounter[DAU_FR_DEBUG_ID_COUNTER_INDEX]++;
+			intToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][DAU_FR_TEMP_CSV_INDEX], 2);
+			intToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][DAU_FR_CURRENT_CSV_INDEX], 3);
+			break;
+		
+		case DAU_FL_DEBUG_ID:
+			CAN_ReceivedPacketsCounter[DAU_FL_DEBUG_ID_COUNTER_INDEX]++;
+			intToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][DAU_FL_TEMP_CSV_INDEX], 2);
+			intToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][DAU_FL_CURRENT_CSV_INDEX], 3);
+			break;
+		
+		case DAU_REAR_DEBUG_ID:
+			CAN_ReceivedPacketsCounter[DAU_REAR_DEBUG_ID_COUNTER_INDEX]++;	
+			intToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][DAU_REAR_TEMP_CSV_INDEX], 2);
+			intToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][DAU_REAR_CURRENT_CSV_INDEX], 3);
+			break;
+		
+		case SW_DEBUG_ID:
+			CAN_ReceivedPacketsCounter[SW_DEBUG_ID_COUNTER_INDEX]++;
+			intToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][SW_TEMP_CSV_INDEX], 2);
+			intToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][SW_CURRENT_CSV_INDEX], 4);
+			break;
+		
+		case GCU_DEBUG_1_ID:
+			CAN_ReceivedPacketsCounter[GCU_DEBUG_1_ID_COUNTER_INDEX]++;
+			intToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][GCU_TEMP_CSV_INDEX], 2);
+			intToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][GCU_CURR_CSV_INDEX], 3);
+			decimalToStringUnsigned(data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][H2O_PUMP_CURRENT_CSV_INDEX], 2, 1);		/* Taking into account the division by 10 */
+			decimalToStringUnsigned(data4, &DATA_BlockBuffer[DATA_BlockWriteIndex][FUEL_PUMP_CURRENT_CSV_INDEX], 2, 1);		/* Taking into account the division by 10 */
+			break;
+		
+		case GCU_DEBUG_2_ID:
+			CAN_ReceivedPacketsCounter[GCU_DEBUG_2_ID_COUNTER_INDEX]++;
+			decimalToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][GEARMOTOR_CURRENT_CSV_INDEX], 2, 1);		/* Taking into account the division by 10 */
+			decimalToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][CLUTCH_CURRENT_CSV_INDEX], 2, 1);			/* Taking into account the division by 10 */
+			decimalToStringUnsigned(data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][FAN_SX_CURRENT_CSV_INDEX], 2, 1);			/* Taking into account the division by 10 */
+			decimalToStringUnsigned(data4, &DATA_BlockBuffer[DATA_BlockWriteIndex][FAN_DX_CURRENT_CSV_INDEX], 2, 1);			/* Taking into account the division by 10 */
+			break;
+		
+		default:
+			break;
+	}
+}
+
+extern inline void DATA_CanParser_FIFO1(CAN_RxPacket_t *unpackedData)
+{	
+	/* Get the four 16 bit data from the 8 bit CAN messages */
+	data1 = (unpackedData->packetData[0] << 8) | unpackedData->packetData[1]; 		/* First data in the packet */
+	data2 = (unpackedData->packetData[2] << 8) | unpackedData->packetData[3]; 		/* Second data in the packet */
+	data3 = (unpackedData->packetData[4] << 8) | unpackedData->packetData[5]; 		/* Third data in the packet */
+	data4 = (unpackedData->packetData[6] << 8) | unpackedData->packetData[7]; 		/* Fourth data in the packet */
+	
+	/* Manage the conversions of all the data types */
+	switch(unpackedData->packetHeader.StdId) {
+
 		/* DAU ID range */
 		
 		case DAU_FR_ID:
@@ -278,74 +347,16 @@ extern inline void DATA_CanParser(CAN_RxPacket_t *unpackedData)
 			intToStringUnsigned(data4, &DATA_BlockBuffer[DATA_BlockWriteIndex][IMU2_SENSORS_CALIBRATION_CSV_INDEX], 3);
 			break;
 		
-		/* GCU ID range */
-		
-		case GCU_CLUTCH_MODE_MAP_SW_ID:
-			CAN_ReceivedPacketsCounter[GCU_CLUTCH_MODE_MAP_SW_ID_COUNTER_INDEX]++;
-			intToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][CLUTCH_FEEDBACK_CSV_INDEX], 3);
-			intToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][MODE_FEEDBACK_CSV_INDEX], 1);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][MAP_FEEDBACK_CSV_INDEX], 1);
-			intToStringUnsigned(data4, &DATA_BlockBuffer[DATA_BlockWriteIndex][ANTISTALL_FEEDBACK_CSV_INDEX], 1);
-			break;
-	
-		case GCU_TRACTION_LIMITER_AUTOG_ACC_SW_ID:
-			CAN_ReceivedPacketsCounter[GCU_TRACTION_LIMITER_AUTOG_ACC_SW_ID_COUNTER_INDEX]++;
-			intToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][TRACTION_FEEDBACK_CSV_INDEX], 1);
-			intToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][RPM_LIMITER_FEEDBACK_CSV_INDEX], 3);
-			intToStringUnsigned(data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][AUTOGEARSHIFT_FEEDBACK_CSV_INDEX], 1);
-			intToStringUnsigned(data4, &DATA_BlockBuffer[DATA_BlockWriteIndex][ACCELERATION_FEEDBACK_CSV_INDEX], 1);
-			break;
-		
-		/* Debug ID range */
-		
-		case DAU_FR_DEBUG_ID:
-			CAN_ReceivedPacketsCounter[DAU_FR_DEBUG_ID_COUNTER_INDEX]++;
-			intToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][DAU_FR_TEMP_CSV_INDEX], 2);
-			intToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][DAU_FR_CURRENT_CSV_INDEX], 3);
-			break;
-		
-		case DAU_FL_DEBUG_ID:
-			CAN_ReceivedPacketsCounter[DAU_FL_DEBUG_ID_COUNTER_INDEX]++;
-			intToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][DAU_FL_TEMP_CSV_INDEX], 2);
-			intToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][DAU_FL_CURRENT_CSV_INDEX], 3);
-			break;
-		
-		case DAU_REAR_DEBUG_ID:
-			CAN_ReceivedPacketsCounter[DAU_REAR_DEBUG_ID_COUNTER_INDEX]++;	
-			intToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][DAU_REAR_TEMP_CSV_INDEX], 2);
-			intToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][DAU_REAR_CURRENT_CSV_INDEX], 3);
-			break;
-		
-		case SW_DEBUG_ID:
-			CAN_ReceivedPacketsCounter[SW_DEBUG_ID_COUNTER_INDEX]++;
-			intToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][SW_TEMP_CSV_INDEX], 2);
-			intToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][SW_CURRENT_CSV_INDEX], 4);
-			break;
-		
-		case GCU_DEBUG_1_ID:
-			CAN_ReceivedPacketsCounter[GCU_DEBUG_1_ID_COUNTER_INDEX]++;
-			intToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][GCU_TEMP_CSV_INDEX], 2);
-			intToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][GCU_CURR_CSV_INDEX], 3);
-			decimalToStringUnsigned(data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][H2O_PUMP_CURRENT_CSV_INDEX], 2, 1);		/* Taking into account the division by 10 */
-			decimalToStringUnsigned(data4, &DATA_BlockBuffer[DATA_BlockWriteIndex][FUEL_PUMP_CURRENT_CSV_INDEX], 2, 1);		/* Taking into account the division by 10 */
-			break;
-		
-		case GCU_DEBUG_2_ID:
-			CAN_ReceivedPacketsCounter[GCU_DEBUG_2_ID_COUNTER_INDEX]++;
-			decimalToStringUnsigned(data1, &DATA_BlockBuffer[DATA_BlockWriteIndex][GEARMOTOR_CURRENT_CSV_INDEX], 2, 1);		/* Taking into account the division by 10 */
-			decimalToStringUnsigned(data2, &DATA_BlockBuffer[DATA_BlockWriteIndex][CLUTCH_CURRENT_CSV_INDEX], 2, 1);			/* Taking into account the division by 10 */
-			decimalToStringUnsigned(data3, &DATA_BlockBuffer[DATA_BlockWriteIndex][FAN_SX_CURRENT_CSV_INDEX], 2, 1);			/* Taking into account the division by 10 */
-			decimalToStringUnsigned(data4, &DATA_BlockBuffer[DATA_BlockWriteIndex][FAN_DX_CURRENT_CSV_INDEX], 2, 1);			/* Taking into account the division by 10 */
-			break;
-		
 		/* DATRON ID range */
 		
 		case DATRON_1_ID:
+			CAN_ReceivedPacketsCounter[DATRON_1_ID_COUNTER_INDEX]++;
 			DATRON_Distance = ((data3 << 16) & 0xFFFF0000) | data4;
 			int32ToString((int32_t)DATRON_Distance, &DATA_BlockBuffer[DATA_BlockWriteIndex][DATRON_DISTANCE_CSV_INDEX], 10);
 			break;
 		
 		case DATRON_2_ID:
+			CAN_ReceivedPacketsCounter[DATRON_2_ID_COUNTER_INDEX]++;
 			fData1 = DATRON_Velocity_DataConversion((int16_t)data1) * 100.0f; 			/* Taking into account the division by 100 */
 			fData2 = DATRON_Velocity_DataConversion((int16_t)data2) * 100.0f; 			/* Taking into account the division by 100 */
 			decimalToString((int16_t)fData1, &DATA_BlockBuffer[DATA_BlockWriteIndex][DATRON_X_CSV_INDEX], 3, 2);

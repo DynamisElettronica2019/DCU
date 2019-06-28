@@ -345,10 +345,7 @@ extern void USART2_Init_9600(void)
   huart2.AdvancedInit.OverrunDisable = UART_ADVFEATURE_OVERRUN_DISABLE;
   huart2.AdvancedInit.DMADisableonRxError = UART_ADVFEATURE_DMA_DISABLEONRXERROR;
 	HAL_UART_Init(&huart2);
-	
 }
-
-	
 
 /* USER CODE END 1 */
 

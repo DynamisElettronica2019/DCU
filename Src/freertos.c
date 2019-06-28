@@ -700,7 +700,7 @@ void startAcquisitionStateMachineTask(void const * argument)
 void canFifo0UnpackTask(void const * argument)
 {
   /* USER CODE BEGIN canFifo0UnpackTask */
-	CAN_RxPacket_t CAN_UnpackedData;
+	CAN_RxPacket_t CAN_UnpackedData_FIFO0;
 	
 	Flash_LoadCalibration(&OffsetHandler);
 	DATA_PacketReset();					/* Reset the data saving buffer */
@@ -709,8 +709,8 @@ void canFifo0UnpackTask(void const * argument)
 	
   /* Infinite loop */
   for(;;) {		
-		if(xQueueReceive(canFifo0QueueHandle, &CAN_UnpackedData, portMAX_DELAY) == pdTRUE) {		
-			DATA_CanParser(&CAN_UnpackedData);  	/* Data parsing and conversion */
+		if(xQueueReceive(canFifo0QueueHandle, &CAN_UnpackedData_FIFO0, portMAX_DELAY) == pdTRUE) {		
+			DATA_CanParser_FIFO0(&CAN_UnpackedData_FIFO0);  	/* Data parsing and conversion */
 		}
   }
   /* USER CODE END canFifo0UnpackTask */
@@ -726,12 +726,12 @@ void canFifo0UnpackTask(void const * argument)
 void canFifo1UnpackTask(void const * argument)
 {
   /* USER CODE BEGIN canFifo1UnpackTask */
-	CAN_RxPacket_t CAN_UnpackedData;
+	CAN_RxPacket_t CAN_UnpackedData_FIFO1;
 	
   /* Infinite loop */
   for(;;) {
-		if(xQueueReceive(canFifo1QueueHandle, &CAN_UnpackedData, portMAX_DELAY) == pdTRUE) {		
-			DATA_CanParser(&CAN_UnpackedData);  	/* Data parsing and convertion */
+		if(xQueueReceive(canFifo1QueueHandle, &CAN_UnpackedData_FIFO1, portMAX_DELAY) == pdTRUE) {		
+			DATA_CanParser_FIFO1(&CAN_UnpackedData_FIFO1);  	/* Data parsing and convertion */
 		}
   }
   /* USER CODE END canFifo1UnpackTask */

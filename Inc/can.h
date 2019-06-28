@@ -58,6 +58,7 @@ extern void CAN_PacketCounterReset(void);
 static inline void CAN_SendPacketPolling(CAN_TxPacket_t packet);
 static void CAN_FilterConfig(void);
 static void CAN_PacketInit(void);
+static void CAN_SetFiler(uint8_t filterBank, uint16_t filterMask,  uint16_t filterID, uint32_t CAN_FIFO_Number);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
