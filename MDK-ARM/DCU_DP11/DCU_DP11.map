@@ -1,4 +1,4 @@
-Component: ARM Compiler 5.06 update 6 (build 750) Tool: armlink [4d35ed]
+Component: ARM Compiler 5.06 update 5 (build 528) Tool: armlink [4d35e2]
 
 ==============================================================================
 
@@ -5969,80 +5969,80 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
-      1560        142          0         20        424       6684   adc.o
-        26          0          0          0          0       2403   bsp_driver_sd.o
-      1278        160          0         24        360       9359   can.o
-       224         24        942          0          0       2495   ccsbcs.o
-       582         18          0          0          0      24040   cmsis_os.o
-      5770        218          0         48       1344    1005205   data.o
-      1674        440          0          0          0      26619   data_conversion.o
-       148         28          0          0          0       3721   diskio.o
-       108          4          0          0          0        790   dma.o
-         0          0          0          0          0       9548   event_groups.o
-        56         18          0          5       1128       1672   fatfs.o
-      7102         86        157         12         48      41669   ff.o
-       144         12          0          0         16       2565   ff_gen_drv.o
-       392         12          0          0          0       2553   flash_utility.o
-      2226        182        847        176          0      18558   freertos.o
-       418         48          0         24          0       3020   gpio.o
-      3968        314          0         26        608      11569   gps.o
-       596         22          0         24      65536       6707   heap_4.o
-       212         24          0          0         76       1689   i2c.o
-       150          0          0          0          0       3618   list.o
-       808         40          0          0          0      43763   main.o
-       802         76          0         12          0      11581   port.o
-      2310         22          0          0         64      17943   queue.o
-       204         22          0          4         56       2198   rtc.o
-        40         12          0          8          0      16992   sd_diskio.o
+      1560        142          0         20        424       6656   adc.o
+        26          0          0          0          0       2399   bsp_driver_sd.o
+      1278        160          0         24        360       9323   can.o
+       224         24        942          0          0       2487   ccsbcs.o
+       582         18          0          0          0      24000   cmsis_os.o
+      5770        218          0         48       1344    1004997   data.o
+      1674        440          0          0          0      26567   data_conversion.o
+       148         28          0          0          0       3717   diskio.o
+       108          4          0          0          0        786   dma.o
+         0          0          0          0          0       9512   event_groups.o
+        56         18          0          5       1128       1664   fatfs.o
+      7102         86        157         12         48      41641   ff.o
+       144         12          0          0         16       2553   ff_gen_drv.o
+       392         12          0          0          0       2541   flash_utility.o
+      2226        182        847        176          0      18522   freertos.o
+       418         48          0         24          0       3016   gpio.o
+      3968        314          0         26        608      11537   gps.o
+       596         22          0         24      65536       6695   heap_4.o
+       212         24          0          0         76       1681   i2c.o
+       150          0          0          0          0       3598   list.o
+       808         40          0          0          0      43719   main.o
+       802         76          0         12          0      11489   port.o
+      2310         22          0          0         64      17951   queue.o
+       204         22          0          4         56       2186   rtc.o
+        40         12          0          8          0      16972   sd_diskio.o
         36         10          0          0        324        749   sdmmc.o
-        36          8        504          0      17920        808   startup_stm32f767xx.o
-       112         20          0         12          0       8522   stm32f7xx_hal.o
-      1832         54          0          0          0       9205   stm32f7xx_hal_adc.o
-         2          0          0          0          0       1013   stm32f7xx_hal_adc_ex.o
-      1892          6          0          0          0      15292   stm32f7xx_hal_can.o
-       162         10          0          0          0      37662   stm32f7xx_hal_cortex.o
-      1206         18          8          0          0       5974   stm32f7xx_hal_dma.o
-       480         40          0          0         28       4406   stm32f7xx_hal_flash.o
-        88          4          0          0          0       2192   stm32f7xx_hal_flash_ex.o
-       658         24          0          0          0       4411   stm32f7xx_hal_gpio.o
-      2422          6          0          0          0      11825   stm32f7xx_hal_hcd.o
-       180          0          0          0          0       3671   stm32f7xx_hal_i2c.o
-       196          0          0          0          0       2087   stm32f7xx_hal_i2c_ex.o
-        60         10          0          0          0        838   stm32f7xx_hal_msp.o
-       124          8          0          0          0       1260   stm32f7xx_hal_pwr_ex.o
-      1672        114          0          0          0       6087   stm32f7xx_hal_rcc.o
-      1504         36          0          0          0       2280   stm32f7xx_hal_rcc_ex.o
-      1110         12          0          0          0       6798   stm32f7xx_hal_rtc.o
-       786         10          0          0          0       5873   stm32f7xx_hal_sd.o
-      1148         26          0          0          0       9856   stm32f7xx_hal_tim.o
-       106          0          0          0          0       3052   stm32f7xx_hal_tim_ex.o
-       124         16          0          0         64       1371   stm32f7xx_hal_timebase_tim.o
-      2604         64          0          0          0      14934   stm32f7xx_hal_uart.o
-       284        124          0          0          0      13071   stm32f7xx_it.o
-       464         14          0          0          0       6724   stm32f7xx_ll_sdmmc.o
-      1920         44          0          4          0      16651   stm32f7xx_ll_usb.o
-      1944         22          0          0          0      10413   string_utility.o
-        62          0          0          0          0       3384   syscall.o
-        96         20         24          4          0       1239   system_stm32f7xx.o
-      2524        190          0         60        400      22371   tasks.o
-      1560        148          0         21         17       9695   telemetry.o
-       424         36          0          0        192       3048   tim.o
-       344         68          0          8         15       5741   timestamp.o
-       968        150          0         16        352       6052   usart.o
-      1112        190          1       1522       1268       8000   usb_host.o
-       692         16          0          0        708      13733   usbh_conf.o
-      1498         26         40          0          0      19526   usbh_core.o
-      1394         12          0          0          0       9640   usbh_ctlreq.o
-       452         26         20          0        512       4597   usbh_diskio.o
-       206          0          0          0          0       4440   usbh_ioreq.o
-      2302         10          4         32          0      11473   usbh_msc.o
-       732         26          0          0          0       5456   usbh_msc_bot.o
-       946          0          0          0          0       6763   usbh_msc_scsi.o
-       124          0          0          0          0       3378   usbh_pipes.o
-        24          6          0          0          0        518   usbh_platform.o
+        36          8        504          0      17920        804   startup_stm32f767xx.o
+       112         20          0         12          0       8514   stm32f7xx_hal.o
+      1832         54          0          0          0       9189   stm32f7xx_hal_adc.o
+         2          0          0          0          0       1005   stm32f7xx_hal_adc_ex.o
+      1892          6          0          0          0      15260   stm32f7xx_hal_can.o
+       162         10          0          0          0      37638   stm32f7xx_hal_cortex.o
+      1206         18          8          0          0       5966   stm32f7xx_hal_dma.o
+       480         40          0          0         28       4390   stm32f7xx_hal_flash.o
+        88          4          0          0          0       2188   stm32f7xx_hal_flash_ex.o
+       658         24          0          0          0       4391   stm32f7xx_hal_gpio.o
+      2422          6          0          0          0      11793   stm32f7xx_hal_hcd.o
+       180          0          0          0          0       3663   stm32f7xx_hal_i2c.o
+       196          0          0          0          0       2075   stm32f7xx_hal_i2c_ex.o
+        60         10          0          0          0        834   stm32f7xx_hal_msp.o
+       124          8          0          0          0       1256   stm32f7xx_hal_pwr_ex.o
+      1672        114          0          0          0       6075   stm32f7xx_hal_rcc.o
+      1504         36          0          0          0       2276   stm32f7xx_hal_rcc_ex.o
+      1110         12          0          0          0       6790   stm32f7xx_hal_rtc.o
+       786         10          0          0          0       5853   stm32f7xx_hal_sd.o
+      1148         26          0          0          0       9832   stm32f7xx_hal_tim.o
+       106          0          0          0          0       3048   stm32f7xx_hal_tim_ex.o
+       124         16          0          0         64       1363   stm32f7xx_hal_timebase_tim.o
+      2604         64          0          0          0      14906   stm32f7xx_hal_uart.o
+       284        124          0          0          0      13007   stm32f7xx_it.o
+       464         14          0          0          0       6716   stm32f7xx_ll_sdmmc.o
+      1920         44          0          4          0      16619   stm32f7xx_ll_usb.o
+      1944         22          0          0          0      10409   string_utility.o
+        62          0          0          0          0       3372   syscall.o
+        96         20         24          4          0       1231   system_stm32f7xx.o
+      2524        190          0         60        400      22351   tasks.o
+      1560        148          0         21         17       9675   telemetry.o
+       424         36          0          0        192       3040   tim.o
+       344         68          0          8         15       5693   timestamp.o
+       968        150          0         16        352       6024   usart.o
+      1112        190          1       1522       1268       7984   usb_host.o
+       692         16          0          0        708      13705   usbh_conf.o
+      1498         26         40          0          0      19490   usbh_core.o
+      1394         12          0          0          0       9632   usbh_ctlreq.o
+       452         26         20          0        512       4585   usbh_diskio.o
+       206          0          0          0          0       4424   usbh_ioreq.o
+      2302         10          4         32          0      11441   usbh_msc.o
+       732         26          0          0          0       5444   usbh_msc_bot.o
+       946          0          0          0          0       6747   usbh_msc_scsi.o
+       124          0          0          0          0       3374   usbh_pipes.o
+        24          6          0          0          0        514   usbh_platform.o
 
     ----------------------------------------------------------------------
-     69512       3548       2584       2072      91464    1623040   Object Totals
+     69512       3548       2584       2072      91464    1621544   Object Totals
          0          0         32          0          0          0   (incl. Generated)
        102          0          5         10          4          0   (incl. Padding)
 
@@ -6092,8 +6092,8 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-     70560       3594       2584       2080      91464    1573588   Grand Totals
-     70560       3594       2584        828      91464    1573588   ELF Image Totals (compressed)
+     70560       3594       2584       2080      91464    1572092   Grand Totals
+     70560       3594       2584        828      91464    1572092   ELF Image Totals (compressed)
      70560       3594       2584        828          0          0   ROM Totals
 
 ==============================================================================
