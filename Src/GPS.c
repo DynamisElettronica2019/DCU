@@ -48,25 +48,25 @@ extern inline void GPS_DataConversion(uint8_t * GPSRawBuffer)
 	/* Based on message type recived, converts the raw NMEA buffer */
 	switch(GPS_MessageID) {
 		case MESSAGE_TYPE_GGA:
-			//GPS_Init2();									/*this message should never arrive, so reinit GPS*/
+			GPS_Init2();									/*this message should never arrive, so reinit GPS*/
 			GPS_GGA_conversion(GPS_RawBuffer);
 			NMEA_output.NMEA_GGA_type = GPS_OutputGGA;
 			break;
 		
 		case MESSAGE_TYPE_GLL:
-			//GPS_Init2();		/* This message should never arrive, so reinit GPS */
+			GPS_Init2();		/* This message should never arrive, so reinit GPS */
 			GPS_GLL_conversion(GPS_RawBuffer);
 			NMEA_output.NMEA_GLL_type = GPS_OutputGLL;
 			break;
 		
 		case MESSAGE_TYPE_GSA:
-			//GPS_Init2();		/* This message should never arrive, so reinit GPS */
+			GPS_Init2();		/* This message should never arrive, so reinit GPS */
 			GPS_GSA_conversion(GPS_RawBuffer); 
 			NMEA_output.NMEA_GSA_type = GPS_OutputGSA;
 			break;
 		
 		case MESSAGE_TYPE_GSV:
-			//GPS_Init2();		/* This message should never arrive, so reinit GPS */															
+			GPS_Init2();		/* This message should never arrive, so reinit GPS */															
 
 		case MESSAGE_TYPE_RMC:
 			GPS_RMC_conversion(GPS_RawBuffer);
@@ -80,12 +80,12 @@ extern inline void GPS_DataConversion(uint8_t * GPSRawBuffer)
 		
 		case MESSAGE_TYPE_UNKNOWN:
 			xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0);	/* Add error to queue */
-			//GPS_Init2();		/* This message should never arrive, so reinit GPS */
+			GPS_Init2();		/* This message should never arrive, so reinit GPS */
 			break;
 		
 		default:
-			//xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0);	/* Add error to queue */
-			//GPS_Init2();		/* This message should never arrive, so reinit GPS */
+			xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0);	/* Add error to queue */
+			GPS_Init2();		/* This message should never arrive, so reinit GPS */
 			break;
 	}
 	
@@ -94,7 +94,7 @@ extern inline void GPS_DataConversion(uint8_t * GPSRawBuffer)
 
 static inline uint8_t GPS_get_messageID(uint8_t * buffer)
 {		
-	switch(buffer[4]) {
+	switch(buffer [4]) {
 		case 'G': return MESSAGE_TYPE_GGA;
 		case 'L': return MESSAGE_TYPE_GLL;
 		case 'S': 
@@ -468,17 +468,17 @@ static inline void GPS_VTG_conversion(uint8_t * buffer)
 	}
 }
 
-//static void GPS_Init2(void)
-//{
-//	USART2_Init_9600();
-//	HAL_UART_Transmit(&huart2, (uint8_t *)STOP_GLL, STOP_GLL_LENGTH, 100);											 	/* Not send GLL messages */
-//	HAL_UART_Transmit(&huart2, (uint8_t *)STOP_GSV, STOP_GSV_LENGTH, 100);												/* Not send GSV messages */
-//	HAL_UART_Transmit(&huart2, (uint8_t *)STOP_GGA, STOP_GGA_LENGTH, 100);												/* Not send GGA messages */
-//	HAL_UART_Transmit(&huart2, (uint8_t *)STOP_GSA, STOP_GSA_LENGTH, 100);												/* Not send GSA messages */
-//	HAL_UART_Transmit(&huart2, GPS_FixRate10Hz, GPS_SET_FIX_RATE_10HZ_LENGTH, 100); 							/* Set fix rate at 10 Hz */
-//	HAL_UART_Transmit(&huart2, (uint8_t *)SET_BAUDRATE_38400, SET_BAUDRATE_38400_LENGTH, 100);		/* Baudrate at 38400 */
-//	USART2_Init_38400();
-//}
+static void GPS_Init2(void)
+{
+	//USART2_Init_9600();
+	HAL_UART_Transmit(&huart2, (uint8_t *)STOP_GLL, STOP_GLL_LENGTH, 100);											 	/* Not send GLL messages */
+	HAL_UART_Transmit(&huart2, (uint8_t *)STOP_GSV, STOP_GSV_LENGTH, 100);												/* Not send GSV messages */
+	HAL_UART_Transmit(&huart2, (uint8_t *)STOP_GGA, STOP_GGA_LENGTH, 100);												/* Not send GGA messages */
+	HAL_UART_Transmit(&huart2, (uint8_t *)STOP_GSA, STOP_GSA_LENGTH, 100);												/* Not send GSA messages */
+	HAL_UART_Transmit(&huart2, GPS_FixRate10Hz, GPS_SET_FIX_RATE_10HZ_LENGTH, 100); 							/* Set fix rate at 10 Hz */
+	HAL_UART_Transmit(&huart2, (uint8_t *)SET_BAUDRATE_38400, SET_BAUDRATE_38400_LENGTH, 100);		/* Baudrate at 38400 */
+	//USART2_Init_38400();
+}
 
 static inline float GPS_minuts_conversion(uint8_t decimi, uint8_t  centesimi, uint8_t millesimi, uint8_t decimillesimi, uint8_t centimillesimi)
 {
