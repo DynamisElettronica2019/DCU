@@ -182,12 +182,11 @@ extern inline float STEERING_WHEEL_ANGLE_DataConversion(int16_t input)
 	float temp;
 	
 	temp = (float)(input);
-	
-	if (temp < 1049) {
-		temp = temp + 3262.0f;
+	if (temp < 1500) {
+		temp = temp + 3236.0f;
 	}
 	
-	temp = temp - 2885.4055f;
+	temp = temp - 3057.0f;
 	temp = temp * 0.110362f;
 	return temp;
 }

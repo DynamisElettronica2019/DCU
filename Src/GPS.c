@@ -41,6 +41,7 @@ extern void GPS_Init(void)
 }
 
 extern inline void GPS_DataConversion(uint8_t * GPSRawBuffer)
+
 {
 	uint8_t errorLetter = GPS_NMEA_UNKNOW_ERROR;
 	GPS_MessageID = GPS_get_messageID(GPS_RawBuffer);		/* Get message type, needed for conversion */
@@ -595,3 +596,4 @@ static inline float GPS_str_to_float(uint8_t decimi, uint8_t  centesimi)
 	result = ((float)decimi*10.0f + (float)centesimi) / 100.0f;
 	return result;
 }
+
