@@ -81,12 +81,12 @@ extern inline void GPS_DataConversion(uint8_t * GPSRawBuffer)
 		
 		case MESSAGE_TYPE_UNKNOWN:
 			xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0);	/* Add error to queue */
-			GPS_Init2();		/* This message should never arrive, so reinit GPS */
+			//GPS_Init2();		/* This message should never arrive, so reinit GPS */
 			break;
 		
 		default:
 			xQueueSend(ErrorQueueHandle, (void *)&errorLetter, (TickType_t)0);	/* Add error to queue */
-			GPS_Init2();		/* This message should never arrive, so reinit GPS */
+			//GPS_Init2();		/* This message should never arrive, so reinit GPS */
 			break;
 	}
 	
