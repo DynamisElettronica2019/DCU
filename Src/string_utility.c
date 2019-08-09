@@ -12,6 +12,7 @@ extern inline void decimalToString(int16_t i, uint8_t *s, uint8_t numInt, uint8_
 	int16_t integer;
 	int16_t decimal;
 	uint8_t charSizeCount = 0;
+	uint8_t negativeZeroFlag = 0;
 
   divResult = i;
 
@@ -37,10 +38,16 @@ extern inline void decimalToString(int16_t i, uint8_t *s, uint8_t numInt, uint8_
     if(i < 0)
     {
       i *= -1;
+			if (integer == 0){
+				negativeZeroFlag = 1;
+			}
     }
 
     decimal = i % power(10, nunDec);
     intToString((int16_t)integer, &s[0], numInt + 1);
+		if(negativeZeroFlag){
+			s[0] = '-';
+		}
     s[numInt+1] = DECIMAL_SEPARATOR;
     intToString((int16_t)decimal, &s[numInt + 2], nunDec);
   }
